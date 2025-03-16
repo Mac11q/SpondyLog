@@ -7,6 +7,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SpondyLog - Suivi des crises inflammatoires</title>
+
     <style>
         /* Style pour le lien du titre */
         header h1 a {
@@ -561,25 +562,10 @@
 
         button {
             font: inherit !important;
-    } 
-
-        @media (max-width: 480px) {
-        .view-btn {
-            font-size: 12px;
-        }
-        }
-
-    </style>
-
-<script>
-    if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.register('./service-worker.js')
-        .then(() => console.log('Service Worker enregistré'))
-        .catch(err => console.log('Erreur Service Worker', err));
-    }
-    </script>
+    } </style>
 
 </head>
+
 <body>
     <input type="file" id="import-file-input" accept=".json" style="display: none;">
 
@@ -785,7 +771,7 @@
         <div id="confirm-reset-modal" class="modal">
             <div class="modal-content" style="max-width: 400px; text-align: center;">
             <p style="margin-bottom: 20px; font-size: 1.1em;">
-                Êtes-vous sûr de vouloir réinitialiser le jour sélectionné ?
+                Êtes-vous sûr de vouloir réinitialiser la journée sélectionnée ?
             </p>
             <div style="display: flex; justify-content: space-around;">
                 <button id="confirm-reset-yes" style="background-color: white; color: black; border: 1px solid #ccc; padding: 10px 20px; cursor: pointer;">
