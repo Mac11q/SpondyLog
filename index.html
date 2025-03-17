@@ -396,6 +396,12 @@
             top: 5px;
             right: 5px;
         }
+
+        .mini-note-present {
+            border: 2px solid var(--primary-color);
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
         
         .med-indicator {
             position: absolute;
@@ -1291,9 +1297,9 @@
                                 miniDay.classList.add("mini-note-present");
                                 
                                 // Si tu veux également ajouter l'indicateur de note (le petit point)
-                                const noteIndicator = document.createElement("div");
-                                noteIndicator.className = "note-indicator";
-                                miniDay.appendChild(noteIndicator);
+                                //const noteIndicator = document.createElement("div");
+                                //noteIndicator.className = "note-indicator";
+                                //miniDay.appendChild(noteIndicator);
                                 
                                 // Assure-toi que miniDay a une position relative pour que le note-indicator
                                 // soit correctement positionné
