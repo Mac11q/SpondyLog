@@ -1133,9 +1133,13 @@
                         
                         // Ajouter un indicateur si une note existe pour cette date
                         if (userNotes[dateId]) {
-                            const noteIndicator = document.createElement("div");
-                            noteIndicator.className = "note-indicator";
-                            dayCell.appendChild(noteIndicator);
+                            // Ajouter la classe qui encadre la cellule
+                            dayCell.classList.add("note-present");
+
+                            // Ajouter le point bleu dans le coin supérieur droit
+                            //const noteIndicator = document.createElement("div");
+                            //noteIndicator.className = "note-indicator";
+                            //dayCell.appendChild(noteIndicator);
                         }
                         
                         // Ajouter un indicateur si des anti-inflammatoires ont été pris ce jour
