@@ -230,6 +230,7 @@
             justify-content: center;
             align-items: center;
             position: relative;
+            border-radius: 0px;
         }
 
         /* Vue annuelle */
@@ -285,6 +286,7 @@
             justify-content: center;
             align-items: center;
             position: relative;
+            border-radius: 0px;
         }
 
         .modal {
@@ -378,14 +380,21 @@
             margin-top: 5px;
         }
 
+        /* Encadrer la cellule lorsqu'une note est présente */
+        .note-present {
+            border: 2px solid var(--primary-color);
+            border-radius: 4px;
+        }
+
+        /* Point bleu pour indiquer la présence d'une note */
         .note-indicator {
             position: absolute;
+            width: 8px;
+            height: 8px;
+            background-color: var(--primary-color);
+            border-radius: 50%;
             top: 5px;
             right: 5px;
-            width: 6px;
-            height: 6px;
-            border-radius: 50%;
-            background-color: var(--primary-color);
         }
         
         .med-indicator {
@@ -1273,9 +1282,22 @@
                             }
                             
                             // Ajouter un carré rouge autour du jour courant
+                            // Gestion combinée des bordures
                             if (date === currentDay && month === currentMonth && year === currentYear) {
                                 miniDay.style.border = "2px solid red";
                                 miniDay.style.boxSizing = "border-box";
+                            } else if (userNotes && userNotes[dateId]) {
+                                // Utiliser la classe mini-note-present au lieu du style inline
+                                miniDay.classList.add("mini-note-present");
+                                
+                                // Si tu veux également ajouter l'indicateur de note (le petit point)
+                                const noteIndicator = document.createElement("div");
+                                noteIndicator.className = "note-indicator";
+                                miniDay.appendChild(noteIndicator);
+                                
+                                // Assure-toi que miniDay a une position relative pour que le note-indicator
+                                // soit correctement positionné
+                                miniDay.style.position = "relative";
                             }
                             
                             // Ajout de l'événement de clic pour ouvrir le modal sans changer la vue
@@ -1383,9 +1405,16 @@
             }
         }
 
-        function closeModal() {
+        function closeModal(refresh = false) {
             painModal.style.display = "none";
             selectedDate = null;
+            if (refresh) {
+                if (currentView === "month") {
+                    renderCalendar(currentMonth, currentYear);
+                } else {
+                    renderYearView(currentYear);
+                }
+            }
         }
 
         function selectPainLevel(level) {
