@@ -848,6 +848,10 @@
         let currentMonth = currentDate.getMonth(); // Récupère automatiquement le mois actuel (0-11)
         let currentYear = currentDate.getFullYear(); // Récupère automatiquement l'année actuelle
         let currentView = "month"; // Vue par défaut
+        let selectedFromYearView = false;
+        let selectedViewMonth = null;
+        let selectedViewYear = null;
+
         
         // Stockage des données utilisateur (en mémoire uniquement)
         let userPainData = {};
@@ -928,10 +932,25 @@
             
             // Événements de changement de vue
             monthViewBtn.addEventListener("click", function() {
+                // Récupère la date actuelle seulement quand on clique sur le bouton mensuel
+                const now = new Date();
+                currentMonth = now.getMonth();
+                currentYear = now.getFullYear();
+                // Réinitialiser la variable de suivi
+                selectedFromYearView = false;
+                selectedViewMonth = null;
+                selectedViewYear = null;
                 setView("month");
             });
             
             yearViewBtn.addEventListener("click", function() {
+                // Récupérer l'année actuelle
+                const now = new Date();
+                currentYear = now.getFullYear();
+                // Réinitialiser la variable de suivi
+                selectedFromYearView = false;
+                selectedViewMonth = null;
+                selectedViewYear = null;
                 setView("year");
             });
             
@@ -961,28 +980,33 @@
                 if (titleLink) { // Vérification pour éviter les erreurs si l'élément n'existe pas
                     titleLink.addEventListener("click", function(event) {
                     event.preventDefault(); // Empêche le comportement par défaut du lien
-            
+
                     // Réinitialise à la date actuelle
                     const now = new Date();
                     currentMonth = now.getMonth();
                     currentYear = now.getFullYear();
-            
+                    
+                    // Réinitialiser la variable de suivi
+                    selectedFromYearView = false;
+                    selectedViewMonth = null;
+                    selectedViewYear = null;
+
                     // Bascule vers la vue mensuelle si ce n'est pas déjà le cas
                     setView("month");
-            
+
                     // Met à jour l'affichage du titre du mois pour refléter le changement
                     const monthNames = ["Janvier", "Février", "Mars", "Avril", "Mai", "Juin", 
-                               "Juillet", "Août", "Septembre", "Octobre", "Novembre", "Décembre"];
+                            "Juillet", "Août", "Septembre", "Octobre", "Novembre", "Décembre"];
                     currentMonthDisplay.textContent = `${monthNames[currentMonth]} ${currentYear}`;
-            
+
                     // Rend le calendrier avec le mois et l'année actuels
                     renderCalendar(currentMonth, currentYear);
-            
+
                     // Effet visuel optionnel pour indiquer que l'action a été effectuée
                     titleLink.style.opacity = "0.7";
                     setTimeout(() => {
                         titleLink.style.opacity = "1";
-                    }, 200); 
+                    }, 200);
                 });
 
             }
@@ -1032,6 +1056,20 @@
                 renderYearView(currentYear);
             }
         }
+
+// Modifier les écouteurs d'événements pour les boutons de vue
+// Remplacer ces lignes dans la partie document.addEventListener("DOMContentLoaded", function() {...})
+monthViewBtn.addEventListener("click", function() {
+    // Récupère la date actuelle seulement quand on clique sur le bouton mensuel
+    const now = new Date();
+    currentMonth = now.getMonth();
+    currentYear = now.getFullYear();
+    setView("month");
+});
+
+yearViewBtn.addEventListener("click", function() {
+    setView("year");  // Notez que j'ai corrigé "Year" en "year" (minuscule)
+});
 
         // Fonctions de rendu et de navigation du calendrier mensuel
         function renderCalendar(month, year) {
@@ -1137,9 +1175,9 @@
                             dayCell.classList.add("note-present");
 
                             // Ajouter le point bleu dans le coin supérieur droit
-                            //const noteIndicator = document.createElement("div");
-                            //noteIndicator.className = "note-indicator";
-                            //dayCell.appendChild(noteIndicator);
+                            const noteIndicator = document.createElement("div");
+                            noteIndicator.className = "note-indicator";
+                            dayCell.appendChild(noteIndicator);
                         }
                         
                         // Ajouter un indicateur si des anti-inflammatoires ont été pris ce jour
@@ -1206,8 +1244,13 @@
                 monthHeader.addEventListener("click", function() {
                     // Met à jour le mois courant en utilisant l'indice de la boucle
                     currentMonth = month;
-                    // Assurez-vous que l'année est bien mise à jour (ici, year est le paramètre de la fonction)
+                    // Assurez-vous que l'année est bien mise à jour
                     currentYear = year;
+                    // Garder en mémoire qu'on vient de la vue annuelle
+                    selectedFromYearView = true;
+                    // Sauvegarder le mois et l'année sélectionnés
+                    selectedViewMonth = month;
+                    selectedViewYear = year;
                     // Change la vue en vue mensuelle
                     setView("month");
                     // Met à jour le calendrier mensuel avec le mois sélectionné
@@ -1370,10 +1413,19 @@
         function showPainModal(dateId) {
             selectedDate = dateId;
             
+            // Si on est en vue annuelle, sauvegarder le mois/année actuel
+            if (currentView === "year") {
+                selectedFromYearView = true;
+                // Extraire le mois et l'année du dateId
+                const [year, month, day] = dateId.split('-');
+                selectedViewMonth = parseInt(month) - 1; // Convertir en format 0-11
+                selectedViewYear = parseInt(year);
+            }
+            
             // Formater la date pour l'affichage
             const [year, month, day] = dateId.split('-');
             const monthNames = ["Janvier", "Février", "Mars", "Avril", "Mai", "Juin", 
-                               "Juillet", "Août", "Septembre", "Octobre", "Novembre", "Décembre"];
+                            "Juillet", "Août", "Septembre", "Octobre", "Novembre", "Décembre"];
             const formattedDate = `${day} ${monthNames[parseInt(month)-1]} ${year}`;
             
             modalDateTitle.textContent = `Date - ${formattedDate}`;
@@ -1417,14 +1469,30 @@
 
         function closeModal(refresh = false) {
             painModal.style.display = "none";
-            selectedDate = null;
+            
             if (refresh) {
-                if (currentView === "month") {
-                    renderCalendar(currentMonth, currentYear);
+                if (selectedFromYearView && selectedViewMonth !== null && selectedViewYear !== null) {
+                    // Si on vient de la vue annuelle, restaurer le mois/année sélectionné
+                    if (currentView === "month") {
+                        // Si on est en vue mensuelle, mettre à jour avec le mois sélectionné
+                        currentMonth = selectedViewMonth;
+                        currentYear = selectedViewYear;
+                        renderCalendar(currentMonth, currentYear);
+                    } else {
+                        // Si on est en vue annuelle, rester sur l'année sélectionnée
+                        renderYearView(selectedViewYear);
+                    }
                 } else {
-                    renderYearView(currentYear);
+                    // Comportement normal
+                    if (currentView === "month") {
+                        renderCalendar(currentMonth, currentYear);
+                    } else {
+                        renderYearView(currentYear);
+                    }
                 }
             }
+            
+            selectedDate = null;
         }
 
         function selectPainLevel(level) {
@@ -1453,15 +1521,8 @@
                 // Sauvegarder les données
                 saveUserData();
                 
-                // Fermer le modal
-                closeModal();
-                
-                // Mettre à jour l'affichage
-                if (currentView === "month") {
-                    renderCalendar(currentMonth, currentYear);
-                } else {
-                    renderYearView(currentYear);
-                }
+                // Fermer le modal et mettre à jour l'affichage
+                closeModal(true);
             }
         }
 
@@ -1479,15 +1540,8 @@
                 // Sauvegarder les données
                 saveUserData();
                 
-                // Fermer le modal
-                closeModal();
-                
-                // Mettre à jour l'affichage
-                if (currentView === "month") {
-                    renderCalendar(currentMonth, currentYear);
-                } else {
-                    renderYearView(currentYear);
-                }
+                // Fermer le modal et mettre à jour l'affichage
+                closeModal(true);
             }
         }
 
