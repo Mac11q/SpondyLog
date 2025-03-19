@@ -1144,7 +1144,7 @@
                             redSquare.style.left = "-5px";
                             redSquare.style.right = "-5px";
                             redSquare.style.bottom = "-5px";
-                            redSquare.style.border = "2px solid red";
+                            redSquare.style.border = "2px solid #7E00D0";
                             redSquare.style.borderRadius = "2px";
                             redSquare.style.pointerEvents = "none"; // Pour que les clics passent à travers
                             redSquare.style.zIndex = "1";
@@ -1339,8 +1339,9 @@
                             // Ajouter un carré rouge autour du jour courant
                             // Gestion combinée des bordures
                             if (date === currentDay && month === currentMonth && year === currentYear) {
-                                miniDay.style.border = "2px solid red";
+                                miniDay.style.border = "2px solid #7E00D0";
                                 miniDay.style.boxSizing = "border-box";
+                                miniDay.style.borderRadius = "2px"
                             } else if (userNotes && userNotes[dateId]) {
                                 // Utiliser la classe mini-note-present au lieu du style inline
                                 miniDay.classList.add("mini-note-present");
