@@ -382,7 +382,7 @@
 
         /* Encadrer la cellule lorsqu'une note est présente */
         .note-present {
-            border: 2px solid var(--primary-color);
+            border: 2px solid #7E00D0;
             border-radius: 2px;
         }
 
@@ -391,14 +391,14 @@
             position: absolute;
             width: 6px;
             height: 6px;
-            background-color: var(--primary-color);
+            background-color: #7E00D0;
             border-radius: 50%;
             top: 3px;
             right: 3px;
         }
 
         .mini-note-present {
-            border: 2px solid var(--primary-color);
+            border: 2px solid #7E00D0;
             border-radius: 2px;
             box-sizing: border-box;
         }
@@ -1144,7 +1144,7 @@
                             redSquare.style.left = "-5px";
                             redSquare.style.right = "-5px";
                             redSquare.style.bottom = "-5px";
-                            redSquare.style.border = "2px solid #7E00D0";
+                            redSquare.style.border = "2px solid #3498db";
                             redSquare.style.borderRadius = "2px";
                             redSquare.style.pointerEvents = "none"; // Pour que les clics passent à travers
                             redSquare.style.zIndex = "1";
@@ -1339,7 +1339,7 @@
                             // Ajouter un carré rouge autour du jour courant
                             // Gestion combinée des bordures
                             if (date === currentDay && month === currentMonth && year === currentYear) {
-                                miniDay.style.border = "2px solid #7E00D0";
+                                miniDay.style.border = "2px solid #3498db";
                                 miniDay.style.boxSizing = "border-box";
                                 miniDay.style.borderRadius = "2px"
                             } else if (userNotes && userNotes[dateId]) {
