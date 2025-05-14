@@ -1,0 +1,2781 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <link rel="manifest" href="manifest.json">
+    <link rel="apple-touch-icon" href="icon-192.png">
+    <meta name="theme-color" content="#3498db">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.3.0"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SpondyLog - Suivi des crises inflammatoires</title>
+    <style>
+        /* Style pour le lien du titre */
+        header h1 a {
+            color: var(--primary-color);
+            text-decoration: none;
+             cursor: pointer;
+            transition: opacity 0.2s;
+        }
+
+        header h1 a:hover {
+            opacity: 0.8;
+            text-decoration: underline;
+        }
+
+        :root {
+            --primary-color: #3498db;
+            --secondary-color: #2c3e50;
+            --text-color: #333;
+            --light-bg: #f9f9f9;
+            --border-color: #ddd;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: var(--light-bg);
+            color: var(--text-color);
+            line-height: 1.6;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 100%;
+            margin: 0 auto;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        h1 {
+            color: var(--primary-color);
+        }
+
+        .view-toggle {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+
+        .view-btn {
+            background: var(--secondary-color);
+            color: white;
+            border: none;
+            border-radius: 5px;
+            padding: 12px 20px;
+            font-size: 16px;
+            width: 100%; /* Pour qu’ils prennent toute la largeur */
+            cursor: pointer;
+            transition: background 0.3s;
+            margin: 0 10px;
+        }
+
+        .view-btn.active {
+            background: var(--primary-color);
+        }
+
+        .view-btn:hover {
+            background: var(--primary-color);
+        }
+
+        .calendar-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .calendar-nav {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .nav-btn {
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 5px;
+            padding: 5px 15px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        .nav-btn:hover {
+            background: #2980b9;
+        }
+
+        .current-month, .current-year {
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: var(--secondary-color);
+        }
+
+        /* Style mis à jour pour la légende */
+        .legend {
+            margin: 20px 0;
+            padding: 15px;
+            background: #f5f5f5;
+            border-radius: 8px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+
+        .legend h3 {
+            margin-bottom: 15px;
+            color: var(--secondary-color);
+            text-align: center;
+        }
+
+        .color-scale {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 12px;
+            justify-content: center;
+        }
+
+        .color-item {
+            display: flex;
+            align-items: center;
+            padding: 6px;
+            border-radius: 4px;
+            transition: background-color 0.2s;
+        }
+
+        .color-item:hover {
+            background-color: rgba(0,0,0,0.05);
+        }
+
+        .color-box {
+            width: 24px;
+            height: 24px;
+            border-radius: 4px;
+            border: 1px solid #ccc;
+            margin-right: 10px;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+        }
+
+        /* Styles responsifs supplémentaires */
+        @media (max-width: 480px) {
+        .color-scale {
+            grid-template-columns: repeat(2, 1fr);
+        }
+    
+        .color-item {
+            padding: 4px;
+        }
+    
+        .color-box {
+            width: 20px;
+            height: 20px;
+        }
+        }
+
+        @media (min-width: 768px) {
+        .color-scale {
+            grid-template-columns: repeat(3, 1fr);
+        }
+        }
+
+        @media (min-width: 992px) {
+        .color-scale {
+            grid-template-columns: repeat(6, 1fr);
+        }
+        }
+
+        .calendar {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .calendar th {
+            background: var(--secondary-color);
+            color: white;
+            padding: 10px;
+            text-align: center;
+        }
+
+        .calendar td {
+            border: 1px solid var(--border-color);
+            width: calc(100% / 7);
+            position: relative;
+            height: 60px;
+            vertical-align: top;
+            padding: 5px;
+        }
+
+        .day-number {
+            font-weight: bold;
+            position: absolute;
+            top: 5px;
+            left: 5px;
+        }
+
+        .day-cell {
+            width: 100%;
+            height: 100%;
+            cursor: pointer;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            border-radius: 2px;
+        }
+
+        /* Vue annuelle */
+        .year-view {
+            display: none;  
+        }
+
+        .year-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 15px;
+        }
+
+        .month-card {
+            border: 1px solid var(--border-color);
+            border-radius: 5px;
+            overflow: hidden;
+        }
+
+        .month-name {
+            background: var(--secondary-color);
+            color: white;
+            text-align: center;
+            padding: 5px;
+            font-weight: bold;
+        }
+
+        .mini-calendar {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .mini-calendar th {
+            background: #f5f5f5;
+            color: var(--text-color);
+            padding: 2px;
+            font-size: 0.7rem;
+        }
+
+        .mini-calendar td {
+            height: 20px;
+            width: calc(100% / 7);
+            font-size: 0.7rem;
+            text-align: center;
+            padding: 0;
+        }
+
+        .mini-day {
+            width: 100%;
+            height: 100%;
+            cursor: pointer;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            border-radius: 0px;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 100;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-content {
+            background-color: white;
+            padding: 20px;
+            border-radius: 5px;
+            width: 90%;
+            max-width: 400px;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .close-btn {
+            background: transparent;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: #888;
+        }
+
+        .pain-options {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .pain-option {
+            width: calc(33.333% - 10px);
+            padding: 15px 10px;
+            text-align: center;
+            border: 1px solid var(--border-color);
+            border-radius: 5px;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .pain-option:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .erase-option {
+            width: 100%;
+            padding: 15px 10px;
+            text-align: center;
+            border: 1px solid var(--border-color);
+            background-color: #f5f5f5;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+
+        .erase-option:hover {
+            background-color: #e5e5e5;
+        }
+
+        /* Styles pour les notes */
+        .notes-section {
+            margin-top: 15px;
+            margin-bottom: 15px;
+        }
+
+        .day-note-textarea {
+            width: 100%;
+            min-height: 80px;
+            padding: 8px;
+            border: 1px solid var(--border-color);
+            border-radius: 5px;
+            resize: vertical;
+            font-family: inherit;
+            margin-top: 5px;
+        }
+
+        /* Encadrer la cellule lorsqu'une note est présente */
+        .note-present {
+            border: 2px solid var(--primary-color);
+            border-radius: 2px;
+        }
+
+        /* Point bleu pour indiquer la présence d'une note */
+        .note-indicator {
+            position: absolute;
+            width: 6px;
+            height: 6px;
+            background-color: var(--primary-color);
+            border-radius: 50%;
+            top: 3px;
+            right: 3px;
+        }
+
+        .mini-note-present {
+            border: 2px solid var(--primary-color);
+            border-radius: 2px;
+            box-sizing: border-box;
+        }
+        
+        .med-indicator {
+            position: absolute;
+            bottom: 5px;
+            right: 5px;
+            font-size: 12px;
+            color: #FF5722;
+        }
+
+        .med-checkbox {
+            margin-top: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .med-checkbox input {
+            width: 18px;
+            height: 18px;
+        }
+
+        .med-icon {
+            transform: rotate(135deg);
+            display: inline-block;
+        }
+
+        .view-all-notes {
+            margin-top: 20px;
+            text-align: center;
+            display: flex;
+            flex-direction: column; /* Affiche les éléments en colonne */
+            gap: 10px; /* Espace entre les boutons */
+            align-items: center; /* Centre les boutons horizontalement */
+        }
+
+        .notes-list-content {
+            max-width: 600px;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .notes-list {
+            margin-top: 15px;
+        }
+
+        .note-entry {
+            margin-bottom: 15px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .note-date {
+            font-weight: bold;
+            color: var(--primary-color);
+            margin-bottom: 5px;
+        }
+
+        .note-pain-level {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            margin-right: 10px;
+            vertical-align: middle;
+        }
+
+        .note-text {
+            margin-top: 5px;
+            white-space: pre-wrap;
+        }
+
+        @media (max-width: 600px) {
+            .container {
+                padding: 10px;
+            }
+
+            .calendar th, .calendar td {
+                font-size: 12px;
+                padding: 5px;
+            }
+
+            .day-number {
+                font-size: 12px;
+            }
+
+            .pain-option {
+                width: calc(50% - 5px);
+            }
+            
+            .year-grid {
+                grid-template-columns: repeat(2, 1fr); /* 2 colonnes au lieu de 4 */;
+            }
+        }
+
+        /* Styles pour la liste déroulante des types de notes */
+        .note-type-container {
+            position: relative;
+            margin-bottom: 8px;  /* espace sous la liste */
+            width: 100%;
+        }
+        .selected-note-type {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: #fff;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            padding: 5px 10px;
+            cursor: pointer;
+        }
+        .selected-note-type .color-dot {
+            margin-right: 8px;
+        }
+        .dropdown-arrow {
+            margin-left: 10px;
+            font-size: 0.8em;
+            color: #555;
+        }
+        .note-type-list {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: #fff;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            list-style: none;
+            padding: 0;
+            margin: 4px 0;
+            max-height: 150px;
+            overflow-y: auto;
+            display: none;  /* masqué par défaut, affiché quand déroulé */
+            z-index: 10;
+        }
+        .note-type-list li {
+            display: flex;
+            align-items: center;
+            padding: 5px 10px;
+            cursor: pointer;
+        }
+        .note-type-list li:hover {
+            background: #f0f0f0;
+        }
+        .note-type-list .color-dot {
+            margin-right: 8px;
+        }
+        .edit-type-btn {
+            margin-left: auto;
+            background: none;
+            border: none;
+            font-size: 1.2em;
+            line-height: 1;
+            cursor: pointer;
+            color: #555;
+        }
+        .edit-type-btn:hover {
+            color: #000;
+        }
+
+        .color-dot {
+            display: inline-block;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            margin-right: 8px;
+            vertical-align: middle;
+        }
+
+        /* Style pour l’option "Ajouter un type" */
+        .add-type-item {
+            text-align: center;
+            font-style: italic;
+            color: var(--primary-color);
+        }
+
+        /* Styles pour les badges de notes présentes */
+        .note-badges-container {
+            margin-bottom: 8px;
+        }
+        .note-badge {
+            display: inline-block;
+            background: #f4f4f4;
+            border-radius: 12px;
+            padding: 3px 8px;
+            margin-right: 5px;
+            font-size: 0.85em;
+            cursor: pointer;
+        }
+        .note-badge .badge-dot {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            margin-right: 5px;
+            vertical-align: middle;
+        }
+
+        /* Styles pour la pop-up d'ajout/édition de type de note */
+        #note-type-modal .modal-content {
+            /* centrer la modale plus petite */
+            text-align: left;
+        }
+        #note-type-modal label {
+            display: block;
+            margin: 10px 0 5px;
+        }
+        #note-type-modal input[type="text"] {
+            width: 100%;
+            padding: 5px;
+            margin-bottom: 10px;
+        }
+        #note-type-modal input[type="color"] {
+            padding: 0;
+            margin-left: 5px;
+            vertical-align: middle;
+        }
+        .modal-actions {
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            margin-top: 15px;
+        }
+        .modal-actions button {
+            padding: 5px 10px;
+            margin-left: 5px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        #save-type-btn {
+            background-color: var(--primary-color);
+            color: #fff;
+        }
+        #cancel-type-btn {
+            background-color: #ccc;
+            color: #000;
+        }
+        #delete-type-btn {
+            background: none;
+            border: none;
+            font-size: 0.9em;
+            cursor: pointer;
+        }
+        #delete-type-btn:hover {
+            text-decoration: underline;
+        }
+
+        /* Styles pour le graphique */
+        .date-range-selector {
+            margin-top: 15px;
+            padding: 10px;
+            background: #f5f5f5;
+            border-radius: 5px;
+        }
+
+        .range-option {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .range-option select, .range-option input {
+            padding: 5px;
+            border-radius: 5px;
+            border: 1px solid var(--border-color);
+        }
+
+        .chart-stats {
+            background: #f5f5f5;
+            padding: 15px;
+            border-radius: 5px;
+        }
+
+        .stat-item {
+            margin: 10px;
+            text-align: center;
+        }
+
+        .stat-label {
+            font-weight: bold;
+            display: block;
+            margin-bottom: 5px;
+            color: var(--secondary-color);
+        }
+
+        .stat-value {
+            font-size: 1.2rem;
+        }
+
+        #import-export-container {
+            position: relative; /* au lieu de fixed */
+            margin-top: 20px;   /* espace en haut */
+            text-align: right;  /* aligne à droite */
+            z-index: 99;
+        }
+
+        #import-export-btn {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 8px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif!important;
+        }
+
+        #import-export-dropdown {
+            display: none;
+            position: absolute;
+            bottom: -250%;
+            right: 0;
+            background: white;
+            border: 1px solid #ddd;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            border-radius: 4px;
+            z-index: 1000;
+            margin-bottom: 5px;
+            font-size: inherit;
+            padding: 1px 20px;
+            font-family: inherit;
+            font-size: inherit;
+            cursor: pointer;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif!important;
+        }
+
+        button {
+            font: inherit !important;
+        } 
+
+        @media (max-width: 480px) {
+            .view-btn {
+                font-size: 16px;
+                white-space: pre-line; /* permet d'interpréter les \n comme des retours à la ligne */
+             }
+        }
+
+    </style>
+
+<script>
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('./service-worker.js')
+        .then(() => console.log('Service Worker enregistré'))
+        .catch(err => console.log('Erreur Service Worker', err));
+    }
+    </script>
+
+</head>
+<body>
+    <input type="file" id="import-file-input" accept=".json" style="display: none;">
+
+    <div class="container">
+        <header>
+            <h1><a href="#" id="title-link">SpondyLog</a></h1>
+            <p>Suivi quotidien des crises inflammatoires</p>
+
+        </header>
+
+        <div class="view-toggle">
+            <button id="month-view-btn" class="view-btn active">Mensuelle</button>
+            <button id="year-view-btn" class="view-btn">Annuelle</button>
+        </div>
+
+        <!-- Vue mensuelle -->
+        <div id="month-view" class="month-view">
+            <div class="calendar-header">
+                <div class="calendar-nav">
+                    <button id="prev-month" class="nav-btn">←</button>
+                    <div id="current-month" class="current-month"></div>
+                    <button id="next-month" class="nav-btn">→</button>
+                </div>
+            </div>
+
+            <table class="calendar" id="calendar">
+                <thead>
+                    <tr>
+                        <th>Lun</th>
+                        <th>Mar</th>
+                        <th>Mer</th>
+                        <th>Jeu</th>
+                        <th>Ven</th>
+                        <th>Sam</th>
+                        <th>Dim</th>
+                    </tr>
+                </thead>
+                <tbody id="calendar-body">
+                    <!-- Le contenu du calendrier sera généré dynamiquement par JavaScript -->
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Vue annuelle -->
+        <div id="year-view" class="year-view">
+            <div class="calendar-header">
+                <div class="calendar-nav">
+                    <button id="prev-year" class="nav-btn">←</button>
+                    <div id="current-year" class="current-year"></div>
+                    <button id="next-year" class="nav-btn">→</button>
+                </div>
+            </div>
+
+            <div id="year-grid" class="year-grid">
+                <!-- Les 12 mois seront générés dynamiquement ici -->
+            </div>
+        </div>
+
+        <div class="legend">
+            <h3>Légende des niveaux de douleur</h3>
+            <div class="color-scale">
+                <div class="color-item">
+                    <div class="color-box" style="background-color: #FFFFFF;"></div>
+                    <span>0 - Absente</span>
+                </div>        
+                <div class="color-item">
+                    <div class="color-box" style="background-color: #00FF00;"></div>
+                    <span>1 - Légère</span>
+                </div>
+                <div class="color-item">
+                    <div class="color-box" style="background-color: #FFFF00;"></div>
+                    <span>2 - Modérée</span>
+                </div>
+                <div class="color-item">
+                    <div class="color-box" style="background-color: #FF8000;"></div>
+                    <span>3 - Forte</span>
+                </div>
+                <div class="color-item">
+                    <div class="color-box" style="background-color: #FF4000;"></div>
+                    <span>4 - Très forte</span>
+                </div>
+                <div class="color-item">
+                    <div class="color-box" style="background-color: #000000;"></div>
+                    <span>5 - Extrême</span>
+                </div>
+            </div>
+        </div>
+    
+        <!-- Bouton pour voir toutes les notes -->
+            <div class="view-all-notes">
+                <button id="show-notes-btn" class="view-btn">Voir toutes les notes</button>
+                <button id="show-chart-btn" class="view-btn">Voir graphique</button>
+            </div>
+        </div>
+
+        <!-- Bouton Import/Export -->
+        <div id="import-export-container">
+            <button id="import-export-btn">Import/Export</button>
+            <div id="import-export-dropdown">
+                <div id="import-option" style="padding: 10px; cursor: pointer;">Importer</div>
+                <div id="export-option" style="padding: 10px; cursor: pointer;">Exporter</div>
+            </div>
+        </div>
+        </div>
+
+        <!-- Modal pour afficher le graphique -->
+        <div id="chart-modal" class="modal">
+            <div class="modal-content" style="max-width: 800px; width: 90%;">
+                <div class="modal-header">
+                    <h3>Évolution de la douleur</h3>
+                    <button class="close-btn" id="close-chart-modal">&times;</button>
+                </div>
+                <div class="date-range-selector" style="margin-bottom: 10px;">
+                    <div class="range-option" style="display: flex; align-items: center; gap: 10px;">
+                        <label for="date-range">Période :</label>
+                        <select id="date-range" style="padding: 4px 8px;">
+                            <option value="7">7 derniers jours</option>
+                            <option value="14">14 derniers jours</option>
+                            <option value="30" selected>30 derniers jours</option>
+                            <option value="90">3 derniers mois</option>
+                            <option value="180">6 derniers mois</option>
+                            <option value="365">Année complète</option>
+                            <option value="custom">Personnalisé</option>
+                        </select>
+                    </div>
+                    <div id="custom-date-range" style="display: none; margin-top: 5px;">
+                        <div style="display: flex; gap: 10px;">
+                            <div>
+                                <label for="start-date">Du :</label>
+                                <input type="date" id="start-date">
+                            </div>
+                            <div>
+                                <label for="end-date">Au :</label>
+                                <input type="date" id="end-date">
+                            </div>
+                        </div>
+                        <button id="apply-custom-dates" class="view-btn" style="margin-top: 5px; padding: 4px 12px; font-size: 0.9em; display: block; margin-left: auto; margin-right: auto;">Appliquer</button>
+                    </div>
+                </div>
+                <div class="chart-container" style="position: relative; height: 350px; margin-bottom: 10px;">
+                    <canvas id="pain-chart"></canvas>
+                </div>
+                <div class="chart-stats" style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 5px; padding: 0;">
+                    <div class="stat-item" style="padding: 0 2px; background-color: #f5f5f5; border-radius: 4px; text-align: center;">
+                        <span class="stat-label" style="display: block; font-weight: bold; font-size: 0.8em; margin-bottom: 0;">Niveau moyen</span>
+                        <span id="avg-pain" class="stat-value" style="font-size: 0.95em; color: #3366cc;">--</span>
+                    </div>
+                    <div class="stat-item" style="padding: 0 2px; background-color: #f5f5f5; border-radius: 4px; text-align: center;">
+                        <span class="stat-label" style="display: block; font-weight: bold; font-size: 0.8em; margin-bottom: 0;">Niveau max</span>
+                        <span id="max-pain" class="stat-value" style="font-size: 0.95em; color: #dc3545;">--</span>
+                    </div>
+                    <div class="stat-item" style="padding: 0 2px; background-color: #f5f5f5; border-radius: 4px; text-align: center;">
+                        <span class="stat-label" style="display: block; font-weight: bold; font-size: 0.8em; margin-bottom: 0;">Anti-inflam.</span>
+                        <span id="med-days" class="stat-value" style="font-size: 0.95em; color: #fd7e14;">--</span>
+                    </div>
+                    <div class="stat-item" style="padding: 0 2px; background-color: #f5f5f5; border-radius: 4px; text-align: center;">
+                        <span class="stat-label" style="display: block; font-weight: bold; font-size: 0.8em; margin-bottom: 0;">Crises mod./sév.</span>
+                        <span id="severe-days" class="stat-value" style="font-size: 0.95em; color: #6f42c1;">--</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Modal pour la sélection du niveau de douleur et des notes -->
+        <div id="pain-modal" class="modal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3 id="modal-date-title">Sélectionner le niveau de douleur</h3>
+                    <button class="close-btn" id="close-modal">&times;</button>
+                </div>
+                
+                <!-- 1. Section pour les anti-inflammatoires (en premier) -->
+                <div class="modal-section med-section">
+                    <input type="checkbox" id="med-taken">
+                    <label for="med-taken" class="med-label">
+                        <span class="med-icon">💊</span> Anti-inflammatoires pris ce jour
+                    </label>
+                </div>
+                
+                <!-- 2. Section pour les notes (en deuxième) -->
+                <div class="modal-section notes-section">
+                    <label for="day-note" class="section-label">Notes du jour :</label>
+                
+                    <!-- Début de l'ajout : Liste déroulante des types de notes -->
+                    <div class="note-type-container">
+                        <!-- Élément affiché de la liste déroulante (type sélectionné) -->
+                        <div id="selected-note-type" class="selected-note-type">
+                            <span id="selected-type-dot" class="color-dot"></span>
+                            <span id="selected-type-name">Catégorie 1</span>
+                            <span class="dropdown-arrow">▼</span>
+                        </div>
+                        <!-- Options de la liste déroulante des types de notes -->
+                        <ul id="note-type-list" class="note-type-list">
+                            <!-- Les <li> des types de notes seront insérés dynamiquement en JS -->
+                            <!-- Option d'ajout d'un nouveau type de note : -->
+                            <li id="add-type-item" class="add-type-item">+ Ajouter un type de note</li>
+                        </ul>
+                    </div>
+                    <!-- Conteneur des badges de notes présentes pour ce jour -->
+                    <div id="note-badges-container" class="note-badges-container"></div>
+                    <!-- Fin de l'ajout -->
+                
+                    <textarea id="day-note" class="day-note-textarea"
+                      placeholder="Ajoutez vos notes pour cette journée..."></textarea>
+                </div>
+                <!-- ... (Suite du modal : section niveau de douleur, etc.) ... -->
+                
+                <!-- Modal d'ajout/édition d'un type de note -->
+                <div id="note-type-modal" class="modal">
+                    <div class="modal-content" style="max-width: 300px;">
+                        <h3 id="note-type-modal-title">Ajouter un type de note</h3>
+                        <label for="type-name-input">Nom :</label>
+                        <input type="text" id="type-name-input" placeholder="Nom du type de note" />
+                        <label for="type-color-input">Couleur :</label>
+                        <input type="color" id="type-color-input" value="#3498db" />
+                        <div class="modal-actions">
+                            <button id="save-type-btn">Enregistrer</button>
+                            <button id="cancel-type-btn" type="button">Annuler</button>
+                            <button id="delete-type-btn" type="button" style="margin-left:auto; color:#c00;">
+                                Supprimer
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            
+                <!-- 3. Section pour le niveau de douleur (efn dernier) -->
+                <div class="modal-section pain-section">
+                    <label for="day-note" style="margin-bottom: 10px; display: inline-block;">Niveau de douleur ressenti : </label>
+                    <div class="pain-options">
+                        <div class="pain-option" data-value="0" style="background-color: #FFFFFF;">0</div>
+                        <div class="pain-option" data-value="1" style="background-color: #00FF00;">1</div>
+                        <div class="pain-option" data-value="2" style="background-color: #FFFF00;">2</div>
+                        <div class="pain-option" data-value="3" style="background-color: #FF8000;">3</div>
+                        <div class="pain-option" data-value="4" style="background-color: #FF4000;">4</div>
+                        <div class="pain-option" data-value="5" style="background-color: #000000; color: white;">5</div>
+                    </div>
+                    <div class="erase-option" id="erase-value">Réinitialiser</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Modal de confirmation pour la réinitialisation -->
+        <div id="confirm-reset-modal" class="modal">
+            <div class="modal-content" style="max-width: 400px; text-align: center;">
+            <p style="margin-bottom: 20px; font-size: 1.1em;">
+                Êtes-vous sûr de vouloir réinitialiser le jour sélectionné ?
+            </p>
+            <div style="display: flex; justify-content: space-around;">
+                <button id="confirm-reset-yes" style="background-color: white; color: black; border: 1px solid #ccc; padding: 10px 20px; cursor: pointer;">
+                Oui
+                </button>
+                <button id="confirm-reset-no" style="background-color: #3498db; color: white; border: none; padding: 10px 20px; cursor: pointer;">
+                Non
+                </button>
+            </div>
+            </div>
+        </div>
+        
+        <!-- Section pour le pense-bête (maintenant en dernier) -->
+            <div class="notes-section">
+                <label for="pense-bête-note" class="section-label">Pense-bête</label>
+                <textarea id="pense-bête-note" class="day-note-textarea" placeholder="Quelque chose à ne pas oublier ?"></textarea>
+        </div>
+
+        <!-- Nouveau modal pour afficher toutes les notes -->
+        <div id="notes-list-modal" class="modal">
+            <div class="modal-content notes-list-content">
+              <div class="modal-header">
+                <h3>Historique des notes</h3>
+                <button class="close-btn" id="close-notes-list">&times;</button>
+              </div>
+              <div style="margin-bottom: 10px;">
+                <label for="note-type-filter">Filtrer par type :</label>
+                <select id="note-type-filter" style="margin-left: 10px;">
+                  <option value="all">Tous les types</option>
+                </select>
+              </div>
+              <div id="notes-list" class="notes-list"></div>
+            </div>
+          </div>
+
+    <script>
+        // Constantes et variables globales
+        const painColors = {
+            0: "#FFFFFF",
+            1: "#00FF00", // Bleu clair au lieu de #80FF00
+            2: "#FFFF00",
+            3: "#FF8000",
+            4: "#FF4000",
+            5: "#000000", // Noir au lieu de #FF0000
+            "default_past": "#FFFFFF",
+            "default_future": "#FFFFFF"
+        };
+
+        let currentDate = new Date();
+        let currentMonth = currentDate.getMonth(); // Récupère automatiquement le mois actuel (0-11)
+        let currentYear = currentDate.getFullYear(); // Récupère automatiquement l'année actuelle
+        let currentView = "month"; // Vue par défaut
+        let selectedFromYearView = false;
+        let selectedViewMonth = null;
+        let selectedViewYear = null;
+
+        
+        // Stockage des données utilisateur (en mémoire uniquement)
+        let userPainData = {};
+        let userNotes = {}; // Nouvelle variable pour stocker les notes
+        let noteTypes = [];  // Liste des types de notes personnalisées (objets { name, color })
+        let userMedsData = {}; // Variable pour stocker les jours avec prise d'anti-inflammatoires
+        let editingTypeName = null;
+        
+        function populateNoteTypeFilter() {
+            const filterSelect = document.getElementById('note-type-filter');
+            filterSelect.innerHTML = '<option value="all">Tous les types</option>';
+            noteTypes.forEach(type => {
+                const opt = document.createElement('option');
+                opt.value = type.name;
+                opt.textContent = type.name;
+                filterSelect.appendChild(opt);
+            });
+
+            const savedFilter = localStorage.getItem('spondylogNoteFilter');
+            if (savedFilter && [...filterSelect.options].some(o => o.value === savedFilter)) {
+                filterSelect.value = savedFilter;
+            }
+        }
+
+        document.getElementById("note-type-filter").addEventListener("change", function () {
+            localStorage.setItem("spondylogNoteFilter", this.value);
+            renderNotesList();
+        });
+        
+        function openTypeModalForAdd() {
+            editingTypeName = null;
+            document.getElementById('note-type-modal-title').textContent = "Ajouter un type de note";
+            document.getElementById('type-name-input').value = "";
+            document.getElementById('type-color-input').value = "#3498db";
+            document.getElementById('delete-type-btn').style.display = "none";
+            document.getElementById('note-type-modal').style.display = "flex";
+        }
+
+        function openTypeModalForEdit(typeName) {
+        editingTypeName = typeName;
+        document.getElementById('note-type-modal-title').textContent = "Modifier le type de note";
+        const obj = noteTypes.find(t => t.name === typeName);
+        document.getElementById('type-name-input').value  = obj ? obj.name  : "";
+        document.getElementById('type-color-input').value = obj ? obj.color : "#3498db";
+        document.getElementById('delete-type-btn').style.display = "inline-block";
+        document.getElementById('note-type-modal').style.display   = "flex";
+        }
+
+        // Éléments DOM
+        const monthView = document.getElementById("month-view");
+        const yearView = document.getElementById("year-view");
+        const monthViewBtn = document.getElementById("month-view-btn");
+        const yearViewBtn = document.getElementById("year-view-btn");
+        const calendarBody = document.getElementById("calendar-body");
+        const yearGrid = document.getElementById("year-grid");
+        let currentMonthDisplay = document.getElementById("current-month");
+        let currentYearDisplay = document.getElementById("current-year");
+        const prevMonthBtn = document.getElementById("prev-month");
+        const nextMonthBtn = document.getElementById("next-month");
+        const prevYearBtn = document.getElementById("prev-year");
+        const nextYearBtn = document.getElementById("next-year");
+        const painModal = document.getElementById("pain-modal");
+        const modalDateTitle = document.getElementById("modal-date-title");
+        const closeModalBtn = document.getElementById("close-modal");
+        const painOptions = document.querySelectorAll(".pain-option");
+        const eraseOption = document.getElementById("erase-value");
+        const dayNoteTextarea = document.getElementById("day-note");
+        const showNotesBtn = document.getElementById("show-notes-btn");
+        const notesListModal = document.getElementById("notes-list-modal");
+        const closeNotesListBtn = document.getElementById("close-notes-list");
+        const notesList = document.getElementById("notes-list")
+
+        let selectedDate = null;     // Variable temporaire pour stocker la date sélectionnée
+
+        async function loadUserDataFromFile() {
+            try {
+                const response = await fetch('http://localhost:8000/data'); // Demande au serveur Python
+                if (!response.ok) throw new Error("Erreur de chargement du fichier JSON");
+
+                const data = await response.json();
+                userPainData = data.painData || {};
+                userNotes = data.notes || {};
+                userMedsData = data.medsData || {};
+
+                renderCalendar(currentMonth, currentYear); // Mettre à jour l'affichage du calendrier
+            } catch (error) {
+                console.error("Erreur lors du chargement des données :", error);
+            }
+        } 
+
+        // Appeler la fonction au chargement de la page
+        document.addEventListener("DOMContentLoaded", loadUserDataFromFile);
+
+        // Initialisation
+        document.addEventListener("DOMContentLoaded", function() {
+
+        // Éléments DOM pour la dropdown des types de note
+        const selectedNoteType = document.querySelector(".note-type-container"); // Conteneur principal
+        const selectedTypeArea = document.getElementById("selected-type-name").parentElement; // Élément cliquable
+        const noteTypeList     = document.getElementById("note-type-list");
+        const addTypeItem      = document.getElementById("add-type-item");
+        const noteTypeModal    = document.getElementById("note-type-modal");
+        const saveTypeBtn      = document.getElementById("save-type-btn");
+        const cancelTypeBtn    = document.getElementById("cancel-type-btn");
+        const deleteTypeBtn    = document.getElementById("delete-type-btn");
+        const typeNameInput   = document.getElementById("type-name-input");
+        const typeColorInput  = document.getElementById("type-color-input");
+
+        // 3) Délégation sur la <ul> des types…
+        noteTypeList.addEventListener("click", function(e) {
+            // Empêche la propagation pour ne pas ré-ouvrir le dropdown
+            e.stopPropagation();
+
+            // On cherche l'élément <li> cliqué (ou son parent immédiat)
+            const li = e.target.closest("li");
+            if (!li) return;
+
+            // Cas "Ajouter un type"
+            if (li.id === "add-type-item") {
+                openTypeModalForAdd();
+
+            // Cas "…" : modifier un type existant
+            } else if (e.target.classList.contains("edit-type-btn")) {
+                const typeName = li.dataset.name;
+                openTypeModalForEdit(typeName);
+
+            // Cas sélection d'un type dans la liste
+            } else {
+                // Sauvegarde la note en cours avant de changer de type
+                saveCurrentNote();
+
+                // Récupère le nouveau type sélectionné
+                const newType = li.dataset.name;
+
+                // Met à jour l'affichage du sélecteur
+                document.getElementById("selected-type-name").textContent = newType;
+                document.getElementById("selected-type-dot").style.backgroundColor =
+                    noteTypes.find(t => t.name === newType).color;
+
+                // Charge la note correspondante (ou vide le textarea)
+                dayNoteTextarea.value =
+                    (userNotes[selectedDate] || {})[newType] || "";
+
+                // Met à jour les badges des autres notes présentes
+                updateNoteBadges(selectedDate, newType);
+
+                // Ferme la liste déroulante
+                noteTypeList.style.display = "none";
+            }
+        });
+    
+
+        // 1) Ouvrir / fermer la dropdown
+        selectedTypeArea.addEventListener("click", function(e) {
+        e.stopPropagation();
+        noteTypeList.style.display =
+            noteTypeList.style.display === "block" ? "none" : "block";
+        });
+
+        // 2) Fermer la dropdown si clic en-dehors
+        window.addEventListener("click", function(e) {
+        const container = document.querySelector(".note-type-container");
+        if (!container.contains(e.target)) {
+            noteTypeList.style.display = "none";
+        }
+        });
+
+        // 4) + Ajouter un type
+        addTypeItem.addEventListener("click", function(e) {
+        e.stopPropagation();
+        openTypeModalForAdd();
+        });
+
+        // 5) Bouton « Enregistrer » du modal d’ajout/édition
+        saveTypeBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+
+            // Récupérer le nom et la couleur choisis
+            const newName  = typeNameInput.value.trim();
+            const newColor = typeColorInput.value;
+
+            // Validation : nom non vide
+            if (!newName) {
+                alert("Veuillez saisir un nom pour le type de note.");
+                return;
+            }
+
+            // Validation : pas de doublon en mode ajout
+            if (editingTypeName === null &&
+                noteTypes.some(t => t.name.toLowerCase() === newName.toLowerCase())) {
+                alert("Un type de note avec ce nom existe déjà.");
+                return;
+            }
+
+            // === MODE AJOUT ===
+            if (editingTypeName === null) {
+                // 1. Ajouter le nouveau type dans la liste
+                noteTypes.push({ name: newName, color: newColor });
+                // 2. Persister immédiatement
+                localStorage.setItem('spondylogNoteTypes', JSON.stringify(noteTypes));
+                // 3. Fermer le modal d’ajout
+                noteTypeModal.style.display = "none";
+                // 4. Mettre à jour la dropdown principale
+                document.getElementById('selected-type-name').textContent           = newName;
+                document.getElementById('selected-type-dot').style.backgroundColor = newColor;
+                // 5. Reconstruire la liste déroulante
+                const list = document.getElementById("note-type-list");
+                list.innerHTML = "";
+                noteTypes.forEach(type => {
+                    const li = document.createElement("li");
+                    li.dataset.name = type.name;
+                    li.innerHTML = `
+                        <span class="color-dot" style="background:${type.color}"></span>
+                        ${type.name}
+                        <button class="edit-type-btn" data-name="${type.name}">…</button>
+                    `;
+                    list.appendChild(li);
+                });
+                const addLi = document.createElement("li");
+                addLi.id        = "add-type-item";
+                addLi.className = "add-type-item";
+                addLi.textContent = "+ Ajouter un type de note";
+                list.appendChild(addLi);
+                // 6. Vider le textarea pour saisir la note du nouveau type
+                dayNoteTextarea.value = "";
+                // 7. Mettre à jour les badges
+                updateNoteBadges(selectedDate, newName);
+                return;
+            }
+
+            // === MODE ÉDITION ===
+            // Trouver l’objet du type en cours d’édition
+            const typeObj = noteTypes.find(t => t.name === editingTypeName);
+            if (typeObj) {
+                // 1. Mettre à jour nom & couleur
+                typeObj.name  = newName;
+                typeObj.color = newColor;
+                // 2. Mettre à jour les clés dans userNotes pour conserver les notes existantes
+                for (let date in userNotes) {
+                    if (userNotes[date][editingTypeName] !== undefined) {
+                        userNotes[date][newName] = userNotes[date][editingTypeName];
+                        delete userNotes[date][editingTypeName];
+                    }
+                }
+                // 3. Persister types et notes
+                localStorage.setItem('spondylogNoteTypes', JSON.stringify(noteTypes));
+                localStorage.setItem('spondylogNotes',    JSON.stringify(userNotes));
+                // 4. Mettre à jour l’affichage du modal de notes
+                showPainModal(selectedDate);
+            }
+
+            // Fermer le modal d’ajout/édition
+            noteTypeModal.style.display = "none";
+        });
+
+
+
+        cancelTypeBtn.addEventListener('click', () => {
+            noteTypeModal.style.display = "none";  // fermer la pop-up
+        });
+        
+        deleteTypeBtn.addEventListener('click', () => {
+            if (!editingTypeName) return;
+
+            // 1️⃣ Confirmation claire de la suppression définitive
+            const ok = confirm(
+            `Supprimer définitivement le type de note "${editingTypeName}" ?\n` +
+            `Toutes les notes associées à ce type seront également supprimées.`
+            );
+            if (!ok) return;
+
+            // 2️⃣ Empêche la suppression de la dernière catégorie
+            if (noteTypes.length <= 1) {
+                alert("Vous devez conserver au moins un type de note.");
+                return;
+            }
+
+            // 3️⃣ Retirer le type de la liste des types
+            noteTypes = noteTypes.filter(t => t.name !== editingTypeName);
+
+            // 4️⃣ Supprimer toutes les notes de ce type pour chaque jour
+            for (let date in userNotes) {
+                if (userNotes[date][editingTypeName] !== undefined) {
+                    delete userNotes[date][editingTypeName];
+                }
+                // Si plus aucune note pour ce jour, supprimer l’entrée date
+                if (userNotes[date] && Object.keys(userNotes[date]).length === 0) {
+                    delete userNotes[date];
+                }
+            }
+
+            // 5️⃣ Persister les changements
+            localStorage.setItem('spondylogNoteTypes', JSON.stringify(noteTypes));
+            localStorage.setItem('spondylogNotes', JSON.stringify(userNotes));
+
+            // 6️⃣ Rafraîchir l’UI si le modal est toujours ouvert
+            if (selectedDate) {
+                showPainModal(selectedDate);
+            }
+
+            // 7️⃣ Fermer le modal d’édition de type
+            noteTypeModal.style.display = "none";
+        });
+
+        // 6) Fermer la modale si clic en-dehors
+        noteTypeModal.addEventListener("click", function(e) {
+        if (e.target === noteTypeModal) noteTypeModal.style.display = "none";
+        });
+        
+            // Essayer de charger les données depuis localStorage
+            loadUserData();
+            
+            // Affichage du calendrier initial
+            renderCalendar(currentMonth, currentYear);
+            renderYearView(currentYear);
+            
+            // Événements de navigation du calendrier mensuel
+            prevMonthBtn.addEventListener("click", navigateToPrevMonth);
+            nextMonthBtn.addEventListener("click", navigateToNextMonth);
+            
+            // Événements de navigation du calendrier annuel
+            prevYearBtn.addEventListener("click", navigateToPrevYear);
+            nextYearBtn.addEventListener("click", navigateToNextYear);
+            
+            // Événements du modal
+            closeModalBtn.addEventListener("click", closeModal);
+            painOptions.forEach(option => {
+                option.addEventListener("click", function() {
+                    selectPainLevel(this.getAttribute("data-value"));
+                });
+            });
+            
+            // Événements de changement de vue
+            monthViewBtn.addEventListener("click", function() {
+                // Récupère la date actuelle seulement quand on clique sur le bouton mensuel
+                const now = new Date();
+                currentMonth = now.getMonth();
+                currentYear = now.getFullYear();
+                // Réinitialiser la variable de suivi
+                selectedFromYearView = false;
+                selectedViewMonth = null;
+                selectedViewYear = null;
+                setView("month");
+            });
+            
+            yearViewBtn.addEventListener("click", function() {
+                // Récupérer l'année actuelle
+                const now = new Date();
+                currentYear = now.getFullYear();
+                // Réinitialiser la variable de suivi
+                selectedFromYearView = false;
+                selectedViewMonth = null;
+                selectedViewYear = null;
+                setView("year");
+            });
+            
+            // Événements pour la liste des notes
+            showNotesBtn.addEventListener("click", function() {
+                populateNoteTypeFilter();
+                renderNotesList();
+                notesListModal.style.display = "flex";
+            });
+            
+            closeNotesListBtn.addEventListener("click", function() {
+                notesListModal.style.display = "none";
+            });
+            
+            // Fermer le modal des notes si clic en dehors
+            window.addEventListener("click", function(event) {
+                if (event.target === notesListModal) {
+                    notesListModal.style.display = "none";
+                }
+            });
+
+            // Initialiser la référence à la case à cocher des anti-inflammatoires
+            medCheckbox = document.getElementById('med-taken');
+            });
+
+            // Ajouter un gestionnaire d'événements pour le clic sur le titre
+            const titleLink = document.getElementById("title-link");
+                if (titleLink) { // Vérification pour éviter les erreurs si l'élément n'existe pas
+                    titleLink.addEventListener("click", function(event) {
+                    event.preventDefault(); // Empêche le comportement par défaut du lien
+
+                    // Réinitialise à la date actuelle
+                    const now = new Date();
+                    currentMonth = now.getMonth();
+                    currentYear = now.getFullYear();
+                    
+                    // Réinitialiser la variable de suivi
+                    selectedFromYearView = false;
+                    selectedViewMonth = null;
+                    selectedViewYear = null;
+
+                    // Bascule vers la vue mensuelle si ce n'est pas déjà le cas
+                    setView("month");
+
+                    // Met à jour l'affichage du titre du mois pour refléter le changement
+                    const monthNames = ["Janvier", "Février", "Mars", "Avril", "Mai", "Juin", 
+                            "Juillet", "Août", "Septembre", "Octobre", "Novembre", "Décembre"];
+                    currentMonthDisplay.textContent = `${monthNames[currentMonth]} ${currentYear}`;
+
+                    // Rend le calendrier avec le mois et l'année actuels
+                    renderCalendar(currentMonth, currentYear);
+
+                    // Effet visuel optionnel pour indiquer que l'action a été effectuée
+                    titleLink.style.opacity = "0.7";
+                    setTimeout(() => {
+                        titleLink.style.opacity = "1";
+                    }, 200);
+                });
+
+            }
+
+            // Fonctions pour sauvegarder et charger les données utilisateur
+            function saveUserData() {
+            // Stocker les données dans localStorage
+            localStorage.setItem('spondylogPainData', JSON.stringify(userPainData));
+            localStorage.setItem('spondylogNotes', JSON.stringify(userNotes));
+            localStorage.setItem('spondylogMedsData', JSON.stringify(userMedsData));
+            localStorage.setItem('spondylogNoteTypes', JSON.stringify(noteTypes));
+            }
+
+        
+            function loadUserData() {
+            // 1) Charger les données existantes
+            const savedPainData   = localStorage.getItem('spondylogPainData');
+            const savedNotes      = localStorage.getItem('spondylogNotes');
+            const savedMedsData   = localStorage.getItem('spondylogMedsData');
+            const savedNoteTypes  = localStorage.getItem('spondylogNoteTypes');
+
+            if (savedPainData)   userPainData = JSON.parse(savedPainData);
+            if (savedMedsData)   userMedsData = JSON.parse(savedMedsData);
+
+            // 2) Initialiser les types de notes AVANT conversion des anciennes notes
+            if (savedNoteTypes) {
+                noteTypes = JSON.parse(savedNoteTypes);
+            } else {
+                noteTypes = [{ name: "Catégorie 1", color: "#3498db" }];
+                localStorage.setItem('spondylogNoteTypes', JSON.stringify(noteTypes));
+            }
+
+            // 3) Charger et convertir les notes
+            if (savedNotes) {
+                userNotes = JSON.parse(savedNotes);
+
+                for (let date in userNotes) {
+                    const entry = userNotes[date];
+
+                    if (typeof entry === 'string') {
+                        // Ancien format : transformer en objet
+                        userNotes[date] = {};
+                        userNotes[date][ noteTypes[0].name ] = entry;
+                    } 
+                    else if (typeof entry === 'object' && entry !== null) {
+                        // Déplacer toute clé inconnue sous la catégorie par défaut
+                        for (let catName in entry) {
+                            if (!noteTypes.find(t => t.name === catName)) {
+                                const txt = entry[catName];
+                                const def = noteTypes[0].name;
+                                userNotes[date][def] = (userNotes[date][def] || "") +
+                                                    (userNotes[date][def] ? "\n" : "") + txt;
+                                delete userNotes[date][catName];
+                            }
+                        }
+                    }
+                }
+                // Enregistrer la conversion
+                localStorage.setItem('spondylogNotes', JSON.stringify(userNotes));}
+            }
+
+            function saveCurrentNote() {
+                if (!selectedDate) return;
+                // Détermine le type actuellement sélectionné
+                const currentType = document.getElementById('selected-type-name').textContent;
+                const text = dayNoteTextarea.value.trim();
+                if (text !== "") {
+                    // Si du texte est présent, on le sauvegarde dans userNotes pour ce jour et ce type
+                    if (!userNotes[selectedDate]) {
+                        userNotes[selectedDate] = {};
+                    }
+                    userNotes[selectedDate][currentType] = text;
+                } else {
+                    // Si le champ est vide, on supprime la note de ce type pour ce jour
+                    if (userNotes[selectedDate] && userNotes[selectedDate][currentType]) {
+                        delete userNotes[selectedDate][currentType];
+                        // Si plus aucune note pour ce jour, on supprime l'entrée du jour entièrement
+                        if (Object.keys(userNotes[selectedDate]).length === 0) {
+                            delete userNotes[selectedDate];
+                        }
+                    }
+                }
+            }
+
+            function erasePainValue() {
+                if (selectedDate) {
+                    delete userPainData[selectedDate];
+                    delete userNotes[selectedDate];    // supprime toutes les notes de ce jour
+                    delete userMedsData[selectedDate];
+                    saveUserData();
+                    closeModal(true);
+                }
+            }
+
+            function updateNoteBadges(dateId, currentType) {
+                const container = document.getElementById('note-badges-container');
+                container.innerHTML = "";  // vide les anciens badges
+                if (!userNotes[dateId]) {
+                    container.style.display = "none";
+                    return;
+                }
+                // Parcourt les types de notes présents pour ce jour
+                for (let typeName in userNotes[dateId]) {
+                    const noteText = userNotes[dateId][typeName];
+                    if (noteText && noteText.trim() !== "" && typeName !== currentType) {
+                        // Créer un badge pour chaque type qui a une note (sauf le type actuellement sélectionné)
+                        const badge = document.createElement('span');
+                        badge.className = "note-badge";
+                        const dot = document.createElement('span');
+                        dot.className = "badge-dot";
+                        // Trouver la couleur associée au type
+                        const typeObj = noteTypes.find(t => t.name === typeName);
+                        dot.style.backgroundColor = typeObj ? typeObj.color : "#3498db";
+                        badge.appendChild(dot);
+                        badge.appendChild(document.createTextNode(typeName));
+                        // Au clic sur le badge, on sélectionne ce type
+                        badge.addEventListener('click', () => {
+                            // Simuler la sélection de ce type comme si on l'avait choisi dans la liste
+                            const liToSelect = document.querySelector(`#note-type-list li[data-name="${typeName}"]`);
+                            if (liToSelect) {
+                                liToSelect.click();  // déclenche le même comportement que sélectionner dans la liste
+                            }
+                        });
+                        container.style.display = container.childElementCount > 0 ? "block" : "none";
+                    }
+                }
+                // Affiche le conteneur seulement s'il contient au moins un badge
+                container.style.display = container.childElementCount > 0 ? "block" : "none";
+            }
+
+
+            // Fonction pour changer de vue
+            function setView(view) {
+                currentView = view;
+                
+                if (view === "month") {
+                    monthView.style.display = "block";
+                    yearView.style.display = "none";
+                    monthViewBtn.classList.add("active");
+                    yearViewBtn.classList.remove("active");
+                    renderCalendar(currentMonth, currentYear);
+                } else {
+                    monthView.style.display = "none";
+                    yearView.style.display = "block";
+                    monthViewBtn.classList.remove("active");
+                    yearViewBtn.classList.add("active");
+                    renderYearView(currentYear);
+                }
+            }
+
+            // Modifier les écouteurs d'événements pour les boutons de vue
+            // Remplacer ces lignes dans la partie document.addEventListener("DOMContentLoaded", function() {...})
+            monthViewBtn.addEventListener("click", function() {
+                // Récupère la date actuelle seulement quand on clique sur le bouton mensuel
+                const now = new Date();
+                currentMonth = now.getMonth();
+                currentYear = now.getFullYear();
+                setView("month");
+            });
+
+            yearViewBtn.addEventListener("click", function() {
+                setView("year");  // Notez que j'ai corrigé "Year" en "year" (minuscule)
+            });
+
+            // Fonctions de rendu et de navigation du calendrier mensuel
+            function renderCalendar(month, year) {
+                // Mise à jour de l'affichage du mois et de l'année
+                const monthNames = ["Janvier", "Février", "Mars", "Avril", "Mai", "Juin", 
+                                    "Juillet", "Août", "Septembre", "Octobre", "Novembre", "Décembre"];
+                currentMonthDisplay.textContent = `${monthNames[month]} ${year}`;
+                
+                // Obtenir le premier jour du mois
+                const firstDay = new Date(year, month, 1).getDay();
+                // Convertir de 0-6 (où 0 est dimanche) à 1-7 (où 1 est lundi)
+                const firstDayAdjusted = firstDay === 0 ? 7 : firstDay;
+                
+                // Nombre de jours dans le mois
+                const daysInMonth = new Date(year, month + 1, 0).getDate();
+                
+                // Vider le corps du calendrier
+                calendarBody.innerHTML = "";
+                
+                // Variables pour le rendu
+                let date = 1;
+                
+                // Créer les cellules du calendrier
+                for (let i = 0; i < 6; i++) { // 6 lignes maximum dans un mois
+                    // Créer une nouvelle ligne
+                    const row = document.createElement("tr");
+                    
+                    // Créer les cellules individuelles pour chaque jour
+                    for (let j = 1; j <= 7; j++) {
+                        const cell = document.createElement("td");
+                        
+                        if (i === 0 && j < firstDayAdjusted) {
+                            // Cellules vides avant le premier jour du mois
+                            cell.textContent = "";
+                        } else if (date > daysInMonth) {
+                            // Sortir de la boucle si nous avons dépassé le nombre de jours dans le mois
+                            break;
+                        } else {
+                            // Cellule avec une date valide
+                            const dayCell = document.createElement("div");
+                            dayCell.className = "day-cell";
+                            
+                            // Ajouter le numéro du jour
+                            const dayNumber = document.createElement("div");
+                            dayNumber.className = "day-number";
+                            dayNumber.textContent = date;
+                            dayCell.appendChild(dayNumber);
+                            
+                            // Créer un identifiant unique pour cette date
+                            const dateId = `${year}-${month+1}-${date}`;
+                            dayCell.setAttribute("data-date", dateId);
+                            
+                            // Colorier la cellule en fonction des données utilisateur
+                            const targetDate = new Date(year, month, date);
+                            const today = new Date();
+                            today.setHours(0, 0, 0, 0);
+                            
+                            // Vérifier si c'est aujourd'hui et ajouter un carré rouge autour
+                            if (targetDate.getFullYear() === today.getFullYear() && 
+                                targetDate.getMonth() === today.getMonth() && 
+                                targetDate.getDate() === today.getDate()) {
+                                // Application d'un carré rouge qui dépasse de 4px (2px de chaque côté)
+                                dayCell.style.position = "relative";
+                                dayCell.classList.add("current-day");
+                                
+                                // Créer un élément pour le carré rouge qui sera plus grand
+                                const redSquare = document.createElement("div");
+                                redSquare.className = "today-highlight";
+                                redSquare.style.position = "absolute";
+                                redSquare.style.top = "-5px";
+                                redSquare.style.left = "-5px";
+                                redSquare.style.right = "-5px";
+                                redSquare.style.bottom = "-5px";
+                                redSquare.style.border = "2px solid red";
+                                redSquare.style.borderRadius = "2px";
+                                redSquare.style.pointerEvents = "none"; // Pour que les clics passent à travers
+                                redSquare.style.zIndex = "1";
+                                
+                                // Ne pas modifier le style du numéro du jour pour maintenir sa position cohérente
+                                // CORRECTION: Suppression des styles qui modifiaient la position du numéro du jour
+                                
+                                // Ajoutez le carré rouge en premier pour qu'il soit en arrière-plan
+                                dayCell.insertBefore(redSquare, dayCell.firstChild);
+                            }
+                            
+                            if (userPainData[dateId] !== undefined) {
+                                // Valeur définie par l'utilisateur
+                                dayCell.style.backgroundColor = painColors[userPainData[dateId]];
+                                // Si c'est le niveau 5 (noir), mettre le texte en blanc
+                                if (userPainData[dateId] === 5) {
+                                    dayNumber.style.color = "white";
+                                }
+                            } else if (targetDate < today) {
+                                // Jour passé sans saisie
+                                dayCell.style.backgroundColor = painColors.default_past;
+                            } else {
+                                // Jour futur sans saisie
+                                dayCell.style.backgroundColor = painColors.default_future;
+                            }
+                            
+                            // Ajouter un indicateur si une note existe pour cette date
+                            if (userNotes[dateId]) {
+                                // Ajouter la classe qui encadre la cellule
+                                dayCell.classList.add("note-present");
+
+                                // Ajouter le point bleu dans le coin supérieur droit
+                                const noteIndicator = document.createElement("div");
+                                noteIndicator.className = "note-indicator";
+                                dayCell.appendChild(noteIndicator);
+                            }
+                            
+                            // Ajouter un indicateur si des anti-inflammatoires ont été pris ce jour
+                            if (userMedsData[dateId]) {
+                                const medIndicator = document.createElement("div");
+                                medIndicator.className = "med-indicator";
+                                medIndicator.innerHTML = '<span class="med-icon">💊</span>';
+                                dayCell.appendChild(medIndicator);
+                            }
+
+                            // Ajouter l'événement de clic pour ouvrir le modal
+                            dayCell.addEventListener("click", function() {
+                                showPainModal(dateId);
+                            });
+                            
+                            cell.appendChild(dayCell);
+                            date++;
+                        }
+                        
+                        row.appendChild(cell);
+                    }
+                    
+                    calendarBody.appendChild(row);
+                    
+                    // Arrêter si nous avons affiché tous les jours du mois
+                    if (date > daysInMonth) {
+                        break;
+                    }
+                }
+            }
+
+            // Rendu de la vue annuelle
+            function renderYearView(year) {
+                // Mise à jour de l'affichage de l'année
+                currentYearDisplay.textContent = year;
+                
+                // Vider la grille des mois
+                yearGrid.innerHTML = "";
+                
+                // Noms des mois
+                const monthNames = ["Janvier", "Février", "Mars", "Avril", "Mai", "Juin", 
+                                "Juillet", "Août", "Septembre", "Octobre", "Novembre", "Décembre"];
+                
+                // Date du jour actuel
+                const today = new Date();
+                const currentDay = today.getDate();
+                let currentMonth = today.getMonth();
+                let currentYear = today.getFullYear();
+                
+                // Créer une carte pour chaque mois
+                for (let month = 0; month < 12; month++) {
+                    // Créer la carte du mois
+                    const monthCard = document.createElement("div");
+                    monthCard.className = "month-card";
+                    
+                    // En-tête du mois
+                    const monthHeader = document.createElement("div");
+                    monthHeader.className = "month-name";
+                    monthHeader.textContent = monthNames[month];
+                    monthCard.appendChild(monthHeader);
+                    // Rendre l'élément cliquable en changeant le curseur
+                    monthHeader.style.cursor = "pointer";
+                    // Ajouter l'événement click
+                    monthHeader.addEventListener("click", function() {
+                        // Met à jour le mois courant en utilisant l'indice de la boucle
+                        currentMonth = month;
+                        // Assurez-vous que l'année est bien mise à jour
+                        currentYear = year;
+                        // Garder en mémoire qu'on vient de la vue annuelle
+                        selectedFromYearView = true;
+                        // Sauvegarder le mois et l'année sélectionnés
+                        selectedViewMonth = month;
+                        selectedViewYear = year;
+                        // Change la vue en vue mensuelle
+                        setView("month");
+                        // Met à jour le calendrier mensuel avec le mois sélectionné
+                        renderCalendar(currentMonth, currentYear);
+                    });
+                    
+                    // Calendrier mini
+                    const miniCalendar = document.createElement("table");
+                    miniCalendar.className = "mini-calendar";
+                    
+                    // En-tête du calendrier
+                    const thead = document.createElement("thead");
+                    const headerRow = document.createElement("tr");
+                    const days = ["L", "M", "M", "J", "V", "S", "D"];
+                    
+                    for (let i = 0; i < 7; i++) {
+                        const th = document.createElement("th");
+                        th.textContent = days[i];
+                        headerRow.appendChild(th);
+                    }
+                    
+                    thead.appendChild(headerRow);
+                    miniCalendar.appendChild(thead);
+                    
+                    // Corps du calendrier
+                    const tbody = document.createElement("tbody");
+                    
+                    // Obtenir le premier jour du mois
+                    const firstDay = new Date(year, month, 1).getDay();
+                    // Convertir de 0-6 (où 0 est dimanche) à 1-7 (où 1 est lundi)
+                    const firstDayAdjusted = firstDay === 0 ? 7 : firstDay;
+                    
+                    // Nombre de jours dans le mois
+                    const daysInMonth = new Date(year, month + 1, 0).getDate();
+                    
+                    // Variables pour le rendu
+                    let date = 1;
+                    
+                    // Créer les cellules du calendrier
+                    for (let i = 0; i < 6; i++) { // 6 lignes maximum dans un mois
+                        // Créer une nouvelle ligne
+                        const row = document.createElement("tr");
+                        
+                        // Créer les cellules individuelles pour chaque jour
+                        for (let j = 1; j <= 7; j++) {
+                            const cell = document.createElement("td");
+                            
+                            if (i === 0 && j < firstDayAdjusted) {
+                                // Cellules vides avant le premier jour du mois
+                                cell.textContent = "";
+                            } else if (date > daysInMonth) {
+                                // Sortir de la boucle si nous avons dépassé le nombre de jours dans le mois
+                                break;
+                            } else {
+                                // Cellule avec une date valide
+                                const miniDay = document.createElement("div");
+                                miniDay.className = "mini-day";
+                                miniDay.textContent = date;
+                                
+                                // Créer un identifiant unique pour cette date
+                                const dateId = `${year}-${month+1}-${date}`;
+                                miniDay.setAttribute("data-date", dateId);
+                                
+                                // Colorier la cellule en fonction des données utilisateur
+                                const targetDate = new Date(year, month, date);
+                                const todayForComparison = new Date();
+                                todayForComparison.setHours(0, 0, 0, 0);
+                                
+                                if (userPainData[dateId] !== undefined) {
+                                    // Valeur définie par l'utilisateur
+                                    miniDay.style.backgroundColor = painColors[userPainData[dateId]];
+                                    // Si c'est le niveau 5 (noir), mettre le texte en blanc
+                                    if (userPainData[dateId] === 5) {
+                                        miniDay.style.color = "white";
+                                    }
+                                } else if (targetDate < todayForComparison) {
+                                    // Jour passé sans saisie
+                                    miniDay.style.backgroundColor = painColors.default_past;
+                                } else {
+                                    // Jour futur sans saisie
+                                    miniDay.style.backgroundColor = painColors.default_future;
+                                }
+                                
+                                // Ajouter un carré rouge autour du jour courant
+                                // Gestion combinée des bordures
+                                if (date === currentDay && month === currentMonth && year === currentYear) {
+                                    miniDay.style.border = "2px solid red";
+                                    miniDay.style.boxSizing = "border-box";
+                                    miniDay.style.borderRadius = "2px"
+                                } else if (userNotes && userNotes[dateId]) {
+                                    // Utiliser la classe mini-note-present au lieu du style inline
+                                    miniDay.classList.add("mini-note-present");
+                                    
+                                    // Si tu veux également ajouter l'indicateur de note (le petit point)
+                                    //const noteIndicator = document.createElement("div");
+                                    //noteIndicator.className = "note-indicator";
+                                    //miniDay.appendChild(noteIndicator);
+                                    
+                                    // Assure-toi que miniDay a une position relative pour que le note-indicator
+                                    // soit correctement positionné
+                                    miniDay.style.position = "relative";
+                                }
+                                
+                                // Ajout de l'événement de clic pour ouvrir le modal sans changer la vue
+                                miniDay.addEventListener("click", function() {
+                                    showPainModal(dateId);
+                                });
+                                
+                                cell.appendChild(miniDay);
+                                date++;
+                            }
+                            
+                            row.appendChild(cell);
+                        }
+                        
+                        tbody.appendChild(row);
+                        
+                        // Arrêter si nous avons affiché tous les jours du mois
+                        if (date > daysInMonth) {
+                            break;
+                        }
+                    }
+                    
+                    miniCalendar.appendChild(tbody);
+                    monthCard.appendChild(miniCalendar);
+                    yearGrid.appendChild(monthCard);
+                }
+            }
+
+            // Navigation dans le calendrier mensuel
+            function navigateToPrevMonth() {
+                currentMonth--;
+                if (currentMonth < 0) {
+                    currentMonth = 11;
+                    currentYear--;
+                }
+                renderCalendar(currentMonth, currentYear);
+            }
+
+            function navigateToNextMonth() {
+                currentMonth++;
+                if (currentMonth > 11) {
+                    currentMonth = 0;
+                    currentYear++;
+                }
+                renderCalendar(currentMonth, currentYear);
+            }
+
+            // Navigation dans le calendrier annuel
+            function navigateToPrevYear() {
+                currentYear--;
+                renderYearView(currentYear);
+            }
+
+            function navigateToNextYear() {
+                currentYear++;
+                renderYearView(currentYear);
+            }
+
+            function showPainModal(dateId) {
+                // 0️⃣ garde en mémoire la date
+                selectedDate = dateId;
+
+                // Si on vient de la vue année, on mémorise où revenir
+                if (currentView === "year") {
+                    selectedFromYearView = true;
+                    const [y, m] = dateId.split('-');
+                    selectedViewMonth = parseInt(m,10)-1;
+                    selectedViewYear  = parseInt(y,10);
+                }
+
+                // 1️⃣ met à jour le titre du modal
+                const [y,m,d] = dateId.split('-');
+                const monthNames = ["Janvier","Février","Mars","Avril","Mai","Juin",
+                                    "Juillet","Août","Septembre","Octobre","Novembre","Décembre"];
+                modalDateTitle.textContent = `Date – ${d} ${monthNames[parseInt(m,10)-1]} ${y}`;
+
+                // 2️⃣ affiche le niveau de douleur
+                if (userPainData[dateId] != null) {
+                    painOptions.forEach(opt => {
+                    const val = +opt.dataset.value;
+                    if (val === userPainData[dateId]) {
+                        opt.style.transform   = "scale(1.05)";
+                        opt.style.boxShadow   = "0 0 5px rgba(0,0,0,0.3)";
+                    } else {
+                        opt.style.transform   = "none";
+                        opt.style.boxShadow   = "none";
+                    }
+                    });
+                } else {
+                    painOptions.forEach(opt => {
+                    opt.style.transform   = "none";
+                    opt.style.boxShadow   = "none";
+                    });
+                }
+
+                // 3️⃣ type de note par défaut
+                const selectedTypeNameEl = document.getElementById("selected-type-name");
+                const selectedTypeDotEl  = document.getElementById("selected-type-dot");
+                let currentType = noteTypes[0];
+                selectedTypeNameEl.textContent         = currentType.name;
+                selectedTypeDotEl.style.backgroundColor = currentType.color;
+
+                // 4️⃣ charge la note de ce type/date
+                const noteObj = userNotes[dateId] || {};
+                dayNoteTextarea.value = noteObj[currentType.name] || "";
+
+                // 5️⃣ état anti-inflammatoires
+                document.getElementById("med-taken").checked = !!userMedsData[dateId];
+
+                // 6️⃣ reconstruit la liste déroulante
+                const noteTypeList = document.getElementById("note-type-list");
+                noteTypeList.innerHTML = "";
+
+                // ⏩ chaque type existant
+                noteTypes.forEach(type => {
+                    const li = document.createElement("li");
+                    li.dataset.name = type.name;
+                    li.innerHTML = `
+                    <span class="color-dot" style="background:${type.color}"></span>
+                    <span class="note-type-name-option">${type.name}</span>
+                    <button class="edit-type-btn" data-name="${type.name}">…</button>
+                    `;
+                    noteTypeList.appendChild(li);
+                });
+
+                // ⏩ option Ajouter à la fin
+                const addLi = document.createElement("li");
+                addLi.id        = "add-type-item";
+                addLi.className = "add-type-item";
+                addLi.textContent = "+ Ajouter un type de note";
+                noteTypeList.appendChild(addLi);
+
+                // 7️⃣ met à jour les badges existants
+                updateNoteBadges(selectedDate, currentType.name);
+
+                // 8️⃣ affiche le modal
+                painModal.style.display = "flex";
+                }
+
+
+        function closeModal(refresh = false) {
+            painModal.style.display = "none";
+            
+            if (refresh) {
+                if (selectedFromYearView && selectedViewMonth !== null && selectedViewYear !== null) {
+                    // Si on vient de la vue annuelle, restaurer le mois/année sélectionné
+                    if (currentView === "month") {
+                        // Si on est en vue mensuelle, mettre à jour avec le mois sélectionné
+                        currentMonth = selectedViewMonth;
+                        currentYear = selectedViewYear;
+                        renderCalendar(currentMonth, currentYear);
+                    } else {
+                        // Si on est en vue annuelle, rester sur l'année sélectionnée
+                        renderYearView(selectedViewYear);
+                    }
+                } else {
+                    // Comportement normal
+                    if (currentView === "month") {
+                        renderCalendar(currentMonth, currentYear);
+                    } else {
+                        renderYearView(currentYear);
+                    }
+                }
+            }
+            
+            selectedDate = null;
+        }
+
+        function selectPainLevel(level) {
+            if (!selectedDate) return;
+
+            // 1️⃣ Mémoriser le niveau de douleur
+            const painValue = parseInt(level, 10);
+            userPainData[selectedDate] = painValue;
+
+            // 2️⃣ Sauvegarder la note du type de note actuellement sélectionné
+            //    Cette fonction gère correctement userNotes[selectedDate] en tant qu'objet
+            saveCurrentNote();
+
+            // 3️⃣ Sauvegarder l’état des anti-inflammatoires
+            if (document.getElementById('med-taken').checked) {
+                userMedsData[selectedDate] = true;
+            } else {
+                delete userMedsData[selectedDate];
+            }
+
+            // 4️⃣ Écrire toutes les données dans localStorage
+            saveUserData();
+
+            // 5️⃣ Fermer la modale et rafraîchir l’affichage du calendrier
+            closeModal(true);
+        }
+
+        function erasePainValue() {
+            if (selectedDate) {
+                // Supprimer la valeur
+                delete userPainData[selectedDate];
+                
+                // Supprimer la note
+                delete userNotes[selectedDate];
+
+                // Supprimer l'information sur les anti-inflammatoires
+                delete userMedsData[selectedDate];
+                
+                // Sauvegarder les données
+                saveUserData();
+                
+                // Fermer le modal et mettre à jour l'affichage
+                closeModal(true);
+            }
+        }
+
+        // Récupérer les éléments du modal de confirmation
+        const confirmResetModal = document.getElementById("confirm-reset-modal");
+        const confirmResetYesBtn = document.getElementById("confirm-reset-yes");
+        const confirmResetNoBtn = document.getElementById("confirm-reset-no");
+
+        // Assurez-vous de retirer tout écouteur existant sur eraseOption 
+        // (s'il est attaché par un attribut HTML ou par un précédent addEventListener, retirez-le dans l'éditeur si nécessaire)
+        eraseOption.onclick = null; // Supprime tout gestionnaire inline
+
+        // Attacher un nouvel écouteur qui n'affiche que la popup sans appeler erasePainValue
+        eraseOption.addEventListener("click", function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            confirmResetModal.style.display = "flex";
+        });
+
+        // Si l'utilisateur confirme la réinitialisation
+        confirmResetYesBtn.addEventListener("click", function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            // Appeler la fonction de réinitialisation uniquement ici
+            erasePainValue();
+            confirmResetModal.style.display = "none";
+            closeModal();
+            // Rafraîchir l'affichage de la vue actuelle (mensuelle ou annuelle)
+            if (currentView === "month") {
+                renderCalendar(currentMonth, currentYear);
+            } else {
+                renderYearView(currentYear);
+            }
+        });
+
+        // Si l'utilisateur annule la réinitialisation
+        confirmResetNoBtn.addEventListener("click", function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            confirmResetModal.style.display = "none";
+        });
+
+
+        // Fonction pour rendre la liste des notes
+        function renderNotesList() {
+            notesList.innerHTML = ""; // Vider la liste
+
+            const selectedType = document.getElementById("note-type-filter")?.value || "all";
+
+            const noteDates = Object.keys(userNotes)
+                .filter(dateId => {
+                    const entry = userNotes[dateId];
+                    if (typeof entry === 'string') {
+                        return selectedType === "all" && entry.trim() !== "";
+                    } else if (entry && typeof entry === 'object') {
+                        return Object.entries(entry).some(([type, val]) =>
+                            (selectedType === "all" || type === selectedType) &&
+                            typeof val === 'string' && val.trim() !== ""
+                        );
+                    }
+                    return false;
+                })
+                .sort((a, b) => {
+                    const [ay, am, ad] = a.split('-').map(Number);
+                    const [by, bm, bd] = b.split('-').map(Number);
+                    return new Date(by, bm - 1, bd) - new Date(ay, am - 1, ad);
+                });
+
+            if (noteDates.length === 0) {
+                const noNotes = document.createElement("p");
+                noNotes.textContent = "Aucune note enregistrée.";
+                notesList.appendChild(noNotes);
+                return;
+            }
+
+            noteDates.forEach(dateId => {
+                const noteEntry = document.createElement("div");
+                noteEntry.className = "note-entry";
+
+                const [year, month, day] = dateId.split('-').map(Number);
+                const monthNames = ["Janvier", "Février", "Mars", "Avril", "Mai", "Juin",
+                                    "Juillet", "Août", "Septembre", "Octobre", "Novembre", "Décembre"];
+                const formattedDate = `${day} ${monthNames[month - 1]} ${year}`;
+                const noteDate = document.createElement("div");
+                noteDate.className = "note-date";
+
+                let painLevelText = "Niveau non renseigné";
+                if (userPainData[dateId] !== undefined) {
+                    const painLevel = document.createElement("span");
+                    painLevel.className = "note-pain-level";
+                    painLevel.style.backgroundColor = painColors[userPainData[dateId]];
+                    if (userPainData[dateId] === 5) {
+                        painLevel.style.color = "white";
+                        painLevel.style.borderColor = "white";
+                    }
+                    painLevelText = `Niveau ${userPainData[dateId]}`;
+                    noteDate.appendChild(painLevel);
+                }
+                noteDate.innerHTML += ` ${formattedDate} - ${painLevelText}`;
+                noteEntry.appendChild(noteDate);
+
+                const noteText = document.createElement("div");
+                noteText.className = "note-text";
+
+                if (typeof userNotes[dateId] === 'string') {
+                    if (selectedType === "all") {
+                        noteText.textContent = userNotes[dateId];
+                    }
+                } else {
+                    for (const typeName in userNotes[dateId]) {
+                        const text = userNotes[dateId][typeName].trim();
+                        if (!text || (selectedType !== "all" && typeName !== selectedType)) continue;
+
+                        const typeObj = noteTypes.find(t => t.name === typeName);
+                        const color = typeObj ? typeObj.color : "#3498db";
+
+                        const line = document.createElement("div");
+                        const dot = document.createElement("span");
+                        const label = document.createElement("strong");
+                        const content = document.createElement("span");
+
+                        dot.textContent = "●";
+                        dot.style.color = color;
+                        dot.style.marginRight = "5px";
+                        label.textContent = typeName + " : ";
+                        content.textContent = text;
+
+                        line.append(dot, label, content);
+                        noteText.appendChild(line);
+                    }
+                }
+
+                noteEntry.appendChild(noteText);
+
+                if (userMedsData[dateId]) {
+                    const medIcon = document.createElement("span");
+                    medIcon.className = "med-icon";
+                    medIcon.innerHTML = " 💊";
+                    medIcon.style.marginLeft = "5px";
+                    noteDate.appendChild(medIcon);
+                }
+
+                const editLink = document.createElement("a");
+                editLink.href = "#";
+                editLink.textContent = "Modifier";
+                editLink.style.display = "inline-block";
+                editLink.style.marginTop = "10px";
+                editLink.style.color = "var(--primary-color)";
+                editLink.addEventListener("click", e => {
+                    e.preventDefault();
+                    notesListModal.style.display = "none";
+                    showPainModal(dateId);
+                });
+
+                noteEntry.appendChild(editLink);
+                notesList.appendChild(noteEntry);
+            });
+        }
+
+
+        
+        // Variables pour le graphique
+        let painChart = null;
+        const chartModal = document.getElementById("chart-modal");
+        const closeChartBtn = document.getElementById("close-chart-modal");
+        const showChartBtn = document.getElementById("show-chart-btn");
+        const dateRangeSelect = document.getElementById("date-range");
+        const customDateRange = document.getElementById("custom-date-range");
+        const startDateInput = document.getElementById("start-date");
+        const endDateInput = document.getElementById("end-date");
+        const applyCustomDatesBtn = document.getElementById("apply-custom-dates");
+
+        // Événements pour le graphique
+        document.addEventListener("DOMContentLoaded", function() {
+        // 1. Récupérer les éléments
+        const showChartBtn    = document.getElementById("show-chart-btn");
+        const chartModal      = document.getElementById("chart-modal");
+        const dateRangeSelect = document.getElementById("date-range");
+        const customDateRange = document.getElementById("custom-date-range");
+        const startDateInput  = document.getElementById("start-date");
+        const endDateInput    = document.getElementById("end-date");
+
+        // 2. Calculer aujourd'hui et il y a 30 jours
+        const today         = new Date();
+        const thirtyDaysAgo = new Date();
+        thirtyDaysAgo.setDate(today.getDate() - 30);
+
+        // 3. Fonction utilitaire pour formater YYYY‑MM‑JJ (pour <input type="date">)
+        function formatForInput(date) {
+            const yyyy = date.getFullYear();
+            const mm   = String(date.getMonth()+1).padStart(2,"0");
+            const dd   = String(date.getDate()  ).padStart(2,"0");
+            return `${yyyy}-${mm}-${dd}`;
+        }
+
+        // 4. Initialiser une fois, au chargement, les dates personnalisées
+        startDateInput.value = formatForInput(thirtyDaysAgo);
+        endDateInput  .value = formatForInput(today);
+
+        // 5. Gérer le clic sur « Voir graphique »
+        showChartBtn.addEventListener("click", function() {
+            // a) Toujours remettre la période sur « 30 » :
+            dateRangeSelect.value = "30";
+
+            // b) Masquer le form de dates custom au cas où :
+            customDateRange.style.display = "none";
+
+            // c) (Re)Initialiser les valeurs des deux calendar inputs :
+            startDateInput.value = formatForInput(thirtyDaysAgo);
+            endDateInput  .value = formatForInput(today);
+
+            // d) Générer le graphique pour 30 jours
+            generateChart(30);
+
+            // e) Ouvrir la modal
+            chartModal.style.display = "flex";
+        });
+        
+        // Événement pour afficher le graphique
+        showChartBtn.addEventListener("click", function() {
+        generateChart(30); // Génère le graphique pour les 30 derniers jours
+        chartModal.style.display = "flex"; // Affiche le modal sans forcer le changement de vue
+        });
+        
+        // Fermer le modal du graphique
+        closeChartBtn.addEventListener("click", function() {
+            chartModal.style.display = "none";
+        });
+        
+        // Fermer le modal si clic en dehors
+        window.addEventListener("click", function(event) {
+            if (event.target === chartModal) {
+                chartModal.style.display = "none";
+            }
+        });
+        
+        // Événement pour le changement de période
+        dateRangeSelect.addEventListener("change", function() {
+            const range = this.value;
+            
+            if (range === "custom") {
+                customDateRange.style.display = "block";
+            } else {
+                customDateRange.style.display = "none";
+                generateChart(parseInt(range));
+            }
+        });
+        
+        // Événement pour appliquer les dates personnalisées
+        applyCustomDatesBtn.addEventListener("click", function() {
+            const startDate = new Date(startDateInput.value);
+            const endDate = new Date(endDateInput.value);
+            
+            if (startDate && endDate && startDate <= endDate) {
+                generateCustomChart(startDate, endDate);
+            } else {
+                alert("Veuillez sélectionner des dates valides (la date de début doit être antérieure ou égale à la date de fin).");
+            }
+        });
+
+        // Sélectionner les éléments
+        const importExportBtn = document.getElementById("import-export-btn");
+        const importExportDropdown = document.getElementById("import-export-dropdown");
+        const importOption = document.getElementById("import-option");
+        const exportOption = document.getElementById("export-option");
+        const statItems = document.querySelectorAll('.stat-item');
+        statItems.forEach(item => {
+        item.style.margin = '0 5px';
+        item.style.padding = '3px'});
+
+        // Afficher/Masquer le menu déroulant
+        importExportBtn.addEventListener("click", () => {
+        // Toggle l'affichage
+        if (importExportDropdown.style.display === "none" || importExportDropdown.style.display === "") {
+            importExportDropdown.style.display = "block";
+        } else {
+            importExportDropdown.style.display = "none";
+        }
+        });
+
+        // Fermer le dropdown si clic en dehors
+        window.addEventListener("click", (event) => {
+        if (!document.getElementById("import-export-container").contains(event.target)) {
+            importExportDropdown.style.display = "none";
+        }
+        });
+
+        // Gestion du clic sur l'option "Exporter"
+        exportOption.addEventListener("click", () => {
+        exportData();
+        importExportDropdown.style.display = "none";
+        });
+
+        // Gestion du clic sur l'option "Importer"
+        importOption.addEventListener("click", () => {
+        // Déclencher le click sur un input file caché
+        document.getElementById("import-file-input").click();
+        importExportDropdown.style.display = "none";
+        });
+
+        function exportData() {
+            // Rassembler les données dans un objet
+            const exportObj = {
+                painData: userPainData,
+                notes: userNotes,
+                medsData: userMedsData
+            };
+
+            // Convertir en JSON
+            const dataStr = JSON.stringify(exportObj, null, 2);
+
+            // Créer un Blob
+            const blob = new Blob([dataStr], { type: "application/json" });
+
+            // Créer un lien temporaire pour le téléchargement
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement("a");
+            a.href = url;
+            a.download = "spondylog_export.json";
+            document.body.appendChild(a);
+            a.click();
+
+            // Nettoyer
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            }
+
+         const importFileInput = document.getElementById("import-file-input");
+
+            importFileInput.addEventListener("change", (event) => {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                const importedData = JSON.parse(e.target.result);
+
+                // Vérification simple de l'objet importé (vous pouvez ajouter plus de validations)
+                if (importedData.painData && importedData.notes && importedData.medsData) {
+                    // Mettre à jour vos variables
+                    const imported = JSON.parse(ev.target.result)
+                    userPainData = importedData.painData;
+                    userNotes = importedData.notes;
+                    userMedsData = importedData.medsData;
+
+                    const defaultCat = noteTypes[0].name;  // votre catégorie par défaut, ex. "Sport"
+                    for (let date in userNotes) {
+                    if (typeof userNotes[date] === "string") {
+                        // transforme l’ancien format "texte" en { "Sport": "texte" }
+                        userNotes[date] = { [defaultCat]: userNotes[date] };
+                    }
+                    }
+                    
+                    // Sauvegarder dans localStorage
+                    saveUserData();
+
+                    // Actualiser l'affichage (selon la vue active)
+                    if (currentView === "month") {
+                    renderCalendar(currentMonth, currentYear);
+                    } else {
+                    renderYearView(currentYear);
+                    }
+                    alert("Importation réussie !");
+                } else {
+                    alert("Le fichier importé ne contient pas les données attendues.");
+                }
+                } catch (error) {
+                alert("Erreur lors de la lecture du fichier : " + error.message);
+                }
+            };
+            reader.readAsText(file);
+            });
+
+         });
+
+        // Fonction pour formater une date pour les champs input de type date
+        function formatDateForInput(date) {
+            const year = date.getFullYear();
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const day = String(date.getDate()).padStart(2, '0');
+            return `${year}-${month}-${day}`;
+        }
+
+        // Fonction pour générer le graphique sur une période donnée (en jours)
+        function generateChart(days) {
+            const endDate = new Date();
+            const startDate = new Date();
+            startDate.setDate(endDate.getDate() - days + 1); // +1 pour inclure le jour actuel
+            
+            generateCustomChart(startDate, endDate);
+        }
+
+        // Fonction pour générer le graphique sur une période personnalisée
+        function generateCustomChart(startDate, endDate) {
+            // Réinitialiser les dates à minuit pour une comparaison correcte
+            startDate.setHours(0, 0, 0, 0);
+            endDate.setHours(23, 59, 59, 999); // Fin de journée
+            
+            // Préparer les données
+            const dates = [];
+            const painData = [];
+            const medData = [];
+            
+            // Variables pour les statistiques
+            let totalPain = 0;
+            let painCount = 0;
+            let maxPain = -1;
+            let medDays = 0;
+            let severeDays = 0; // Jours avec douleur >= 3
+        
+            // Parcourir chaque jour de la période
+            const currentDate = new Date(startDate);
+            while (currentDate <= endDate) {
+                const dateId = `${currentDate.getFullYear()}-${currentDate.getMonth() + 1}-${currentDate.getDate()}`;
+                
+                // Formater la date pour l'affichage (JJ/MM)
+                const day = String(currentDate.getDate()).padStart(2, '0');
+                const month = String(currentDate.getMonth() + 1).padStart(2, '0');
+                dates.push(`${day}/${month}`);
+                
+                // Récupérer la valeur de douleur
+                let painValue = null;
+                if (userPainData[dateId] !== undefined) {
+                    painValue = userPainData[dateId];
+                    totalPain += painValue;
+                    painCount++;
+                    if (painValue > maxPain) maxPain = painValue;
+                    if (painValue >= 3) severeDays++;
+                }
+                
+                // Récupérer la prise d'anti-inflammatoires
+                const medTaken = userMedsData[dateId] ? true : false;
+                medData.push(medTaken);
+                if (medTaken) medDays++;
+
+                // Ajuster la valeur affichée : si douleur=0 et anti-inflammatoire pris, utiliser 0.3
+                const displayValue = (painValue === 0 && medTaken) ? 0.05 : painValue;
+                painData.push(displayValue);
+                
+                // Passer au jour suivant
+                currentDate.setDate(currentDate.getDate() + 1);
+            }
+        
+        // Calculer la moyenne de douleur
+        const avgPain = painCount > 0 ? (totalPain / painCount).toFixed(1) : "--";
+        
+        // Mettre à jour les statistiques
+        document.getElementById("avg-pain").textContent = avgPain;
+        document.getElementById("max-pain").textContent = maxPain >= 0 ? maxPain : "--";
+        document.getElementById("med-days").textContent = medDays;
+        document.getElementById("severe-days").textContent = severeDays;
+        
+        // Créer des couleurs personnalisées en fonction de la prise d'anti-inflammatoires
+        const barColors = painData.map((pain, index) => {
+            // Si la valeur de douleur est null, on renvoie une couleur grisée
+            if (pain === null) return 'rgba(200, 200, 200, 0.3)';
+            
+            // Si anti-inflammatoire pris ce jour-là, afficher en bleu, sinon en rouge
+            return medData[index] ? 'rgba(54, 162, 235, 0.5)' : 'rgba(255, 99, 132, 0.5)';
+        });
+        
+        const borderColors = painData.map((pain, index) => {
+            // Si la valeur de douleur est null, bordure grisée
+            if (pain === null) return 'rgba(200, 200, 200, 0.5)';
+            
+            // Si anti-inflammatoire pris ce jour-là, bordure bleue, sinon bordure rouge
+            return medData[index] ? 'rgba(54, 162, 235, 1)' : 'rgba(255, 99, 132, 1)';
+        });
+        
+        // Détruire le graphique existant s'il y en a un
+        if (painChart) {
+            painChart.destroy();
+        }
+
+        // Créer le graphique
+        const ctx = document.getElementById('pain-chart').getContext('2d');
+        painChart = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: dates,
+                datasets: [{
+                    label: 'Niveau de douleur',
+                    data: painData,
+                    backgroundColor: barColors,
+                    borderColor: borderColors,
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    x: {
+                        title: {
+                            display: true,
+                            text: ' '
+                        },
+                        grid: {
+                            display: false
+                        }
+                    },
+                    y: {
+                        title: {
+                            display: true,
+                            text: 'Niveau de douleur'
+                        },
+                        min: 0,
+                        max: 5,
+                        ticks: {
+                            stepSize: 1
+                        }
+                    }
+                },
+                plugins: {
+                    tooltip: {
+                        callbacks: {
+                            title: function(tooltipItems) {
+                                const index = tooltipItems[0].dataIndex;
+                                const currentDate = new Date(startDate);
+                                currentDate.setDate(startDate.getDate() + index);
+                                
+                                const day = String(currentDate.getDate()).padStart(2, '0');
+                                const month = String(currentDate.getMonth() + 1).padStart(2, '0');
+                                const year = currentDate.getFullYear();
+                                
+                                return `${day}/${month}/${year}`;
+                            },
+                            label: function(context) {
+                                const value = context.parsed.y;
+                                if (value === null) return 'Niveau de douleur: Non renseigné';
+                                return `Niveau de douleur: ${value}`;
+                            },
+                            afterLabel: function(context) {
+                                const index = context.dataIndex;
+                                
+                                // Indiquer si un anti-inflammatoire a été pris
+                                const medTaken = medData[index];
+                                const medText = medTaken ? 'Anti-inflammatoire: Oui' : 'Anti-inflammatoire: Non';
+                                
+                                // Récupérer la note
+                                const currentDate = new Date(startDate);
+                                currentDate.setDate(startDate.getDate() + index);
+                                
+                                const dateId = `${currentDate.getFullYear()}-${currentDate.getMonth() + 1}-${currentDate.getDate()}`;
+                                const note = userNotes[dateId];
+                                
+                                if (note) {
+                                    // Limiter la longueur de la note à afficher dans l'infobulle
+                                    return [medText, `Note: ${note.length > 50 ? note.substring(0, 50) + '...' : note}`];
+                                }
+                                
+                                return medText;
+                            }
+                        }
+                    },
+                    legend: {
+                        display: false
+                    }
+                }
+            }
+        });
+        
+        // Ajouter une légende personnalisée en dehors du graphique
+        updateChartLegend();
+
+        // Espace sous le graphique
+        const chartCanvas = document.getElementById('pain-chart');
+        chartCanvas.style.marginBottom = '30px'; 
+        }
+
+        // Fonction pour ajouter une légende personnalisée
+        function updateChartLegend() {
+            // Vérifier si un élément de légende existe déjà et le supprimer
+            const existingLegend = document.getElementById('custom-chart-legend');
+            if (existingLegend) {
+                existingLegend.remove();
+            }
+            
+            // Créer un nouvel élément de légende
+            const legendContainer = document.createElement('div');
+            legendContainer.id = 'custom-chart-legend';
+            legendContainer.style.display = 'flex';
+            legendContainer.style.justifyContent = 'center';
+            legendContainer.style.marginTop = '10px';
+            legendContainer.style.marginBottom = '5px';
+            
+            // Légende pour les barres rouges (sans anti-inflammatoires)
+            const noMedLegend = document.createElement('div');
+            noMedLegend.style.display = 'flex';
+            noMedLegend.style.alignItems = 'center';
+            noMedLegend.style.marginRight = '20px';
+            
+            const noMedColor = document.createElement('div');
+            noMedColor.style.width = '15px';
+            noMedColor.style.height = '15px';
+            noMedColor.style.backgroundColor = 'rgba(255, 99, 132, 0.5)';
+            noMedColor.style.borderColor = 'rgba(255, 99, 132, 1)';
+            noMedColor.style.borderWidth = '1px';
+            noMedColor.style.borderStyle = 'solid';
+            noMedColor.style.marginRight = '5px';
+            
+            const noMedText = document.createElement('span');
+            noMedText.textContent = 'Sans anti-inflammatoire';
+            
+            noMedLegend.appendChild(noMedColor);
+            noMedLegend.appendChild(noMedText);
+            
+            // Légende pour les barres bleues (avec anti-inflammatoires)
+            const medLegend = document.createElement('div');
+            medLegend.style.display = 'flex';
+            medLegend.style.alignItems = 'center';
+            
+            const medColor = document.createElement('div');
+            medColor.style.width = '15px';
+            medColor.style.height = '15px';
+            medColor.style.backgroundColor = 'rgba(54, 162, 235, 0.5)';
+            medColor.style.borderColor = 'rgba(54, 162, 235, 1)';
+            medColor.style.borderWidth = '1px';
+            medColor.style.borderStyle = 'solid';
+            medColor.style.marginRight = '5px';
+            
+            const medText = document.createElement('span');
+            medText.textContent = 'Avec anti-inflammatoire';
+            
+            medLegend.appendChild(medColor);
+            medLegend.appendChild(medText);
+            
+            // Ajouter les éléments de légende au conteneur
+            legendContainer.appendChild(noMedLegend);
+            legendContainer.appendChild(medLegend);
+            
+            // Insérer la légende avant le graphique
+            const chartContainer = document.getElementById('pain-chart').parentNode;
+            chartContainer.insertBefore(legendContainer, document.getElementById('pain-chart'));
+            
+        }
+        // Fonction pour sauvegarder le pense-bête dans le localStorage
+        function savePenseBete() {
+            const penseBeteText = document.getElementById("pense-bête-note").value;
+            localStorage.setItem("spondylogPenseBete", penseBeteText);
+            }
+
+            // Fonction pour charger le pense-bête depuis le localStorage
+            function loadPenseBete() {
+            const savedPenseBete = localStorage.getItem("spondylogPenseBete");
+            if (savedPenseBete) {
+                document.getElementById("pense-bête-note").value = savedPenseBete;
+            }}
+
+            // Appeler loadPenseBete() au chargement de la page
+            document.addEventListener("DOMContentLoaded", function() {
+            loadPenseBete();
+
+            // Sauvegarder automatiquement lorsque le contenu change
+            const penseBeteTextarea = document.getElementById("pense-bête-note");
+            penseBeteTextarea.addEventListener("input", savePenseBete);
+            })
+    </script>
+
+</body>
+</html>
