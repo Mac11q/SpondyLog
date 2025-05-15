@@ -497,6 +497,159 @@
             }
         }
 
+        /* Styles pour la liste déroulante des types de notes */
+        .note-type-container {
+            position: relative;
+            margin-bottom: 8px;  /* espace sous la liste */
+            width: 100%;
+        }
+        .selected-note-type {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: #fff;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            padding: 5px 10px;
+            cursor: pointer;
+        }
+        .selected-note-type .color-dot {
+            margin-right: 8px;
+        }
+        .dropdown-arrow {
+            margin-left: 10px;
+            font-size: 0.8em;
+            color: #555;
+        }
+        .note-type-list {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: #fff;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            list-style: none;
+            padding: 0;
+            margin: 4px 0;
+            max-height: 150px;
+            overflow-y: auto;
+            display: none;  /* masqué par défaut, affiché quand déroulé */
+            z-index: 10;
+        }
+        .note-type-list li {
+            display: flex;
+            align-items: center;
+            padding: 5px 10px;
+            cursor: pointer;
+        }
+        .note-type-list li:hover {
+            background: #f0f0f0;
+        }
+        .note-type-list .color-dot {
+            margin-right: 8px;
+        }
+        .edit-type-btn {
+            margin-left: auto;
+            background: none;
+            border: none;
+            font-size: 1.2em;
+            line-height: 1;
+            cursor: pointer;
+            color: #555;
+        }
+        .edit-type-btn:hover {
+            color: #000;
+        }
+
+        .color-dot {
+            display: inline-block;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            margin-right: 8px;
+            vertical-align: middle;
+        }
+
+        /* Style pour l’option "Ajouter un type" */
+        .add-type-item {
+            text-align: center;
+            font-style: italic;
+            color: var(--primary-color);
+        }
+
+        /* Styles pour les badges de notes présentes */
+        .note-badges-container {
+            margin-bottom: 8px;
+        }
+        .note-badge {
+            display: inline-block;
+            background: #f4f4f4;
+            border-radius: 12px;
+            padding: 3px 8px;
+            margin-right: 5px;
+            font-size: 0.85em;
+            cursor: pointer;
+        }
+        .note-badge .badge-dot {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            margin-right: 5px;
+            vertical-align: middle;
+        }
+
+        /* Styles pour la pop-up d'ajout/édition de type de note */
+        #note-type-modal .modal-content {
+            /* centrer la modale plus petite */
+            text-align: left;
+        }
+        #note-type-modal label {
+            display: block;
+            margin: 10px 0 5px;
+        }
+        #note-type-modal input[type="text"] {
+            width: 100%;
+            padding: 5px;
+            margin-bottom: 10px;
+        }
+        #note-type-modal input[type="color"] {
+            padding: 0;
+            margin-left: 5px;
+            vertical-align: middle;
+        }
+        .modal-actions {
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            margin-top: 15px;
+        }
+        .modal-actions button {
+            padding: 5px 10px;
+            margin-left: 5px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        #save-type-btn {
+            background-color: var(--primary-color);
+            color: #fff;
+        }
+        #cancel-type-btn {
+            background-color: #ccc;
+            color: #000;
+        }
+        #delete-type-btn {
+            background: none;
+            border: none;
+            font-size: 0.9em;
+            cursor: pointer;
+        }
+        #delete-type-btn:hover {
+            text-decoration: underline;
+        }
+
         /* Styles pour le graphique */
         .date-range-selector {
             margin-top: 15px;
@@ -779,7 +932,47 @@
                 <!-- 2. Section pour les notes (en deuxième) -->
                 <div class="modal-section notes-section">
                     <label for="day-note" class="section-label">Notes du jour :</label>
-                    <textarea id="day-note" class="day-note-textarea" placeholder="Ajoutez vos notes pour cette journée..."></textarea>
+                
+                    <!-- Début de l'ajout : Liste déroulante des types de notes -->
+                    <div class="note-type-container">
+                        <!-- Élément affiché de la liste déroulante (type sélectionné) -->
+                        <div id="selected-note-type" class="selected-note-type">
+                            <span id="selected-type-dot" class="color-dot"></span>
+                            <span id="selected-type-name">Catégorie 1</span>
+                            <span class="dropdown-arrow">▼</span>
+                        </div>
+                        <!-- Options de la liste déroulante des types de notes -->
+                        <ul id="note-type-list" class="note-type-list">
+                            <!-- Les <li> des types de notes seront insérés dynamiquement en JS -->
+                            <!-- Option d'ajout d'un nouveau type de note : -->
+                            <li id="add-type-item" class="add-type-item">+ Ajouter un type de note</li>
+                        </ul>
+                    </div>
+                    <!-- Conteneur des badges de notes présentes pour ce jour -->
+                    <div id="note-badges-container" class="note-badges-container"></div>
+                    <!-- Fin de l'ajout -->
+                
+                    <textarea id="day-note" class="day-note-textarea"
+                      placeholder="Ajoutez vos notes pour cette journée..."></textarea>
+                </div>
+                <!-- ... (Suite du modal : section niveau de douleur, etc.) ... -->
+                
+                <!-- Modal d'ajout/édition d'un type de note -->
+                <div id="note-type-modal" class="modal">
+                    <div class="modal-content" style="max-width: 300px;">
+                        <h3 id="note-type-modal-title">Ajouter un type de note</h3>
+                        <label for="type-name-input">Nom :</label>
+                        <input type="text" id="type-name-input" placeholder="Nom du type de note" />
+                        <label for="type-color-input">Couleur :</label>
+                        <input type="color" id="type-color-input" value="#3498db" />
+                        <div class="modal-actions">
+                            <button id="save-type-btn">Enregistrer</button>
+                            <button id="cancel-type-btn" type="button">Annuler</button>
+                            <button id="delete-type-btn" type="button" style="margin-left:auto; color:#c00;">
+                                Supprimer
+                            </button>
+                        </div>
+                    </div>
                 </div>
             
                 <!-- 3. Section pour le niveau de douleur (efn dernier) -->
@@ -824,13 +1017,19 @@
         <!-- Nouveau modal pour afficher toutes les notes -->
         <div id="notes-list-modal" class="modal">
             <div class="modal-content notes-list-content">
-                <div class="modal-header">
-                    <h3>Historique des notes</h3>
-                    <button class="close-btn" id="close-notes-list">&times;</button>
-                </div>
-                <div id="notes-list" class="notes-list">
+              <div class="modal-header">
+                <h3>Historique des notes</h3>
+                <button class="close-btn" id="close-notes-list">&times;</button>
+              </div>
+              <div style="margin-bottom: 10px;">
+                <label for="note-type-filter">Filtrer par type :</label>
+                <select id="note-type-filter" style="margin-left: 10px;">
+                  <option value="all">Tous les types</option>
+                </select>
+              </div>
+              <div id="notes-list" class="notes-list"></div>
             </div>
-        </div>
+          </div>
 
     <script>
         // Constantes et variables globales
@@ -857,7 +1056,49 @@
         // Stockage des données utilisateur (en mémoire uniquement)
         let userPainData = {};
         let userNotes = {}; // Nouvelle variable pour stocker les notes
+        let noteTypes = [];  // Liste des types de notes personnalisées (objets { name, color })
         let userMedsData = {}; // Variable pour stocker les jours avec prise d'anti-inflammatoires
+        let editingTypeName = null;
+        
+        function populateNoteTypeFilter() {
+            const filterSelect = document.getElementById('note-type-filter');
+            filterSelect.innerHTML = '<option value="all">Tous les types</option>';
+            noteTypes.forEach(type => {
+                const opt = document.createElement('option');
+                opt.value = type.name;
+                opt.textContent = type.name;
+                filterSelect.appendChild(opt);
+            });
+
+            const savedFilter = localStorage.getItem('spondylogNoteFilter');
+            if (savedFilter && [...filterSelect.options].some(o => o.value === savedFilter)) {
+                filterSelect.value = savedFilter;
+            }
+        }
+
+        document.getElementById("note-type-filter").addEventListener("change", function () {
+            localStorage.setItem("spondylogNoteFilter", this.value);
+            renderNotesList();
+        });
+        
+        function openTypeModalForAdd() {
+            editingTypeName = null;
+            document.getElementById('note-type-modal-title').textContent = "Ajouter un type de note";
+            document.getElementById('type-name-input').value = "";
+            document.getElementById('type-color-input').value = "#3498db";
+            document.getElementById('delete-type-btn').style.display = "none";
+            document.getElementById('note-type-modal').style.display = "flex";
+        }
+
+        function openTypeModalForEdit(typeName) {
+        editingTypeName = typeName;
+        document.getElementById('note-type-modal-title').textContent = "Modifier le type de note";
+        const obj = noteTypes.find(t => t.name === typeName);
+        document.getElementById('type-name-input').value  = obj ? obj.name  : "";
+        document.getElementById('type-color-input').value = obj ? obj.color : "#3498db";
+        document.getElementById('delete-type-btn').style.display = "inline-block";
+        document.getElementById('note-type-modal').style.display   = "flex";
+        }
 
         // Éléments DOM
         const monthView = document.getElementById("month-view");
@@ -881,10 +1122,9 @@
         const showNotesBtn = document.getElementById("show-notes-btn");
         const notesListModal = document.getElementById("notes-list-modal");
         const closeNotesListBtn = document.getElementById("close-notes-list");
-        const notesList = document.getElementById("notes-list");
+        const notesList = document.getElementById("notes-list")
 
-        // Variable temporaire pour stocker la date sélectionnée
-        let selectedDate = null;
+        let selectedDate = null;     // Variable temporaire pour stocker la date sélectionnée
 
         async function loadUserDataFromFile() {
             try {
@@ -900,14 +1140,227 @@
             } catch (error) {
                 console.error("Erreur lors du chargement des données :", error);
             }
-        }
+        } 
 
         // Appeler la fonction au chargement de la page
         document.addEventListener("DOMContentLoaded", loadUserDataFromFile);
 
-
         // Initialisation
         document.addEventListener("DOMContentLoaded", function() {
+
+        // Éléments DOM pour la dropdown des types de note
+        const selectedNoteType = document.querySelector(".note-type-container"); // Conteneur principal
+        const selectedTypeArea = document.getElementById("selected-type-name").parentElement; // Élément cliquable
+        const noteTypeList     = document.getElementById("note-type-list");
+        const addTypeItem      = document.getElementById("add-type-item");
+        const noteTypeModal    = document.getElementById("note-type-modal");
+        const saveTypeBtn      = document.getElementById("save-type-btn");
+        const cancelTypeBtn    = document.getElementById("cancel-type-btn");
+        const deleteTypeBtn    = document.getElementById("delete-type-btn");
+        const typeNameInput   = document.getElementById("type-name-input");
+        const typeColorInput  = document.getElementById("type-color-input");
+
+        // 3) Délégation sur la <ul> des types…
+        noteTypeList.addEventListener("click", function(e) {
+            // Empêche la propagation pour ne pas ré-ouvrir le dropdown
+            e.stopPropagation();
+
+            // On cherche l'élément <li> cliqué (ou son parent immédiat)
+            const li = e.target.closest("li");
+            if (!li) return;
+
+            // Cas "Ajouter un type"
+            if (li.id === "add-type-item") {
+                openTypeModalForAdd();
+
+            // Cas "…" : modifier un type existant
+            } else if (e.target.classList.contains("edit-type-btn")) {
+                const typeName = li.dataset.name;
+                openTypeModalForEdit(typeName);
+
+            // Cas sélection d'un type dans la liste
+            } else {
+                // Sauvegarde la note en cours avant de changer de type
+                saveCurrentNote();
+
+                // Récupère le nouveau type sélectionné
+                const newType = li.dataset.name;
+
+                // Met à jour l'affichage du sélecteur
+                document.getElementById("selected-type-name").textContent = newType;
+                document.getElementById("selected-type-dot").style.backgroundColor =
+                    noteTypes.find(t => t.name === newType).color;
+
+                // Charge la note correspondante (ou vide le textarea)
+                dayNoteTextarea.value =
+                    (userNotes[selectedDate] || {})[newType] || "";
+
+                // Met à jour les badges des autres notes présentes
+                updateNoteBadges(selectedDate, newType);
+
+                // Ferme la liste déroulante
+                noteTypeList.style.display = "none";
+            }
+        });
+    
+
+        // 1) Ouvrir / fermer la dropdown
+        selectedTypeArea.addEventListener("click", function(e) {
+        e.stopPropagation();
+        noteTypeList.style.display =
+            noteTypeList.style.display === "block" ? "none" : "block";
+        });
+
+        // 2) Fermer la dropdown si clic en-dehors
+        window.addEventListener("click", function(e) {
+        const container = document.querySelector(".note-type-container");
+        if (!container.contains(e.target)) {
+            noteTypeList.style.display = "none";
+        }
+        });
+
+        // 4) + Ajouter un type
+        addTypeItem.addEventListener("click", function(e) {
+        e.stopPropagation();
+        openTypeModalForAdd();
+        });
+
+        // 5) Bouton « Enregistrer » du modal d’ajout/édition
+        saveTypeBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+
+            // Récupérer le nom et la couleur choisis
+            const newName  = typeNameInput.value.trim();
+            const newColor = typeColorInput.value;
+
+            // Validation : nom non vide
+            if (!newName) {
+                alert("Veuillez saisir un nom pour le type de note.");
+                return;
+            }
+
+            // Validation : pas de doublon en mode ajout
+            if (editingTypeName === null &&
+                noteTypes.some(t => t.name.toLowerCase() === newName.toLowerCase())) {
+                alert("Un type de note avec ce nom existe déjà.");
+                return;
+            }
+
+            // === MODE AJOUT ===
+            if (editingTypeName === null) {
+                // 1. Ajouter le nouveau type dans la liste
+                noteTypes.push({ name: newName, color: newColor });
+                // 2. Persister immédiatement
+                localStorage.setItem('spondylogNoteTypes', JSON.stringify(noteTypes));
+                // 3. Fermer le modal d’ajout
+                noteTypeModal.style.display = "none";
+                // 4. Mettre à jour la dropdown principale
+                document.getElementById('selected-type-name').textContent           = newName;
+                document.getElementById('selected-type-dot').style.backgroundColor = newColor;
+                // 5. Reconstruire la liste déroulante
+                const list = document.getElementById("note-type-list");
+                list.innerHTML = "";
+                noteTypes.forEach(type => {
+                    const li = document.createElement("li");
+                    li.dataset.name = type.name;
+                    li.innerHTML = `
+                        <span class="color-dot" style="background:${type.color}"></span>
+                        ${type.name}
+                        <button class="edit-type-btn" data-name="${type.name}">…</button>
+                    `;
+                    list.appendChild(li);
+                });
+                const addLi = document.createElement("li");
+                addLi.id        = "add-type-item";
+                addLi.className = "add-type-item";
+                addLi.textContent = "+ Ajouter un type de note";
+                list.appendChild(addLi);
+                // 6. Vider le textarea pour saisir la note du nouveau type
+                dayNoteTextarea.value = "";
+                // 7. Mettre à jour les badges
+                updateNoteBadges(selectedDate, newName);
+                return;
+            }
+
+            // === MODE ÉDITION ===
+            // Trouver l’objet du type en cours d’édition
+            const typeObj = noteTypes.find(t => t.name === editingTypeName);
+            if (typeObj) {
+                // 1. Mettre à jour nom & couleur
+                typeObj.name  = newName;
+                typeObj.color = newColor;
+                // 2. Mettre à jour les clés dans userNotes pour conserver les notes existantes
+                for (let date in userNotes) {
+                    if (userNotes[date][editingTypeName] !== undefined) {
+                        userNotes[date][newName] = userNotes[date][editingTypeName];
+                        delete userNotes[date][editingTypeName];
+                    }
+                }
+                // 3. Persister types et notes
+                localStorage.setItem('spondylogNoteTypes', JSON.stringify(noteTypes));
+                localStorage.setItem('spondylogNotes',    JSON.stringify(userNotes));
+                // 4. Mettre à jour l’affichage du modal de notes
+                showPainModal(selectedDate);
+            }
+
+            // Fermer le modal d’ajout/édition
+            noteTypeModal.style.display = "none";
+        });
+
+
+
+        cancelTypeBtn.addEventListener('click', () => {
+            noteTypeModal.style.display = "none";  // fermer la pop-up
+        });
+        
+        deleteTypeBtn.addEventListener('click', () => {
+            if (!editingTypeName) return;
+
+            // 1️⃣ Confirmation claire de la suppression définitive
+            const ok = confirm(
+            `Supprimer définitivement le type de note "${editingTypeName}" ?\n` +
+            `Toutes les notes associées à ce type seront également supprimées.`
+            );
+            if (!ok) return;
+
+            // 2️⃣ Empêche la suppression de la dernière catégorie
+            if (noteTypes.length <= 1) {
+                alert("Vous devez conserver au moins un type de note.");
+                return;
+            }
+
+            // 3️⃣ Retirer le type de la liste des types
+            noteTypes = noteTypes.filter(t => t.name !== editingTypeName);
+
+            // 4️⃣ Supprimer toutes les notes de ce type pour chaque jour
+            for (let date in userNotes) {
+                if (userNotes[date][editingTypeName] !== undefined) {
+                    delete userNotes[date][editingTypeName];
+                }
+                // Si plus aucune note pour ce jour, supprimer l’entrée date
+                if (userNotes[date] && Object.keys(userNotes[date]).length === 0) {
+                    delete userNotes[date];
+                }
+            }
+
+            // 5️⃣ Persister les changements
+            localStorage.setItem('spondylogNoteTypes', JSON.stringify(noteTypes));
+            localStorage.setItem('spondylogNotes', JSON.stringify(userNotes));
+
+            // 6️⃣ Rafraîchir l’UI si le modal est toujours ouvert
+            if (selectedDate) {
+                showPainModal(selectedDate);
+            }
+
+            // 7️⃣ Fermer le modal d’édition de type
+            noteTypeModal.style.display = "none";
+        });
+
+        // 6) Fermer la modale si clic en-dehors
+        noteTypeModal.addEventListener("click", function(e) {
+        if (e.target === noteTypeModal) noteTypeModal.style.display = "none";
+        });
+        
             // Essayer de charger les données depuis localStorage
             loadUserData();
             
@@ -957,6 +1410,7 @@
             
             // Événements pour la liste des notes
             showNotesBtn.addEventListener("click", function() {
+                populateNoteTypeFilter();
                 renderNotesList();
                 notesListModal.style.display = "flex";
             });
@@ -1018,27 +1472,126 @@
             localStorage.setItem('spondylogPainData', JSON.stringify(userPainData));
             localStorage.setItem('spondylogNotes', JSON.stringify(userNotes));
             localStorage.setItem('spondylogMedsData', JSON.stringify(userMedsData));
+            localStorage.setItem('spondylogNoteTypes', JSON.stringify(noteTypes));
             }
+
         
             function loadUserData() {
-            // Charger les données depuis localStorage s'il y en a
-            const savedPainData = localStorage.getItem('spondylogPainData');
-            const savedNotes = localStorage.getItem('spondylogNotes');
-            const savedMedsData = localStorage.getItem('spondylogMedsData');
-            
-                if (savedPainData) {
-                    userPainData = JSON.parse(savedPainData);
-                }
-                
-                if (savedNotes) {
-                    userNotes = JSON.parse(savedNotes);
-                }
-                
-                if (savedMedsData) {
-                    userMedsData = JSON.parse(savedMedsData);
-                }
+            // 1) Charger les données existantes
+            const savedPainData   = localStorage.getItem('spondylogPainData');
+            const savedNotes      = localStorage.getItem('spondylogNotes');
+            const savedMedsData   = localStorage.getItem('spondylogMedsData');
+            const savedNoteTypes  = localStorage.getItem('spondylogNoteTypes');
 
-            }      
+            if (savedPainData)   userPainData = JSON.parse(savedPainData);
+            if (savedMedsData)   userMedsData = JSON.parse(savedMedsData);
+
+            // 2) Initialiser les types de notes AVANT conversion des anciennes notes
+            if (savedNoteTypes) {
+                noteTypes = JSON.parse(savedNoteTypes);
+            } else {
+                noteTypes = [{ name: "Catégorie 1", color: "#3498db" }];
+                localStorage.setItem('spondylogNoteTypes', JSON.stringify(noteTypes));
+            }
+
+            // 3) Charger et convertir les notes
+            if (savedNotes) {
+                userNotes = JSON.parse(savedNotes);
+
+                for (let date in userNotes) {
+                    const entry = userNotes[date];
+
+                    if (typeof entry === 'string') {
+                        // Ancien format : transformer en objet
+                        userNotes[date] = {};
+                        userNotes[date][ noteTypes[0].name ] = entry;
+                    } 
+                    else if (typeof entry === 'object' && entry !== null) {
+                        // Déplacer toute clé inconnue sous la catégorie par défaut
+                        for (let catName in entry) {
+                            if (!noteTypes.find(t => t.name === catName)) {
+                                const txt = entry[catName];
+                                const def = noteTypes[0].name;
+                                userNotes[date][def] = (userNotes[date][def] || "") +
+                                                    (userNotes[date][def] ? "\n" : "") + txt;
+                                delete userNotes[date][catName];
+                            }
+                        }
+                    }
+                }
+                // Enregistrer la conversion
+                localStorage.setItem('spondylogNotes', JSON.stringify(userNotes));}
+            }
+
+            function saveCurrentNote() {
+                if (!selectedDate) return;
+                // Détermine le type actuellement sélectionné
+                const currentType = document.getElementById('selected-type-name').textContent;
+                const text = dayNoteTextarea.value.trim();
+                if (text !== "") {
+                    // Si du texte est présent, on le sauvegarde dans userNotes pour ce jour et ce type
+                    if (!userNotes[selectedDate]) {
+                        userNotes[selectedDate] = {};
+                    }
+                    userNotes[selectedDate][currentType] = text;
+                } else {
+                    // Si le champ est vide, on supprime la note de ce type pour ce jour
+                    if (userNotes[selectedDate] && userNotes[selectedDate][currentType]) {
+                        delete userNotes[selectedDate][currentType];
+                        // Si plus aucune note pour ce jour, on supprime l'entrée du jour entièrement
+                        if (Object.keys(userNotes[selectedDate]).length === 0) {
+                            delete userNotes[selectedDate];
+                        }
+                    }
+                }
+            }
+
+            function erasePainValue() {
+                if (selectedDate) {
+                    delete userPainData[selectedDate];
+                    delete userNotes[selectedDate];    // supprime toutes les notes de ce jour
+                    delete userMedsData[selectedDate];
+                    saveUserData();
+                    closeModal(true);
+                }
+            }
+
+            function updateNoteBadges(dateId, currentType) {
+                const container = document.getElementById('note-badges-container');
+                container.innerHTML = "";  // vide les anciens badges
+                if (!userNotes[dateId]) {
+                    container.style.display = "none";
+                    return;
+                }
+                // Parcourt les types de notes présents pour ce jour
+                for (let typeName in userNotes[dateId]) {
+                    const noteText = userNotes[dateId][typeName];
+                    if (noteText && noteText.trim() !== "" && typeName !== currentType) {
+                        // Créer un badge pour chaque type qui a une note (sauf le type actuellement sélectionné)
+                        const badge = document.createElement('span');
+                        badge.className = "note-badge";
+                        const dot = document.createElement('span');
+                        dot.className = "badge-dot";
+                        // Trouver la couleur associée au type
+                        const typeObj = noteTypes.find(t => t.name === typeName);
+                        dot.style.backgroundColor = typeObj ? typeObj.color : "#3498db";
+                        badge.appendChild(dot);
+                        badge.appendChild(document.createTextNode(typeName));
+                        // Au clic sur le badge, on sélectionne ce type
+                        badge.addEventListener('click', () => {
+                            // Simuler la sélection de ce type comme si on l'avait choisi dans la liste
+                            const liToSelect = document.querySelector(`#note-type-list li[data-name="${typeName}"]`);
+                            if (liToSelect) {
+                                liToSelect.click();  // déclenche le même comportement que sélectionner dans la liste
+                            }
+                        });
+                        container.style.display = container.childElementCount > 0 ? "block" : "none";
+                    }
+                }
+                // Affiche le conteneur seulement s'il contient au moins un badge
+                container.style.display = container.childElementCount > 0 ? "block" : "none";
+            }
+
 
             // Fonction pour changer de vue
             function setView(view) {
@@ -1413,65 +1966,87 @@
                 renderYearView(currentYear);
             }
 
-            // Gestion du modal pour le niveau de douleur
             function showPainModal(dateId) {
+                // 0️⃣ garde en mémoire la date
                 selectedDate = dateId;
-            
-            // Si on est en vue annuelle, sauvegarder le mois/année actuel
-            if (currentView === "year") {
-                selectedFromYearView = true;
-                // Extraire le mois et l'année du dateId
-                const [year, month, day] = dateId.split('-');
-                selectedViewMonth = parseInt(month) - 1; // Convertir en format 0-11
-                selectedViewYear = parseInt(year);
-            }
-            
-            // Formater la date pour l'affichage
-            const [year, month, day] = dateId.split('-');
-            const monthNames = ["Janvier", "Février", "Mars", "Avril", "Mai", "Juin", 
-                            "Juillet", "Août", "Septembre", "Octobre", "Novembre", "Décembre"];
-            const formattedDate = `${day} ${monthNames[parseInt(month)-1]} ${year}`;
-            
-            modalDateTitle.textContent = `Date - ${formattedDate}`;
-            
-            // Charger la valeur de douleur existante si disponible
-            if (userPainData[dateId] !== undefined) {
-                // Mettre en surbrillance l'option sélectionnée
-                painOptions.forEach(option => {
-                    if (parseInt(option.getAttribute("data-value")) === userPainData[dateId]) {
-                        option.style.transform = "scale(1.05)";
-                        option.style.boxShadow = "0 0 5px rgba(0, 0, 0, 0.3)";
-                    } else {
-                        option.style.transform = "none";
-                        option.style.boxShadow = "none";
-                    }
-                });
-            } else {
-                // Réinitialiser toutes les options
-                painOptions.forEach(option => {
-                    option.style.transform = "none";
-                    option.style.boxShadow = "none";
-                });
-            }
-            
-            // Charger la note existante si disponible
-            dayNoteTextarea.value = userNotes[dateId] || "";
 
-            // Charger l'état des anti-inflammatoires si disponible
-            document.getElementById('med-taken').checked = userMedsData[dateId] || false;
-            
-            // Afficher le modal
-            painModal.style.display = "flex";
-            
-            // Ajouter un événement pour fermer si clic en dehors
-            window.onclick = function(event) {
-                if (event.target == painModal) {
-                    closeModal();
+                // Si on vient de la vue année, on mémorise où revenir
+                if (currentView === "year") {
+                    selectedFromYearView = true;
+                    const [y, m] = dateId.split('-');
+                    selectedViewMonth = parseInt(m,10)-1;
+                    selectedViewYear  = parseInt(y,10);
                 }
-            }
 
-            
-        }
+                // 1️⃣ met à jour le titre du modal
+                const [y,m,d] = dateId.split('-');
+                const monthNames = ["Janvier","Février","Mars","Avril","Mai","Juin",
+                                    "Juillet","Août","Septembre","Octobre","Novembre","Décembre"];
+                modalDateTitle.textContent = `Date – ${d} ${monthNames[parseInt(m,10)-1]} ${y}`;
+
+                // 2️⃣ affiche le niveau de douleur
+                if (userPainData[dateId] != null) {
+                    painOptions.forEach(opt => {
+                    const val = +opt.dataset.value;
+                    if (val === userPainData[dateId]) {
+                        opt.style.transform   = "scale(1.05)";
+                        opt.style.boxShadow   = "0 0 5px rgba(0,0,0,0.3)";
+                    } else {
+                        opt.style.transform   = "none";
+                        opt.style.boxShadow   = "none";
+                    }
+                    });
+                } else {
+                    painOptions.forEach(opt => {
+                    opt.style.transform   = "none";
+                    opt.style.boxShadow   = "none";
+                    });
+                }
+
+                // 3️⃣ type de note par défaut
+                const selectedTypeNameEl = document.getElementById("selected-type-name");
+                const selectedTypeDotEl  = document.getElementById("selected-type-dot");
+                let currentType = noteTypes[0];
+                selectedTypeNameEl.textContent         = currentType.name;
+                selectedTypeDotEl.style.backgroundColor = currentType.color;
+
+                // 4️⃣ charge la note de ce type/date
+                const noteObj = userNotes[dateId] || {};
+                dayNoteTextarea.value = noteObj[currentType.name] || "";
+
+                // 5️⃣ état anti-inflammatoires
+                document.getElementById("med-taken").checked = !!userMedsData[dateId];
+
+                // 6️⃣ reconstruit la liste déroulante
+                const noteTypeList = document.getElementById("note-type-list");
+                noteTypeList.innerHTML = "";
+
+                // ⏩ chaque type existant
+                noteTypes.forEach(type => {
+                    const li = document.createElement("li");
+                    li.dataset.name = type.name;
+                    li.innerHTML = `
+                    <span class="color-dot" style="background:${type.color}"></span>
+                    <span class="note-type-name-option">${type.name}</span>
+                    <button class="edit-type-btn" data-name="${type.name}">…</button>
+                    `;
+                    noteTypeList.appendChild(li);
+                });
+
+                // ⏩ option Ajouter à la fin
+                const addLi = document.createElement("li");
+                addLi.id        = "add-type-item";
+                addLi.className = "add-type-item";
+                addLi.textContent = "+ Ajouter un type de note";
+                noteTypeList.appendChild(addLi);
+
+                // 7️⃣ met à jour les badges existants
+                updateNoteBadges(selectedDate, currentType.name);
+
+                // 8️⃣ affiche le modal
+                painModal.style.display = "flex";
+                }
+
 
         function closeModal(refresh = false) {
             painModal.style.display = "none";
@@ -1502,34 +2077,28 @@
         }
 
         function selectPainLevel(level) {
-            if (selectedDate) {
-                // Convertir en nombre
-                const painLevel = parseInt(level);
-                
-                // Sauvegarder la valeur
-                userPainData[selectedDate] = painLevel;
-                
-                // Sauvegarder la note si elle existe
-                if (dayNoteTextarea.value.trim() !== "") {
-                    userNotes[selectedDate] = dayNoteTextarea.value.trim();
-                } else if (userNotes[selectedDate]) {
-                    // Supprimer la note si elle est vide maintenant
-                    delete userNotes[selectedDate];
-                }
+            if (!selectedDate) return;
 
-                // Sauvegarder l'état des anti-inflammatoires
-                if (document.getElementById('med-taken').checked) {
-                    userMedsData[selectedDate] = true;
-                } else if (userMedsData[selectedDate]) {
-                    delete userMedsData[selectedDate];
-                }
-                
-                // Sauvegarder les données
-                saveUserData();
-                
-                // Fermer le modal et mettre à jour l'affichage
-                closeModal(true);
+            // 1️⃣ Mémoriser le niveau de douleur
+            const painValue = parseInt(level, 10);
+            userPainData[selectedDate] = painValue;
+
+            // 2️⃣ Sauvegarder la note du type de note actuellement sélectionné
+            //    Cette fonction gère correctement userNotes[selectedDate] en tant qu'objet
+            saveCurrentNote();
+
+            // 3️⃣ Sauvegarder l’état des anti-inflammatoires
+            if (document.getElementById('med-taken').checked) {
+                userMedsData[selectedDate] = true;
+            } else {
+                delete userMedsData[selectedDate];
             }
+
+            // 4️⃣ Écrire toutes les données dans localStorage
+            saveUserData();
+
+            // 5️⃣ Fermer la modale et rafraîchir l’affichage du calendrier
+            closeModal(true);
         }
 
         function erasePainValue() {
@@ -1594,88 +2163,120 @@
         // Fonction pour rendre la liste des notes
         function renderNotesList() {
             notesList.innerHTML = ""; // Vider la liste
-            
-            // Obtenir toutes les dates avec des notes, triées par date décroissante
+
+            const selectedType = document.getElementById("note-type-filter")?.value || "all";
+
             const noteDates = Object.keys(userNotes)
-                .filter(dateId => userNotes[dateId] && userNotes[dateId].trim() !== "")
+                .filter(dateId => {
+                    const entry = userNotes[dateId];
+                    if (typeof entry === 'string') {
+                        return selectedType === "all" && entry.trim() !== "";
+                    } else if (entry && typeof entry === 'object') {
+                        return Object.entries(entry).some(([type, val]) =>
+                            (selectedType === "all" || type === selectedType) &&
+                            typeof val === 'string' && val.trim() !== ""
+                        );
+                    }
+                    return false;
+                })
                 .sort((a, b) => {
-                    const dateA = new Date(a.split('-')[0], parseInt(a.split('-')[1])-1, a.split('-')[2]);
-                    const dateB = new Date(b.split('-')[0], parseInt(b.split('-')[1])-1, b.split('-')[2]);
-                    return dateB - dateA; // Ordre décroissant
+                    const [ay, am, ad] = a.split('-').map(Number);
+                    const [by, bm, bd] = b.split('-').map(Number);
+                    return new Date(by, bm - 1, bd) - new Date(ay, am - 1, ad);
                 });
-            
+
             if (noteDates.length === 0) {
                 const noNotes = document.createElement("p");
                 noNotes.textContent = "Aucune note enregistrée.";
                 notesList.appendChild(noNotes);
                 return;
             }
-            
-            // Créer une entrée pour chaque note
+
             noteDates.forEach(dateId => {
                 const noteEntry = document.createElement("div");
                 noteEntry.className = "note-entry";
-                
-                // Formater la date
-                const [year, month, day] = dateId.split('-');
-                const monthNames = ["Janvier", "Février", "Mars", "Avril", "Mai", "Juin", 
-                                 "Juillet", "Août", "Septembre", "Octobre", "Novembre", "Décembre"];
-                const formattedDate = `${day} ${monthNames[parseInt(month)-1]} ${year}`;
-                
-                // Créer le contenu de l'entrée
+
+                const [year, month, day] = dateId.split('-').map(Number);
+                const monthNames = ["Janvier", "Février", "Mars", "Avril", "Mai", "Juin",
+                                    "Juillet", "Août", "Septembre", "Octobre", "Novembre", "Décembre"];
+                const formattedDate = `${day} ${monthNames[month - 1]} ${year}`;
                 const noteDate = document.createElement("div");
                 noteDate.className = "note-date";
-                
-                // Afficher le niveau de douleur si disponible
+
                 let painLevelText = "Niveau non renseigné";
                 if (userPainData[dateId] !== undefined) {
                     const painLevel = document.createElement("span");
                     painLevel.className = "note-pain-level";
                     painLevel.style.backgroundColor = painColors[userPainData[dateId]];
-                    if (userPainData[dateId] === 5) { 
+                    if (userPainData[dateId] === 5) {
                         painLevel.style.color = "white";
                         painLevel.style.borderColor = "white";
                     }
                     painLevelText = `Niveau ${userPainData[dateId]}`;
-                    
                     noteDate.appendChild(painLevel);
                 }
-                
-                noteDate.innerHTML += `${formattedDate} - ${painLevelText}`;
+                noteDate.innerHTML += ` ${formattedDate} - ${painLevelText}`;
                 noteEntry.appendChild(noteDate);
-                
+
                 const noteText = document.createElement("div");
                 noteText.className = "note-text";
-                noteText.textContent = userNotes[dateId];
+
+                if (typeof userNotes[dateId] === 'string') {
+                    if (selectedType === "all") {
+                        noteText.textContent = userNotes[dateId];
+                    }
+                } else {
+                    for (const typeName in userNotes[dateId]) {
+                        const text = userNotes[dateId][typeName].trim();
+                        if (!text || (selectedType !== "all" && typeName !== selectedType)) continue;
+
+                        const typeObj = noteTypes.find(t => t.name === typeName);
+                        const color = typeObj ? typeObj.color : "#3498db";
+
+                        const line = document.createElement("div");
+                        const dot = document.createElement("span");
+                        const label = document.createElement("strong");
+                        const content = document.createElement("span");
+
+                        dot.textContent = "●";
+                        dot.style.color = color;
+                        dot.style.marginRight = "5px";
+                        label.textContent = typeName + " : ";
+                        content.textContent = text;
+
+                        line.append(dot, label, content);
+                        noteText.appendChild(line);
+                    }
+                }
+
                 noteEntry.appendChild(noteText);
 
-                // Afficher l'indicateur d'anti-inflammatoires si pris ce jour
                 if (userMedsData[dateId]) {
                     const medIcon = document.createElement("span");
                     medIcon.className = "med-icon";
                     medIcon.innerHTML = " 💊";
                     medIcon.style.marginLeft = "5px";
                     noteDate.appendChild(medIcon);
-                    painLevelText += " + Anti-inflammatoires";
                 }
-                
-                // Ajouter un lien pour modifier
+
                 const editLink = document.createElement("a");
                 editLink.href = "#";
-                editLink.style.marginTop = "10px";
-                editLink.style.display = "inline-block";
-                editLink.style.color = "var(--primary-color)";
                 editLink.textContent = "Modifier";
-                editLink.addEventListener("click", function(e) {
+                editLink.style.display = "inline-block";
+                editLink.style.marginTop = "10px";
+                editLink.style.color = "var(--primary-color)";
+                editLink.addEventListener("click", e => {
                     e.preventDefault();
                     notesListModal.style.display = "none";
                     showPainModal(dateId);
                 });
+
                 noteEntry.appendChild(editLink);
-                
                 notesList.appendChild(noteEntry);
             });
         }
+
+
         
         // Variables pour le graphique
         let painChart = null;
@@ -1820,20 +2421,20 @@
             // Rassembler les données dans un objet
             const exportObj = {
                 painData: userPainData,
-                notes: userNotes,
+                notes:    userNotes,
                 medsData: userMedsData
             };
 
-            // Convertir en JSON
+            // Convertir en JSON joliment indenté
             const dataStr = JSON.stringify(exportObj, null, 2);
 
-            // Créer un Blob
+            // Créer un Blob pour le JSON
             const blob = new Blob([dataStr], { type: "application/json" });
 
-            // Créer un lien temporaire pour le téléchargement
+            // Générer un lien de téléchargement temporaire
             const url = URL.createObjectURL(blob);
-            const a = document.createElement("a");
-            a.href = url;
+            const a   = document.createElement("a");
+            a.href    = url;
             a.download = "spondylog_export.json";
             document.body.appendChild(a);
             a.click();
@@ -1843,7 +2444,7 @@
             URL.revokeObjectURL(url);
             }
 
-         const importFileInput = document.getElementById("import-file-input");
+            const importFileInput = document.getElementById("import-file-input");
 
             importFileInput.addEventListener("change", (event) => {
             const file = event.target.files[0];
@@ -1854,22 +2455,29 @@
                 try {
                 const importedData = JSON.parse(e.target.result);
 
-                // Vérification simple de l'objet importé (vous pouvez ajouter plus de validations)
+                // Vérification que les 3 champs existent
                 if (importedData.painData && importedData.notes && importedData.medsData) {
-                    // Mettre à jour vos variables
+                    // Mise à jour des données
                     userPainData = importedData.painData;
-                    userNotes = importedData.notes;
+                    userNotes    = importedData.notes;
                     userMedsData = importedData.medsData;
-                    
-                    // Sauvegarder dans localStorage
-                    saveUserData();
 
-                    // Actualiser l'affichage (selon la vue active)
+                    // Compatibilité avec l’ancien format de notes (string → { cat: texte })
+                    const defaultCat = noteTypes[0].name; // ex. "Sport"
+                    for (let date in userNotes) {
+                    if (typeof userNotes[date] === "string") {
+                        userNotes[date] = { [defaultCat]: userNotes[date] };
+                    }
+                    }
+
+                    // Sauvegarde et rafraîchissement de la vue
+                    saveUserData();
                     if (currentView === "month") {
                     renderCalendar(currentMonth, currentYear);
                     } else {
                     renderYearView(currentYear);
                     }
+
                     alert("Importation réussie !");
                 } else {
                     alert("Le fichier importé ne contient pas les données attendues.");
@@ -1878,10 +2486,12 @@
                 alert("Erreur lors de la lecture du fichier : " + error.message);
                 }
             };
-            reader.readAsText(file);
-            });
 
-         });
+            reader.readAsText(file);
+        });
+
+
+    });
 
         // Fonction pour formater une date pour les champs input de type date
         function formatDateForInput(date) {
@@ -2076,7 +2686,7 @@
         // Espace sous le graphique
         const chartCanvas = document.getElementById('pain-chart');
         chartCanvas.style.marginBottom = '30px'; 
-    }
+        }
 
         // Fonction pour ajouter une légende personnalisée
         function updateChartLegend() {
