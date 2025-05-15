@@ -635,20 +635,35 @@
         #save-type-btn {
             background-color: var(--primary-color);
             color: #fff;
-            margin: 0
         }
+
+        #cancel-type-btn {
+            background-color: var(--primary-color); /* ou #ccc pour cancel */
+            color: #fff;                            /* à ajuster pour le cancel */
+            padding: 4px 10px;       /* réduit l’épaisseur et la largeur */
+            font-size: 0.8em;        /* légèrement plus petit */
+            line-height: 1.2;        /* compact */
+            border: none;
+            border-radius: 3px;      /* coins moins arrondis */
+            cursor: pointer;
+        }
+
+        /* Spécifique au bouton “Annuler” */
         #cancel-type-btn {
             background-color: #ccc;
             color: #000;
-            margin: 0
         }
+
+        /* Bouton “Supprimer” */
         #delete-type-btn {
             background: none;
             border: none;
-            font-size: 0.9em;
+            padding: 2px 6px;        /* très compact */
+            font-size: 0.8em;        /* même taille que les autres */
+            line-height: 1.2;
             cursor: pointer;
-            margin: 0
         }
+
         #delete-type-btn:hover {
             text-decoration: underline;
         }
