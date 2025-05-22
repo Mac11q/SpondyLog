@@ -124,6 +124,62 @@
             color: var(--secondary-color);
         }
 
+        .note-dots-container {
+            position: absolute;
+            top: 4px;
+            right: 3px;
+            display: flex;
+            flex-direction: row-reverse; /* pour coller les points de droite à gauche */
+            gap: 2px;
+            z-index: 2;
+        }
+
+        .note-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            display: inline-block;
+            box-shadow: 0 0 2px #aaa;
+        }
+
+        .note-dot-tooltip {
+            position: absolute;
+            top: 18px;
+            right: 0;
+            background: #222;
+            color: #fff;
+            padding: 8px 12px;
+            border-radius: 7px;
+            font-size: 14px;
+            font-family: inherit;
+            white-space: normal;
+            word-break: break-word;
+            z-index: 10;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.13s;
+            width: 210px;           /* largeur fixe */
+            max-width: 220px;       /* pas plus large */
+            min-width: 140px;       /* jamais trop étroit */
+            box-shadow: 0 3px 10px rgba(0,0,0,0.19);
+            text-align: left;
+            line-height: 1.4;
+            letter-spacing: 0.01em;
+        }
+        .note-dot.show-tooltip .note-dot-tooltip {
+            opacity: 1;
+        }
+
+        .tooltip-dot {
+            display: inline-block;
+            width: 11px;
+            height: 11px;
+            border-radius: 50%;
+            margin-right: 3px;
+            vertical-align: middle;
+            box-shadow: 0 0 2px #444;
+        }
+
         /* Style mis à jour pour la légende */
         .legend {
             margin: 20px 0;
@@ -364,6 +420,27 @@
             background-color: #e5e5e5;
         }
 
+        .erase-option {
+            background: #f5f5f5;
+            border: 1px solid #bbb;
+            border-radius: 4px;
+            padding: 8px 16px;
+            font-size: 1em;
+            color: #333;
+            margin: 0;
+            transition: background 0.2s, color 0.2s;
+            cursor: pointer;
+            display: inline-block;
+            text-align: center;
+        }
+        .erase-option:hover {
+            background: #e0e0e0;
+            color: #c00;
+        }
+        #validate-pain-modal {
+            margin-left: 0 !important;
+        }
+
         /* Styles pour les notes */
         .notes-section {
             margin-top: 15px;
@@ -374,7 +451,7 @@
             width: 100%;
             min-height: 80px;
             padding: 8px;
-            font-size: 16.5px;     /* empêche iOS de zoomer */
+            font-size: 16px;     /* empêche iOS de zoomer */
             line-height: 1.4;    /* au besoin, pour garder une belle lisibilité */
             border: 1px solid var(--border-color);
             border-radius: 5px;
@@ -387,17 +464,6 @@
         .note-present {
             border: 2px solid var(--primary-color);
             border-radius: 2px;
-        }
-
-        /* Point bleu pour indiquer la présence d'une note */
-        .note-indicator {
-            position: absolute;
-            width: 6px;
-            height: 6px;
-            background-color: var(--primary-color);
-            border-radius: 50%;
-            top: 3px;
-            right: 3px;
         }
 
         .mini-note-present {
@@ -499,7 +565,7 @@
             }
         }
 
-        /* Styles pour la liste déroulante des types de notes */
+        /* Styles pour la liste déroulante des types de notes */   
         .note-type-container {
             position: relative;
             margin-bottom: 8px;  /* espace sous la liste */
@@ -612,10 +678,16 @@
             margin: 10px 0 5px;
         }
         #note-type-modal input[type="text"] {
+            font-size: 16px;
             width: 100%;
             padding: 5px;
             margin-bottom: 10px;
         }
+
+        #type-name-input {
+            font-size: 16px;
+        }
+
         #note-type-modal input[type="color"] {
             padding: 0;
             margin-left: 5px;
@@ -938,7 +1010,6 @@
             <div class="modal-content">
                 <div class="modal-header">
                     <h3 id="modal-date-title">Sélectionner le niveau de douleur</h3>
-                    <button class="close-btn" id="close-modal">&times;</button>
                 </div>
                 
                 <!-- 1. Section pour les anti-inflammatoires (en premier) -->
@@ -947,6 +1018,17 @@
                     <label for="med-taken" class="med-label">
                         <span class="med-icon">💊</span> Anti-inflammatoires pris ce jour
                     </label>
+                    <div id="med-details" style="display:none; margin:8px 0 10px 28px;">
+                        <label for="med-type" style="display:inline-block; margin-right:10px;">Type :</label>
+                        <select id="med-type" style="padding:3px 10px; border-radius:4px;">
+                          <option value="ibuprofen">Ibuprofène</option>
+                          <option value="naproxen">Naproxène</option>
+                          <option value="ketoprofen">Kétoprofène</option>
+                          <option value="autre">Autre</option>
+                        </select>
+                        <label for="med-qty" style="display:inline-block; margin-left:16px; margin-right:7px;">Quantité :</label>
+                        <input type="number" id="med-qty" value="1" min="1" max="20" step="1" style="width:52px; padding:3px 5px; border-radius:4px;">
+                    </div>
                 </div>
                 
                 <!-- 2. Section pour les notes (en deuxième) -->
@@ -973,7 +1055,7 @@
                     <!-- Fin de l'ajout -->
                 
                     <textarea id="day-note" class="day-note-textarea"
-                      placeholder="Ajoutez vos notes pour cette journée..."></textarea>
+                      placeholder="Ajouter une note..."></textarea>
                 </div>
                 <!-- ... (Suite du modal : section niveau de douleur, etc.) ... -->
                 
@@ -1006,7 +1088,10 @@
                         <div class="pain-option" data-value="4" style="background-color: #FF4000;">4</div>
                         <div class="pain-option" data-value="5" style="background-color: #000000; color: white;">5</div>
                     </div>
-                    <div class="erase-option" id="erase-value">Réinitialiser</div>
+                    <div style="display: flex; justify-content: flex-end; align-items: center; gap: 14px; margin-top: 25px;">
+                        <div id="erase-value" class="erase-option" style="margin: 0;">Réinitialiser</div>
+                        <button id="validate-pain-modal" class="view-btn" style="min-width:100px;">OK</button>
+                    </div>
                 </div>
             </div>
         </div>
@@ -1321,6 +1406,12 @@
                 localStorage.setItem('spondylogNotes',    JSON.stringify(userNotes));
                 // 4. Mettre à jour l’affichage du modal de notes
                 showPainModal(selectedDate);
+
+                // 5. 👉 Forcer la sélection de la nouvelle catégorie dans la modale
+                setTimeout(function() {
+                    const liToSelect = document.querySelector(`#note-type-list li[data-name="${newName}"]`);
+                    if (liToSelect) liToSelect.click();
+                }, 0);
             }
 
             // Fermer le modal d’ajout/édition
@@ -1397,10 +1488,44 @@
             nextYearBtn.addEventListener("click", navigateToNextYear);
             
             // Événements du modal
-            closeModalBtn.addEventListener("click", closeModal);
+            // Ajoute ce gestionnaire pour le bouton OK
+            const validatePainModalBtn = document.getElementById("validate-pain-modal");
+            if (validatePainModalBtn) {
+                validatePainModalBtn.addEventListener("click", function() {
+                    if (selectedDate) {
+                        saveCurrentNote();
+                        saveMedDataForDay(selectedDate);
+                        // Sauvegarder le niveau de douleur :
+                        const selectedPain = document.querySelector(".pain-option.selected");
+                        if (selectedPain) {
+                            userPainData[selectedDate] = Number(selectedPain.getAttribute("data-value"));
+                        }
+                        saveUserData();
+                    }
+                    closeModal(true); // force le refresh de la vue
+                });
+            }
             painOptions.forEach(option => {
                 option.addEventListener("click", function() {
                     selectPainLevel(this.getAttribute("data-value"));
+
+                    // 🔽🔽 Correction — Ajoute cette partie avant la sauvegarde 🔽🔽
+                    // Ceci force la prise en compte des dernières valeurs saisies (notamment quantité et type)
+                    document.getElementById('med-type')?.blur();
+                    document.getElementById('med-qty')?.blur();
+                    // 🔼🔼 Fin de la correction à ajouter 🔼🔼
+
+                    // Enregistrer toutes les données comme pour "OK"
+                    if (selectedDate) {
+                        saveCurrentNote();
+                        saveMedDataForDay(selectedDate);
+                        const selectedPain = document.querySelector(".pain-option.selected");
+                        if (selectedPain) {
+                            userPainData[selectedDate] = Number(selectedPain.getAttribute("data-value"));
+                        }
+                        saveUserData();
+                    }
+                    closeModal(true); // ferme la modale et rafraîchit la vue
                 });
             });
             
@@ -1449,6 +1574,22 @@
             // Initialiser la référence à la case à cocher des anti-inflammatoires
             medCheckbox = document.getElementById('med-taken');
             });
+
+            // Affiche/masque la sélection des détails pour les anti-inflammatoires
+                const medTakenCheckbox = document.getElementById('med-taken');
+                const medDetailsDiv = document.getElementById('med-details');
+                const medQtyInput = document.getElementById('med-qty');
+
+                if (medTakenCheckbox) {
+                    medTakenCheckbox.addEventListener('change', function() {
+                        if (this.checked) {
+                            medDetailsDiv.style.display = 'block';
+                            medQtyInput.value = 1; // Par défaut
+                        } else {
+                            medDetailsDiv.style.display = 'none';
+                        }
+                    });
+                }
 
             // Ajouter un gestionnaire d'événements pour le clic sur le titre
             const titleLink = document.getElementById("title-link");
@@ -1566,6 +1707,24 @@
                 }
             }
 
+            function saveMedDataForDay(dateId) {
+                // Récupère toujours les éléments DOM à chaque appel
+                const medTakenCheckbox = document.getElementById('med-taken');
+                const medTypeSelect = document.getElementById('med-type');
+                const medQtyInput = document.getElementById('med-qty');
+
+                if (medTakenCheckbox && medTakenCheckbox.checked) {
+                    userMedsData[dateId] = {
+                        taken: true,
+                        type: medTypeSelect ? medTypeSelect.value : 'ibuprofen',
+                        qty: medQtyInput ? Number(medQtyInput.value) || 1 : 1
+                    };
+                } else {
+                    delete userMedsData[dateId];
+                }
+                saveUserData();
+            }
+
             function erasePainValue() {
                 if (selectedDate) {
                     delete userPainData[selectedDate];
@@ -1605,7 +1764,7 @@
                                 liToSelect.click();  // déclenche le même comportement que sélectionner dans la liste
                             }
                         });
-                        container.style.display = container.childElementCount > 0 ? "block" : "none";
+                        container.appendChild(badge); // ← **LIGNE À AJOUTER**
                     }
                 }
                 // Affiche le conteneur seulement s'il contient au moins un badge
@@ -1747,13 +1906,44 @@
                             
                             // Ajouter un indicateur si une note existe pour cette date
                             if (userNotes[dateId]) {
-                                // Ajouter la classe qui encadre la cellule
                                 dayCell.classList.add("note-present");
 
-                                // Ajouter le point bleu dans le coin supérieur droit
-                                const noteIndicator = document.createElement("div");
-                                noteIndicator.className = "note-indicator";
-                                dayCell.appendChild(noteIndicator);
+                                // --- Début nouvelle version multi-points ---
+                                const typesForDay = Object.keys(userNotes[dateId]).filter(typeName => {
+                                    const noteText = userNotes[dateId][typeName];
+                                    return noteText && noteText.trim() !== "";
+                                });
+                                if (typesForDay.length > 0) {
+                                    const dotsContainer = document.createElement("div");
+                                    dotsContainer.className = "note-dots-container";
+                                    typesForDay.slice().reverse().forEach((typeName, idx) => {
+                                        const typeObj = noteTypes.find(t => t.name === typeName);
+                                        const dot = document.createElement("span");
+                                        dot.className = "note-dot";
+                                        dot.style.backgroundColor = typeObj ? typeObj.color : "#3498db";
+                                        const noteText = userNotes[dateId][typeName] || "";
+
+                                        // Tooltip custom (affichage instantané)
+                                        const tooltip = document.createElement("div");
+                                            tooltip.className = "note-dot-tooltip";
+                                            tooltip.innerHTML = `
+                                            <span class="tooltip-dot" style="background:${typeObj ? typeObj.color : "#3498db"}"></span>
+                                            <strong>${typeName}</strong><br>
+                                            ${noteText.length > 70 ? noteText.substring(0, 70) + '…' : noteText}
+                                            `;
+                                            dot.appendChild(tooltip);
+                                            dot.addEventListener("mouseenter", function() {
+                                                dot.classList.add("show-tooltip");
+                                            });
+                                            dot.addEventListener("mouseleave", function() {
+                                                dot.classList.remove("show-tooltip");
+                                            });
+
+                                        dotsContainer.appendChild(dot);
+                                    });
+                                    dayCell.appendChild(dotsContainer);
+                                }
+                                // --- Fin nouvelle version multi-points ---
                             }
                             
                             // Ajouter un indicateur si des anti-inflammatoires ont été pris ce jour
@@ -2065,7 +2255,18 @@
 
                 // 8️⃣ affiche le modal
                 painModal.style.display = "flex";
+
+                if (userMedsData[dateId]) {
+                    medTakenCheckbox.checked = true;
+                    medDetailsDiv.style.display = 'block';
+                    document.getElementById('med-type').value = userMedsData[dateId].type || 'ibuprofen';
+                    medQtyInput.value = userMedsData[dateId].qty || 1;
+                } else {
+                    medTakenCheckbox.checked = false;
+                    medDetailsDiv.style.display = 'none';
+                    medQtyInput.value = 1;
                 }
+            }
 
 
         function closeModal(refresh = false) {
