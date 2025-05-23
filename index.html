@@ -139,7 +139,7 @@
             height: 8px;
             border-radius: 50%;
             display: inline-block;
-            box-shadow: 0 0 2px #aaa;
+            margin-top: -1px;
         }
 
         .note-dot-tooltip {
@@ -161,7 +161,6 @@
             width: 210px;           /* largeur fixe */
             max-width: 220px;       /* pas plus large */
             min-width: 140px;       /* jamais trop étroit */
-            box-shadow: 0 3px 10px rgba(0,0,0,0.19);
             text-align: left;
             line-height: 1.4;
             letter-spacing: 0.01em;
@@ -667,10 +666,48 @@
             margin-right: 5px;
             vertical-align: middle;
         }
+       /* Styles pour le selecteur de médicament et quantité prise  */
+        .med-details-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        #med-details label {
+            margin: 0 !important;
+            font-size: 15px;
+        }
+
+        #med-details select {
+            padding: 3px 10px;
+            border-radius: 4px;
+            border: 1px solid #bbb;
+            font-size: 15px;
+        }
+
+        #med-details input[type="number"] {
+            width: 52px;
+            padding: 3px 5px;
+            border-radius: 4px;
+            border: 1px solid #bbb;
+            font-size: 15px;
+        }
+
+        @media (max-width: 480px) {
+        .med-details-row {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 6px;
+        }
+        #med-details select,
+        #med-details input[type="number"] {
+            width: 100%;
+            max-width: 220px;
+        }
+        }
 
         /* Styles pour la pop-up d'ajout/édition de type de note */
         #note-type-modal .modal-content {
-            /* centrer la modale plus petite */
             text-align: left;
         }
         #note-type-modal label {
@@ -1010,6 +1047,7 @@
             <div class="modal-content">
                 <div class="modal-header">
                     <h3 id="modal-date-title">Sélectionner le niveau de douleur</h3>
+                    <button class="close-btn" id="close-modal">&times;</button>
                 </div>
                 
                 <!-- 1. Section pour les anti-inflammatoires (en premier) -->
@@ -1018,17 +1056,19 @@
                     <label for="med-taken" class="med-label">
                         <span class="med-icon">💊</span> Anti-inflammatoires pris ce jour
                     </label>
-                    <div id="med-details" style="display:none; margin:8px 0 10px 28px;">
-                        <label for="med-type" style="display:inline-block; margin-right:10px;">Type :</label>
-                        <select id="med-type" style="padding:3px 10px; border-radius:4px;">
-                          <option value="ibuprofen">Ibuprofène</option>
-                          <option value="naproxen">Naproxène</option>
-                          <option value="ketoprofen">Kétoprofène</option>
-                          <option value="autre">Autre</option>
-                        </select>
-                        <label for="med-qty" style="display:inline-block; margin-left:16px; margin-right:7px;">Quantité :</label>
-                        <input type="number" id="med-qty" value="1" min="1" max="20" step="1" style="width:52px; padding:3px 5px; border-radius:4px;">
-                    </div>
+                    <div id="med-details" style="display:none; margin:8px 0 10px 10px;">
+                        <div class="med-details-row">
+                          <label for="med-type">Type :</label>
+                          <select id="med-type">
+                            <option value="ibuprofen">Ibuprofène</option>
+                            <option value="naproxen">Naproxène</option>
+                            <option value="ketoprofen">Kétoprofène</option>
+                            <option value="autre">Autre</option>
+                          </select>
+                          <label for="med-qty">Quantité :</label>
+                          <input type="number" id="med-qty" value="1" min="1" max="20" step="1">
+                        </div>
+                      </div>
                 </div>
                 
                 <!-- 2. Section pour les notes (en deuxième) -->
@@ -1264,6 +1304,23 @@
         const deleteTypeBtn    = document.getElementById("delete-type-btn");
         const typeNameInput   = document.getElementById("type-name-input");
         const typeColorInput  = document.getElementById("type-color-input");
+        const painModal = document.getElementById("pain-modal");
+        const closeModalBtn = document.getElementById("close-modal");
+
+        if (closeModalBtn && painModal) {
+                closeModalBtn.addEventListener("click", function() {
+                    painModal.style.display = "none";
+                });
+            }
+
+        painModal.addEventListener("click", function(event) {
+            if (event.target === painModal) {
+                painModal.style.display = "none";
+                // Optionnel : si tu veux aussi "reset" les sélections ou vider les champs
+                // tu peux ajouter ici le même reset que le bouton "fermer" (croix)
+                // mais surtout NE PAS appeler saveCurrentNote() ou saveUserData() ici !
+            }
+        });    
 
         // 3) Délégation sur la <ul> des types…
         noteTypeList.addEventListener("click", function(e) {
