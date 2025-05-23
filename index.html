@@ -667,31 +667,66 @@
             vertical-align: middle;
         }
        /* Styles pour le selecteur de médicament et quantité prise  */
-        .med-details-row {
-            display: flex;
-            align-items: center;
-            gap: 10px;
+       .med-details-grid {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-end; /* Aligne les inputs avec la zone de saisie */
+        width: 100%;
+        gap: 0; /* espace contrôlé par la largeur des colonnes */
         }
 
-        #med-details label {
-            margin: 0 !important;
-            font-size: 13px;
+        .med-type-col {
+        flex: 1 1 66%; /* Prend ~2/3 de la largeur */
+        min-width: 0;
+        display: flex;
+        flex-direction: column;
+        }
+
+        .med-qty-col {
+        flex: 1 1 30%; /* Prend ~1/3 de la largeur */
+        min-width: 0;
+        display: flex;
+        flex-direction: column;
+        align-items: flex-end; /* Aligne la quantité à droite */
+        }
+
+        .med-type-col label,
+        .med-qty-col label {
+        margin-bottom: 2px;
+        font-size: 15px;
+        text-align: left;
+        width: 100%;
+        }
+
+        .med-type-col select,
+        .med-qty-col input[type="number"] {
+        width: 100%;
+        box-sizing: border-box;
         }
 
         #med-details select {
-            padding: 3px 10px;
-            border-radius: 4px;
-            border: 1px solid #bbb;
-            font-size: 16px;
+        padding: 3px 10px;
+        border-radius: 4px;
+        border: 1px solid #bbb;
+        font-size: 16px;
         }
 
         #med-details input[type="number"] {
-            width: 52px;
-            padding: 3px 5px;
-            border-radius: 4px;
-            border: 1px solid #bbb;
-            font-size: 16px;
-         
+        padding: 3px 5px;
+        border-radius: 4px;
+        border: 1px solid #bbb;
+        font-size: 16px;
+        max-width: 70px;
+        }
+
+        @media (max-width: 600px) {
+        .med-details-grid {
+            flex-direction: column;
+            gap: 10px;
+        }
+        .med-qty-col {
+            align-items: stretch;
+        }
         }
 
         /* Styles pour la pop-up d'ajout/édition de type de note */
@@ -1045,16 +1080,20 @@
                         <span class="med-icon">💊</span> Anti-inflammatoires
                     </label>
                     <div id="med-details" style="display:none; margin:8px 0 10px 10px;">
-                        <div class="med-details-row">
-                          <label for="med-type">Type :</label>
-                          <select id="med-type">
-                            <option value="ibuprofen">Ibuprofène</option>
-                            <option value="naproxen">Naproxène</option>
-                            <option value="ketoprofen">Kétoprofène</option>
-                            <option value="autre">Autre</option>
-                          </select>
-                          <label for="med-qty">Quantité :</label>
-                          <input type="number" id="med-qty" value="1" min="1" max="20" step="1">
+                        <div class="med-details-grid">
+                          <div class="med-type-col">
+                            <label for="med-type">Type :</label>
+                            <select id="med-type">
+                              <option value="ibuprofen">Ibuprofène</option>
+                              <option value="naproxen">Naproxène</option>
+                              <option value="ketoprofen">Kétoprofène</option>
+                              <option value="autre">Autre</option>
+                            </select>
+                          </div>
+                          <div class="med-qty-col">
+                            <label for="med-qty">Quantité :</label>
+                            <input type="number" id="med-qty" value="1" min="1" max="20" step="1">
+                          </div>
                         </div>
                       </div>
                 </div>
