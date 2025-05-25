@@ -104,7 +104,7 @@
             gap: 10px;
         }
 
-        .nav-btn {
+        .nav-btn-style {
             background: var(--primary-color);
             color: white;
             border: none;
@@ -114,7 +114,7 @@
             transition: background 0.3s;
         }
 
-        .nav-btn:hover {
+        .nav-btn-style:hover {
             background: #2980b9;
         }
 
@@ -405,21 +405,6 @@
         }
 
         .erase-option {
-            width: 100%;
-            padding: 15px 10px;
-            text-align: center;
-            border: 1px solid var(--border-color);
-            background-color: #f5f5f5;
-            border-radius: 5px;
-            cursor: pointer;
-            margin-top: 10px;
-        }
-
-        .erase-option:hover {
-            background-color: #e5e5e5;
-        }
-
-        .erase-option {
             background: #f5f5f5;
             border: 1px solid #bbb;
             border-radius: 4px;
@@ -436,8 +421,23 @@
             background: #e0e0e0;
             color: #c00;
         }
-        #validate-pain-modal {
+
+        .validate-pain-modal {
             margin-left: 0 !important;
+        }
+
+        .delete-btn-style {
+            background: none;
+            border: none;
+            padding: 2px 6px;
+            font-size: 0.8em;
+            line-height: 1.2;
+            cursor: pointer;
+            color: #c00;
+            transition: text-decoration 0.2s;
+        }
+        .delete-btn-style:hover {
+            text-decoration: underline;
         }
 
         /* Styles pour les notes */
@@ -667,67 +667,80 @@
             vertical-align: middle;
         }
        /* Styles pour le selecteur de médicament et quantité prise  */
-       .med-details-grid {
-        display: flex;
-        justify-content: space-between;
-        align-items: flex-end; /* Aligne les inputs avec la zone de saisie */
-        width: 100%;
-        gap: 0; /* espace contrôlé par la largeur des colonnes */
+        #med-type-dropdown {
+            max-width: 250px;
+            width: 100%;
+        }
+        #med-details input[type="number"] {
+            padding: 5px 10px;         /* même que le dropdown ! */
+            border-radius: 4px;
+            border: 1px solid #bbb;
+            font-size: 16px;
+            min-height: 36px;          /* force la même hauteur visuelle que le select ou le faux dropdown */
+            max-width: 90px;
+            width: 100%;
+            box-sizing: border-box;
+            background: #fff;
         }
 
+        .med-details-grid {
+            display: flex;
+            justify-content: flex-start;
+            align-items: flex-start;  /* Pour aligner labels et champs en haut */
+            width: 100%;
+            gap: 6px;   /* Un peu plus d'espace pour le confort visuel */
+        }
         .med-type-col {
-        flex: 1 1 66%; /* Prend ~2/3 de la largeur */
-        min-width: 0;
-        display: flex;
-        flex-direction: column;
+            flex: 1 1 70%;   /* Moins extrême, pour laisser de la place à quantité */
+            min-width: 0;
+            display: flex;
+            flex-direction: column;
         }
-
         .med-qty-col {
-        flex: 1 1 30%; /* Prend ~1/3 de la largeur */
-        min-width: 0;
-        display: flex;
-        flex-direction: column;
-        align-items: flex-end; /* Aligne la quantité à droite */
+            flex: 0 0 90px;  /* Donne de l’air à la quantité */
+            min-width: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start; /* Aligné à gauche comme le type */
         }
-
         .med-type-col label,
         .med-qty-col label {
-        margin-bottom: 2px;
-        font-size: 15px;
-        text-align: left;
-        width: 100%;
+            margin-bottom: 2px;
+            font-size: 16px;
+            text-align: left;
+            width: 100%;
+            letter-spacing: 0.01em;
+            font-weight: 500;
+            color: #444;
         }
-
-        .med-type-col select,
-        .med-qty-col input[type="number"] {
-        width: 100%;
-        box-sizing: border-box;
-        }
-
-        #med-details select {
-        padding: 3px 10px;
-        border-radius: 4px;
-        border: 1px solid #bbb;
-        font-size: 16px;
-        }
-
         #med-details input[type="number"] {
-        padding: 3px 5px;
-        border-radius: 4px;
-        border: 1px solid #bbb;
-        font-size: 16px;
-        max-width: 70px;
+            padding: 3px 10px;      /* Même padding que le select */
+            border-radius: 4px;
+            border: 1px solid #bbb;
+            font-size: 16px;
+            max-width: 90px;        /* Identique à la colonne */
+            width: 100%;
+            box-sizing: border-box;
+            background: #fff;
+        }
+        @media (max-width: 600px) {
+            .med-details-grid {
+                flex-direction: column;
+                gap: 10px;
+            }
+            .med-type-col,
+            .med-qty-col {
+                width: 100%;
+                align-items: stretch;
+            }
+            #med-type-dropdown,
+            #med-details select,
+            #med-details input[type="number"] {
+                max-width: 100%;
+            }
         }
 
-        @media (max-width: 600px) {
-        .med-details-grid {
-            flex-direction: column;
-            gap: 10px;
-        }
-        .med-qty-col {
-            align-items: stretch;
-        }
-        }
+
 
         /* Styles pour la pop-up d'ajout/édition de type de note */
         #note-type-modal .modal-content {
@@ -771,21 +784,21 @@
             color: #fff;
         }
 
-        #cancel-type-btn {
-            background-color: var(--primary-color); /* ou #ccc pour cancel */
-            color: #fff;                            /* à ajuster pour le cancel */
-            padding: 4px 10px;       /* réduit l’épaisseur et la largeur */
-            font-size: 0.8em;        /* légèrement plus petit */
-            line-height: 1.2;        /* compact */
+        .cancel-btn-style {
+            background-color:#EDEEED; /* même bleu que les autres boutons principaux */
+            color: #000;
+            padding: 4px 16px;
+            font-size: 1em;
+            line-height: 1.2;
             border: none;
-            border-radius: 3px;      /* coins moins arrondis */
+            border-radius: 4px;
             cursor: pointer;
+            transition: background 0.2s, color 0.2s;
         }
 
-        /* Spécifique au bouton “Annuler” */
-        #cancel-type-btn {
-            background-color: #ccc;
-            color: #000;
+        .cancel-btn-style:hover {
+            background-color: #ccc;   /* fond gris clair au survol */
+            color: #000;              /* texte noir comme sur ton autre bouton Annuler */
         }
 
         /* Bouton “Supprimer” */
@@ -800,6 +813,94 @@
 
         #delete-type-btn:hover {
             text-decoration: underline;
+        }
+
+        .save-btn-style {
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 4px;
+            padding: 8px 20px;
+            font-size: 1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        .save-btn-style:hover,
+        #save-type-btn:hover {
+            background: #2980b9;
+            color: white;
+        }
+
+        .modal-button-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            width: 100%;
+            text-align: center;
+        }
+
+        .pain-modal-actions {
+            display: flex;
+            justify-content: center;      /* centre les deux boutons sur la ligne */
+            align-items: center;
+            gap: 16px;                    /* espace entre les boutons */
+            margin-top: 28px;
+            width: 100%;
+        }
+
+        .pain-modal-actions .erase-option {
+            padding: 8px 16px;
+            font-size: 1em;
+            border-radius: 4px;
+            background: #f5f5f5;
+            color: #333;
+            border: 1px solid #bbb;
+            cursor: pointer;
+            transition: background 0.2s, color 0.2s;
+            flex: 0 0 auto; /* Ne prend pas toute la largeur */
+        }
+
+        .pain-modal-actions .erase-option:hover {
+            background: #e0e0e0;
+            color: #c00;
+        }
+
+        .pain-modal-actions .validate-pain-modal-style {
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 5px;
+            padding: 14px 80px;        /* Plus gros que Réinitialiser */
+            font-size: 1.15em;         /* Plus grand texte */
+            min-width: 120px;
+            cursor: pointer;
+            transition: background 0.3s;
+            font-weight: 600;
+            box-sizing: border-box;
+            flex: 0 0 auto;           /* Ne prend pas toute la ligne */
+            /* Sur mobile : prendra toute la largeur avec media query */
+        }
+
+        .pain-modal-actions .validate-pain-modal-style:hover {
+            background: #2980b9;
+        }
+
+        /* Responsive : sur petit écran, les boutons passent l’un sous l’autre et sont plus larges */
+        @media (max-width: 480px) {
+            .pain-modal-actions {
+                flex-direction: column;
+                gap: 10px;
+            }
+            .pain-modal-actions .erase-option,
+            .pain-modal-actions .validate-pain-modal-style {
+                width: 100%;
+                min-width: 0;
+                font-size: 1em;
+                padding: 13px 0;
+                text-align: center;
+            }
         }
 
         /* Styles pour le graphique */
@@ -921,9 +1022,9 @@
         <div id="month-view" class="month-view">
             <div class="calendar-header">
                 <div class="calendar-nav">
-                    <button id="prev-month" class="nav-btn">←</button>
+                    <button id="prev-month" class="nav-btn-style">←</button>
                     <div id="current-month" class="current-month"></div>
-                    <button id="next-month" class="nav-btn">→</button>
+                    <button id="next-month" class="nav-btn-style">→</button>
                 </div>
             </div>
 
@@ -949,9 +1050,9 @@
         <div id="year-view" class="year-view">
             <div class="calendar-header">
                 <div class="calendar-nav">
-                    <button id="prev-year" class="nav-btn">←</button>
+                    <button id="prev-year" class="nav-btn-style">←</button>
                     <div id="current-year" class="current-year"></div>
-                    <button id="next-year" class="nav-btn">→</button>
+                    <button id="next-year" class="nav-btn-style">→</button>
                 </div>
             </div>
 
@@ -1081,22 +1182,39 @@
                     </label>
                     <div id="med-details" style="display:none; margin:8px 0 10px 10px;">
                         <div class="med-details-grid">
-                          <div class="med-type-col">
-                            <label for="med-type">Type :</label>
-                            <select id="med-type">
-                              <option value="ibuprofen">Ibuprofène</option>
-                              <option value="naproxen">Naproxène</option>
-                              <option value="ketoprofen">Kétoprofène</option>
-                              <option value="autre">Autre</option>
-                            </select>
-                          </div>
-                          <div class="med-qty-col">
-                            <label for="med-qty">Quantité :</label>
-                            <input type="number" id="med-qty" value="1" min="1" max="20" step="1">
-                          </div>
+                            <div class="med-type-col">
+                                <label for="med-type-dropdown">Type :</label>
+                                <div id="med-type-dropdown" class="note-type-container" style="max-width:250px;">
+                                    <div id="selected-med-type" class="selected-note-type" style="max-width:250px;">
+                                        <span id="selected-med-type-name">Ibuprofène</span>
+                                        <span class="dropdown-arrow">▼</span>
+                                    </div>
+                                    <ul id="med-type-list" class="note-type-list">
+                                        <li id="add-med-type-item" class="add-type-item">+ Ajouter</li>
+                                    </ul>
+                                </div>
+                            </div>
+                            <div class="med-qty-col">
+                                <label for="med-qty">Quantité :</label>
+                                <input type="number" id="med-qty" value="1" min="1" max="20" step="1">
+                            </div>
                         </div>
-                      </div>
-                </div>
+                        <!-- Modal pour ajouter/éditer un type de médicament -->
+                        <div id="med-type-modal" class="modal">
+                            <div class="modal-content" style="max-width: 350px;">
+                                <h3 id="med-type-modal-title">Ajouter un type d’anti-inflammatoire</h3>
+                                <label for="med-type-name-input">Nom :</label>
+                                <input type="text" id="med-type-name-input" placeholder="Nom du médicament" />
+                                <div class="modal-actions">
+                                    <button id="save-med-type-btn" class="save-btn-style">Enregistrer</button>
+                                    <button id="cancel-med-type-btn" class="cancel-btn-style" type="button">Annuler</button>
+                                    <button id="delete-med-type-btn" class="delete-btn-style">Supprimer</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>                
+                
                 
                 <!-- 2. Section pour les notes (en deuxième) -->
                 <div class="modal-section notes-section">
@@ -1114,7 +1232,7 @@
                         <ul id="note-type-list" class="note-type-list">
                             <!-- Les <li> des types de notes seront insérés dynamiquement en JS -->
                             <!-- Option d'ajout d'un nouveau type de note : -->
-                            <li id="add-type-item" class="add-type-item">+ Ajouter un type de note</li>
+                            <li id="add-type-item" class="add-type-item">+ Ajouter</li>
                         </ul>
                     </div>
                     <!-- Conteneur des badges de notes présentes pour ce jour -->
@@ -1135,10 +1253,9 @@
                         <label for="type-color-input">Couleur :</label>
                         <input type="color" id="type-color-input" value="#3498db" />
                         <div class="modal-actions">
-                            <button id="save-type-btn">Enregistrer</button>
-                            <button id="cancel-type-btn" type="button">Annuler</button>
-                            <button id="delete-type-btn" type="button" style="margin-left:auto; color:#c00;">
-                                Supprimer
+                            <button id="save-type-btn" class="save-btn-style">Enregistrer</button>
+                            <button id="cancel-type-btn" class="cancel-btn-style" >Annuler</button>
+                            <button id="delete-type-btn" class="delete-btn-style">Supprimer</button>
                             </button>
                         </div>
                     </div>
@@ -1155,9 +1272,9 @@
                         <div class="pain-option" data-value="4" style="background-color: #FF4000;">4</div>
                         <div class="pain-option" data-value="5" style="background-color: #000000; color: white;">5</div>
                     </div>
-                    <div style="display: flex; justify-content: flex-end; align-items: center; gap: 14px; margin-top: 25px;">
-                        <div id="erase-value" class="erase-option" style="margin: 0;">Réinitialiser</div>
-                        <button id="validate-pain-modal" class="view-btn" style="min-width:100px;">OK</button>
+                    <div class="pain-modal-actions">
+                        <button id="erase-value" class="erase-option" type="button">Réinitialiser</button>
+                        <button id="validate-pain-modal" class="validate-pain-modal-style">Enregistrer</button>
                     </div>
                 </div>
             </div>
@@ -1462,7 +1579,7 @@
                 const addLi = document.createElement("li");
                 addLi.id        = "add-type-item";
                 addLi.className = "add-type-item";
-                addLi.textContent = "+ Ajouter un type de note";
+                addLi.textContent = "+ Ajouter";
                 list.appendChild(addLi);
                 // 6. Vider le textarea pour saisir la note du nouveau type
                 dayNoteTextarea.value = "";
@@ -1658,6 +1775,181 @@
             // Initialiser la référence à la case à cocher des anti-inflammatoires
             medCheckbox = document.getElementById('med-taken');
             });
+
+
+            // Gestion des types d’anti-inflammatoires personnalisables
+            let medTypes = [];
+            let editingMedTypeName = null;
+
+            function loadMedTypes() {
+            const saved = localStorage.getItem('spondylogMedTypes');
+            if (saved) {
+                medTypes = JSON.parse(saved);
+            } else {
+                // Par défaut
+                medTypes = [
+                { name: "Ibuprofène" },
+                { name: "Naproxène" },
+                { name: "Kétoprofène" },
+                { name: "Autre" }
+                ];
+                localStorage.setItem('spondylogMedTypes', JSON.stringify(medTypes));
+            }
+            }
+
+            function saveMedTypes() {
+            localStorage.setItem('spondylogMedTypes', JSON.stringify(medTypes));
+            }
+
+            function renderMedTypeDropdown(selectedName) {
+            const medTypeList = document.getElementById("med-type-list");
+            medTypeList.innerHTML = "";
+            medTypes.forEach(type => {
+                const li = document.createElement("li");
+                li.dataset.name = type.name;
+                li.innerHTML = `
+                ${type.name}
+                <button class="edit-type-btn" data-name="${type.name}">…</button>
+                `;
+                medTypeList.appendChild(li);
+            });
+            // Ajouter le bouton "Ajouter un type"
+            const addLi = document.createElement("li");
+            addLi.id = "add-med-type-item";
+            addLi.className = "add-type-item";
+            addLi.textContent = "+ Ajouter";
+            medTypeList.appendChild(addLi);
+
+            // Mise à jour de l’affichage du type sélectionné
+            const selectedTypeName = document.getElementById("selected-med-type-name");
+            if (selectedTypeName) {
+                selectedTypeName.textContent = selectedName || (medTypes[0] && medTypes[0].name);
+            }
+            }
+
+            // Ouvre le modal pour ajouter un type
+            function openMedTypeModalForAdd() {
+            editingMedTypeName = null;
+            document.getElementById('med-type-modal-title').textContent = "Ajouter un type d’anti-inflammatoire";
+            document.getElementById('med-type-name-input').value = "";
+            document.getElementById('delete-med-type-btn').style.display = "none";
+            document.getElementById('med-type-modal').style.display = "flex";
+            }
+
+            // Ouvre le modal pour éditer un type
+            function openMedTypeModalForEdit(typeName) {
+            editingMedTypeName = typeName;
+            document.getElementById('med-type-modal-title').textContent = "Modifier le type d’anti-inflammatoire";
+            document.getElementById('med-type-name-input').value = typeName;
+            document.getElementById('delete-med-type-btn').style.display = "inline-block";
+            document.getElementById('med-type-modal').style.display = "flex";
+            }
+
+            // Intégration avec l’UI
+            document.addEventListener("DOMContentLoaded", function() {
+            loadMedTypes();
+            renderMedTypeDropdown();
+
+            const selectedMedTypeArea = document.getElementById("selected-med-type");
+            const medTypeList = document.getElementById("med-type-list");
+            const addMedTypeItem = document.getElementById("add-med-type-item");
+            const medTypeModal = document.getElementById("med-type-modal");
+            const saveMedTypeBtn = document.getElementById("save-med-type-btn");
+            const cancelMedTypeBtn = document.getElementById("cancel-med-type-btn");
+            const deleteMedTypeBtn = document.getElementById("delete-med-type-btn");
+            const medTypeNameInput = document.getElementById("med-type-name-input");
+
+            // Ouvrir/fermer la dropdown
+            selectedMedTypeArea.addEventListener("click", function(e) {
+                e.stopPropagation();
+                medTypeList.style.display = (medTypeList.style.display === "block" ? "none" : "block");
+            });
+
+            // Fermer dropdown si clic dehors
+            window.addEventListener("click", function(e) {
+                if (!document.getElementById("med-type-dropdown").contains(e.target)) {
+                medTypeList.style.display = "none";
+                }
+            });
+
+            // Gestion sélection dans la liste
+            medTypeList.addEventListener("click", function(e) {
+                e.stopPropagation();
+                const li = e.target.closest("li");
+                if (!li) return;
+                if (li.id === "add-med-type-item") {
+                openMedTypeModalForAdd();
+                } else if (e.target.classList.contains("edit-type-btn")) {
+                openMedTypeModalForEdit(li.dataset.name);
+                } else {
+                document.getElementById("selected-med-type-name").textContent = li.dataset.name;
+                medTypeList.style.display = "none";
+                }
+            });
+
+            // Ajout/édition d’un type
+            saveMedTypeBtn.addEventListener("click", function(e) {
+                e.preventDefault();
+                const name = medTypeNameInput.value.trim();
+                if (!name) { alert("Veuillez saisir un nom."); return; }
+                // Doublon ?
+                if (editingMedTypeName === null && medTypes.some(t => t.name.toLowerCase() === name.toLowerCase())) {
+                alert("Ce type existe déjà."); return;
+                }
+                if (editingMedTypeName === null) {
+                medTypes.push({ name });
+                } else {
+                // Renommer l’item
+                const obj = medTypes.find(t => t.name === editingMedTypeName);
+                if (obj) obj.name = name;
+                // Mettre à jour la sélection courante si besoin
+                if (document.getElementById("selected-med-type-name").textContent === editingMedTypeName)
+                    document.getElementById("selected-med-type-name").textContent = name;
+                }
+                saveMedTypes();
+                renderMedTypeDropdown(name);
+                medTypeModal.style.display = "none";
+            });
+
+            // Annuler l’ajout/édition
+            cancelMedTypeBtn.addEventListener("click", function() {
+                medTypeModal.style.display = "none";
+            });
+
+            // Suppression
+            deleteMedTypeBtn.addEventListener("click", function() {
+                if (!editingMedTypeName) return;
+                if (medTypes.length <= 1) { alert("Gardez au moins un type."); return; }
+                if (!confirm(`Supprimer "${editingMedTypeName}" ?`)) return;
+                medTypes = medTypes.filter(t => t.name !== editingMedTypeName);
+                saveMedTypes();
+                renderMedTypeDropdown(medTypes[0] && medTypes[0].name);
+                medTypeModal.style.display = "none";
+            });
+
+            // Fermer modal si clic dehors
+            medTypeModal.addEventListener("click", function(e) {
+                if (e.target === medTypeModal) medTypeModal.style.display = "none";
+            });
+            });
+
+            // Sauvegarder la sélection dans les données du jour lors de la validation
+            function saveMedDataForDay(dateId) {
+            const medTakenCheckbox = document.getElementById('med-taken');
+            const selectedMedType = document.getElementById('selected-med-type-name');
+            const medQtyInput = document.getElementById('med-qty');
+            if (medTakenCheckbox && medTakenCheckbox.checked) {
+                userMedsData[dateId] = {
+                taken: true,
+                type: selectedMedType ? selectedMedType.textContent : (medTypes[0] && medTypes[0].name),
+                qty: medQtyInput ? Number(medQtyInput.value) || 1 : 1
+                };
+            } else {
+                delete userMedsData[dateId];
+            }
+            saveUserData();
+            }
+
 
             // Affiche/masque la sélection des détails pour les anti-inflammatoires
                 const medTakenCheckbox = document.getElementById('med-taken');
@@ -2331,7 +2623,7 @@
                 const addLi = document.createElement("li");
                 addLi.id        = "add-type-item";
                 addLi.className = "add-type-item";
-                addLi.textContent = "+ Ajouter un type de note";
+                addLi.textContent = "+ Ajouter";
                 noteTypeList.appendChild(addLi);
 
                 // 7️⃣ met à jour les badges existants
@@ -2353,233 +2645,297 @@
             }
 
 
-        function closeModal(refresh = false) {
-            painModal.style.display = "none";
+
+
+
+
+
             
-            if (refresh) {
-                if (selectedFromYearView && selectedViewMonth !== null && selectedViewYear !== null) {
-                    // Si on vient de la vue annuelle, restaurer le mois/année sélectionné
-                    if (currentView === "month") {
-                        // Si on est en vue mensuelle, mettre à jour avec le mois sélectionné
-                        currentMonth = selectedViewMonth;
-                        currentYear = selectedViewYear;
-                        renderCalendar(currentMonth, currentYear);
-                    } else {
-                        // Si on est en vue annuelle, rester sur l'année sélectionnée
-                        renderYearView(selectedViewYear);
-                    }
+
+            (function showPainModal(dateId) {
+                selectedDate = dateId;
+                painModal.style.display = "flex";
+
+                // Nom du type de note par défaut (toujours le premier dans noteTypes)
+                const defaultTypeName = noteTypes[0].name;
+
+                // Récupère les notes pour ce jour
+                const notesOfDay = userNotes[dateId] || {};
+
+                // 1. Cas : la note par défaut contient du texte
+                if (notesOfDay[defaultTypeName] && notesOfDay[defaultTypeName].trim() !== "") {
+                    // Sélectionne le type par défaut
+                    document.getElementById("selected-type-name").textContent = defaultTypeName;
+                    document.getElementById("selected-type-dot").style.backgroundColor =
+                        noteTypes.find(t => t.name === defaultTypeName).color;
+                    dayNoteTextarea.value = notesOfDay[defaultTypeName];
+
                 } else {
-                    // Comportement normal
-                    if (currentView === "month") {
-                        renderCalendar(currentMonth, currentYear);
+                    // 2. Cherche une note d’un autre type qui a du texte
+                    const foundType = Object.keys(notesOfDay).find(type =>
+                        type !== defaultTypeName && notesOfDay[type] && notesOfDay[type].trim() !== ""
+                    );
+
+                    if (foundType) {
+                        // Sélectionne ce type et affiche la note correspondante
+                        document.getElementById("selected-type-name").textContent = foundType;
+                        document.getElementById("selected-type-dot").style.backgroundColor =
+                            noteTypes.find(t => t.name === foundType).color;
+                        dayNoteTextarea.value = notesOfDay[foundType];
                     } else {
-                        renderYearView(currentYear);
+                        // 3. Aucun texte : affiche la note par défaut vide
+                        document.getElementById("selected-type-name").textContent = defaultTypeName;
+                        document.getElementById("selected-type-dot").style.backgroundColor =
+                            noteTypes.find(t => t.name === defaultTypeName).color;
+                        dayNoteTextarea.value = "";
                     }
                 }
-            }
-            
-            selectedDate = null;
-        }
 
-        function selectPainLevel(level) {
-            if (!selectedDate) return;
+                // Mets à jour les badges des autres notes présentes pour ce jour (optionnel si tu utilises déjà)
+                updateNoteBadges(dateId, document.getElementById("selected-type-name").textContent);
+            })
 
-            // 1️⃣ Mémoriser le niveau de douleur
-            const painValue = parseInt(level, 10);
-            userPainData[selectedDate] = painValue;
 
-            // 2️⃣ Sauvegarder la note du type de note actuellement sélectionné
-            //    Cette fonction gère correctement userNotes[selectedDate] en tant qu'objet
-            saveCurrentNote();
 
-            // 3️⃣ Sauvegarder l’état des anti-inflammatoires
-            if (document.getElementById('med-taken').checked) {
-                userMedsData[selectedDate] = true;
-            } else {
-                delete userMedsData[selectedDate];
-            }
 
-            // 4️⃣ Écrire toutes les données dans localStorage
-            saveUserData();
+ 
 
-            // 5️⃣ Fermer la modale et rafraîchir l’affichage du calendrier
-            closeModal(true);
-        }
 
-        function erasePainValue() {
-            if (selectedDate) {
-                // Supprimer la valeur
-                delete userPainData[selectedDate];
+
+
+
+
+
+
+
+
+            function closeModal(refresh = false) {
+                painModal.style.display = "none";
                 
-                // Supprimer la note
-                delete userNotes[selectedDate];
-
-                // Supprimer l'information sur les anti-inflammatoires
-                delete userMedsData[selectedDate];
+                if (refresh) {
+                    if (selectedFromYearView && selectedViewMonth !== null && selectedViewYear !== null) {
+                        // Si on vient de la vue annuelle, restaurer le mois/année sélectionné
+                        if (currentView === "month") {
+                            // Si on est en vue mensuelle, mettre à jour avec le mois sélectionné
+                            currentMonth = selectedViewMonth;
+                            currentYear = selectedViewYear;
+                            renderCalendar(currentMonth, currentYear);
+                        } else {
+                            // Si on est en vue annuelle, rester sur l'année sélectionnée
+                            renderYearView(selectedViewYear);
+                        }
+                    } else {
+                        // Comportement normal
+                        if (currentView === "month") {
+                            renderCalendar(currentMonth, currentYear);
+                        } else {
+                            renderYearView(currentYear);
+                        }
+                    }
+                }
                 
-                // Sauvegarder les données
+                selectedDate = null;
+            }
+
+            function selectPainLevel(level) {
+                if (!selectedDate) return;
+
+                // 1️⃣ Mémoriser le niveau de douleur
+                const painValue = parseInt(level, 10);
+                userPainData[selectedDate] = painValue;
+
+                // 2️⃣ Sauvegarder la note du type de note actuellement sélectionné
+                //    Cette fonction gère correctement userNotes[selectedDate] en tant qu'objet
+                saveCurrentNote();
+
+                // 3️⃣ Sauvegarder l’état des anti-inflammatoires
+                if (document.getElementById('med-taken').checked) {
+                    userMedsData[selectedDate] = true;
+                } else {
+                    delete userMedsData[selectedDate];
+                }
+
+                // 4️⃣ Écrire toutes les données dans localStorage
                 saveUserData();
-                
-                // Fermer le modal et mettre à jour l'affichage
+
+                // 5️⃣ Fermer la modale et rafraîchir l’affichage du calendrier
                 closeModal(true);
             }
-        }
 
-        // Récupérer les éléments du modal de confirmation
-        const confirmResetModal = document.getElementById("confirm-reset-modal");
-        const confirmResetYesBtn = document.getElementById("confirm-reset-yes");
-        const confirmResetNoBtn = document.getElementById("confirm-reset-no");
+            function erasePainValue() {
+                if (selectedDate) {
+                    // Supprimer la valeur
+                    delete userPainData[selectedDate];
+                    
+                    // Supprimer la note
+                    delete userNotes[selectedDate];
 
-        // Assurez-vous de retirer tout écouteur existant sur eraseOption 
-        // (s'il est attaché par un attribut HTML ou par un précédent addEventListener, retirez-le dans l'éditeur si nécessaire)
-        eraseOption.onclick = null; // Supprime tout gestionnaire inline
-
-        // Attacher un nouvel écouteur qui n'affiche que la popup sans appeler erasePainValue
-        eraseOption.addEventListener("click", function(e) {
-            e.preventDefault();
-            e.stopPropagation();
-            confirmResetModal.style.display = "flex";
-        });
-
-        // Si l'utilisateur confirme la réinitialisation
-        confirmResetYesBtn.addEventListener("click", function(e) {
-            e.preventDefault();
-            e.stopPropagation();
-            // Appeler la fonction de réinitialisation uniquement ici
-            erasePainValue();
-            confirmResetModal.style.display = "none";
-            closeModal();
-            // Rafraîchir l'affichage de la vue actuelle (mensuelle ou annuelle)
-            if (currentView === "month") {
-                renderCalendar(currentMonth, currentYear);
-            } else {
-                renderYearView(currentYear);
-            }
-        });
-
-        // Si l'utilisateur annule la réinitialisation
-        confirmResetNoBtn.addEventListener("click", function(e) {
-            e.preventDefault();
-            e.stopPropagation();
-            confirmResetModal.style.display = "none";
-        });
-
-
-        // Fonction pour rendre la liste des notes
-        function renderNotesList() {
-            notesList.innerHTML = ""; // Vider la liste
-
-            const selectedType = document.getElementById("note-type-filter")?.value || "all";
-
-            const noteDates = Object.keys(userNotes)
-                .filter(dateId => {
-                    const entry = userNotes[dateId];
-                    if (typeof entry === 'string') {
-                        return selectedType === "all" && entry.trim() !== "";
-                    } else if (entry && typeof entry === 'object') {
-                        return Object.entries(entry).some(([type, val]) =>
-                            (selectedType === "all" || type === selectedType) &&
-                            typeof val === 'string' && val.trim() !== ""
-                        );
-                    }
-                    return false;
-                })
-                .sort((a, b) => {
-                    const [ay, am, ad] = a.split('-').map(Number);
-                    const [by, bm, bd] = b.split('-').map(Number);
-                    return new Date(by, bm - 1, bd) - new Date(ay, am - 1, ad);
-                });
-
-            if (noteDates.length === 0) {
-                const noNotes = document.createElement("p");
-                noNotes.textContent = "Aucune note enregistrée.";
-                notesList.appendChild(noNotes);
-                return;
+                    // Supprimer l'information sur les anti-inflammatoires
+                    delete userMedsData[selectedDate];
+                    
+                    // Sauvegarder les données
+                    saveUserData();
+                    
+                    // Fermer le modal et mettre à jour l'affichage
+                    closeModal(true);
+                }
             }
 
-            noteDates.forEach(dateId => {
-                const noteEntry = document.createElement("div");
-                noteEntry.className = "note-entry";
+            // Récupérer les éléments du modal de confirmation
+            const confirmResetModal = document.getElementById("confirm-reset-modal");
+            const confirmResetYesBtn = document.getElementById("confirm-reset-yes");
+            const confirmResetNoBtn = document.getElementById("confirm-reset-no");
 
-                const [year, month, day] = dateId.split('-').map(Number);
-                const monthNames = ["Janvier", "Février", "Mars", "Avril", "Mai", "Juin",
-                                    "Juillet", "Août", "Septembre", "Octobre", "Novembre", "Décembre"];
-                const formattedDate = `${day} ${monthNames[month - 1]} ${year}`;
-                const noteDate = document.createElement("div");
-                noteDate.className = "note-date";
+            // Assurez-vous de retirer tout écouteur existant sur eraseOption 
+            // (s'il est attaché par un attribut HTML ou par un précédent addEventListener, retirez-le dans l'éditeur si nécessaire)
+            eraseOption.onclick = null; // Supprime tout gestionnaire inline
 
-                let painLevelText = "Niveau non renseigné";
-                if (userPainData[dateId] !== undefined) {
-                    const painLevel = document.createElement("span");
-                    painLevel.className = "note-pain-level";
-                    painLevel.style.backgroundColor = painColors[userPainData[dateId]];
-                    if (userPainData[dateId] === 5) {
-                        painLevel.style.color = "white";
-                        painLevel.style.borderColor = "white";
-                    }
-                    painLevelText = `Niveau ${userPainData[dateId]}`;
-                    noteDate.appendChild(painLevel);
-                }
-                noteDate.innerHTML += ` ${formattedDate} - ${painLevelText}`;
-                noteEntry.appendChild(noteDate);
-
-                const noteText = document.createElement("div");
-                noteText.className = "note-text";
-
-                if (typeof userNotes[dateId] === 'string') {
-                    if (selectedType === "all") {
-                        noteText.textContent = userNotes[dateId];
-                    }
-                } else {
-                    for (const typeName in userNotes[dateId]) {
-                        const text = userNotes[dateId][typeName].trim();
-                        if (!text || (selectedType !== "all" && typeName !== selectedType)) continue;
-
-                        const typeObj = noteTypes.find(t => t.name === typeName);
-                        const color = typeObj ? typeObj.color : "#3498db";
-
-                        const line = document.createElement("div");
-                        const dot = document.createElement("span");
-                        const label = document.createElement("strong");
-                        const content = document.createElement("span");
-
-                        dot.textContent = "●";
-                        dot.style.color = color;
-                        dot.style.marginRight = "5px";
-                        label.textContent = typeName + " : ";
-                        content.textContent = text;
-
-                        line.append(dot, label, content);
-                        noteText.appendChild(line);
-                    }
-                }
-
-                noteEntry.appendChild(noteText);
-
-                if (userMedsData[dateId]) {
-                    const medIcon = document.createElement("span");
-                    medIcon.className = "med-icon";
-                    medIcon.innerHTML = " 💊";
-                    medIcon.style.marginLeft = "5px";
-                    noteDate.appendChild(medIcon);
-                }
-
-                const editLink = document.createElement("a");
-                editLink.href = "#";
-                editLink.textContent = "Modifier";
-                editLink.style.display = "inline-block";
-                editLink.style.marginTop = "10px";
-                editLink.style.color = "var(--primary-color)";
-                editLink.addEventListener("click", e => {
-                    e.preventDefault();
-                    notesListModal.style.display = "none";
-                    showPainModal(dateId);
-                });
-
-                noteEntry.appendChild(editLink);
-                notesList.appendChild(noteEntry);
+            // Attacher un nouvel écouteur qui n'affiche que la popup sans appeler erasePainValue
+            eraseOption.addEventListener("click", function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                confirmResetModal.style.display = "flex";
             });
-        }
+
+            // Si l'utilisateur confirme la réinitialisation
+            confirmResetYesBtn.addEventListener("click", function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                // Appeler la fonction de réinitialisation uniquement ici
+                erasePainValue();
+                confirmResetModal.style.display = "none";
+                closeModal();
+                // Rafraîchir l'affichage de la vue actuelle (mensuelle ou annuelle)
+                if (currentView === "month") {
+                    renderCalendar(currentMonth, currentYear);
+                } else {
+                    renderYearView(currentYear);
+                }
+            });
+
+            // Si l'utilisateur annule la réinitialisation
+            confirmResetNoBtn.addEventListener("click", function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                confirmResetModal.style.display = "none";
+            });
+
+
+            // Fonction pour rendre la liste des notes
+            function renderNotesList() {
+                notesList.innerHTML = ""; // Vider la liste
+
+                const selectedType = document.getElementById("note-type-filter")?.value || "all";
+
+                const noteDates = Object.keys(userNotes)
+                    .filter(dateId => {
+                        const entry = userNotes[dateId];
+                        if (typeof entry === 'string') {
+                            return selectedType === "all" && entry.trim() !== "";
+                        } else if (entry && typeof entry === 'object') {
+                            return Object.entries(entry).some(([type, val]) =>
+                                (selectedType === "all" || type === selectedType) &&
+                                typeof val === 'string' && val.trim() !== ""
+                            );
+                        }
+                        return false;
+                    })
+                    .sort((a, b) => {
+                        const [ay, am, ad] = a.split('-').map(Number);
+                        const [by, bm, bd] = b.split('-').map(Number);
+                        return new Date(by, bm - 1, bd) - new Date(ay, am - 1, ad);
+                    });
+
+                if (noteDates.length === 0) {
+                    const noNotes = document.createElement("p");
+                    noNotes.textContent = "Aucune note enregistrée.";
+                    notesList.appendChild(noNotes);
+                    return;
+                }
+
+                noteDates.forEach(dateId => {
+                    const noteEntry = document.createElement("div");
+                    noteEntry.className = "note-entry";
+
+                    const [year, month, day] = dateId.split('-').map(Number);
+                    const monthNames = ["Janvier", "Février", "Mars", "Avril", "Mai", "Juin",
+                                        "Juillet", "Août", "Septembre", "Octobre", "Novembre", "Décembre"];
+                    const formattedDate = `${day} ${monthNames[month - 1]} ${year}`;
+                    const noteDate = document.createElement("div");
+                    noteDate.className = "note-date";
+
+                    let painLevelText = "Niveau non renseigné";
+                    if (userPainData[dateId] !== undefined) {
+                        const painLevel = document.createElement("span");
+                        painLevel.className = "note-pain-level";
+                        painLevel.style.backgroundColor = painColors[userPainData[dateId]];
+                        if (userPainData[dateId] === 5) {
+                            painLevel.style.color = "white";
+                            painLevel.style.borderColor = "white";
+                        }
+                        painLevelText = `Niveau ${userPainData[dateId]}`;
+                        noteDate.appendChild(painLevel);
+                    }
+                    noteDate.innerHTML += ` ${formattedDate} - ${painLevelText}`;
+                    noteEntry.appendChild(noteDate);
+
+                    const noteText = document.createElement("div");
+                    noteText.className = "note-text";
+
+                    if (typeof userNotes[dateId] === 'string') {
+                        if (selectedType === "all") {
+                            noteText.textContent = userNotes[dateId];
+                        }
+                    } else {
+                        for (const typeName in userNotes[dateId]) {
+                            const text = userNotes[dateId][typeName].trim();
+                            if (!text || (selectedType !== "all" && typeName !== selectedType)) continue;
+
+                            const typeObj = noteTypes.find(t => t.name === typeName);
+                            const color = typeObj ? typeObj.color : "#3498db";
+
+                            const line = document.createElement("div");
+                            const dot = document.createElement("span");
+                            const label = document.createElement("strong");
+                            const content = document.createElement("span");
+
+                            dot.textContent = "●";
+                            dot.style.color = color;
+                            dot.style.marginRight = "5px";
+                            label.textContent = typeName + " : ";
+                            content.textContent = text;
+
+                            line.append(dot, label, content);
+                            noteText.appendChild(line);
+                        }
+                    }
+
+                    noteEntry.appendChild(noteText);
+
+                    if (userMedsData[dateId]) {
+                        const medIcon = document.createElement("span");
+                        medIcon.className = "med-icon";
+                        medIcon.innerHTML = " 💊";
+                        medIcon.style.marginLeft = "5px";
+                        noteDate.appendChild(medIcon);
+                    }
+
+                    const editLink = document.createElement("a");
+                    editLink.href = "#";
+                    editLink.textContent = "Modifier";
+                    editLink.style.display = "inline-block";
+                    editLink.style.marginTop = "10px";
+                    editLink.style.color = "var(--primary-color)";
+                    editLink.addEventListener("click", e => {
+                        e.preventDefault();
+                        notesListModal.style.display = "none";
+                        showPainModal(dateId);
+                    });
+
+                    noteEntry.appendChild(editLink);
+                    notesList.appendChild(noteEntry);
+                });
+            }
 
 
         
