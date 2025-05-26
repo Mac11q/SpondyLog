@@ -126,7 +126,7 @@
 
         .note-dots-container {
             position: absolute;
-            top: 4px;
+            top: 3px;
             right: 2px;
             display: flex;
             flex-direction: row-reverse; /* pour coller les points de droite à gauche */
@@ -158,14 +158,18 @@
             pointer-events: none;
             opacity: 0;
             transition: opacity 0.13s;
-            width: 210px;           /* largeur fixe */
-            max-width: 220px;       /* pas plus large */
-            min-width: 140px;       /* jamais trop étroit */
+            width: 130px;
+            max-width: 140px;
+            min-width: 80px;    
             text-align: left;
             line-height: 1.4;
             letter-spacing: 0.01em;
         }
         .note-dot.show-tooltip .note-dot-tooltip {
+            opacity: 1;
+        }
+
+        .med-indicator.show-tooltip .note-dot-tooltip {
             opacity: 1;
         }
 
@@ -177,6 +181,14 @@
             margin-right: 3px;
             vertical-align: middle;
             box-shadow: 0 0 2px #444;
+        }
+
+        .med-icone-tooltip {
+            display: inline-block;
+            font-size: 15px;
+            margin-top: -1px;
+            transform: rotate(135deg);
+            vertical-align: middle;
         }
 
         /* Style mis à jour pour la légende */
@@ -286,7 +298,7 @@
             justify-content: center;
             align-items: center;
             position: relative;
-            border-radius: 2px;
+            border-radius: 5px;
         }
 
         @media (max-width: 600px) {
@@ -471,7 +483,7 @@
         /* Encadrer la cellule lorsqu'une note est présente */
         .note-present {
             border: 2px solid var(--primary-color);
-            border-radius: 2px;
+            border-radius: 5px;
         }
 
         .mini-note-present {
@@ -482,9 +494,9 @@
         
         .med-indicator {
             position: absolute;
-            bottom: -3px;
-            right: 3px;
-            font-size: 12px;
+            bottom: -2px;
+            right: 1px;
+            font-size: 10px;
             color: #FF5722;
         }
 
@@ -501,7 +513,7 @@
         }
 
         .med-icon {
-            transform: rotate(135deg);
+            transform: rotate(90deg);
             display: inline-block;
         }
 
@@ -748,8 +760,6 @@
                 max-width: 100%;
             }
         }
-
-
 
         /* Styles pour la pop-up d'ajout/édition de type de note */
         #note-type-modal .modal-content {
@@ -1186,9 +1196,7 @@
                 <!-- 1. Section pour les anti-inflammatoires (en premier) -->
                 <div class="modal-section med-section">
                     <input type="checkbox" id="med-taken">
-                    <label for="med-taken" class="med-label">
-                        <span class="med-icon">💊</span> Anti-inflammatoires
-                    </label>
+                    <label for="med-taken"><span class="med-icon">💊</span> Anti-inflammatoires</label>
                     <div id="med-details" style="display:none; margin:8px 0 10px 10px;">
                         <div class="med-details-grid">
                             <div class="med-type-col">
@@ -2306,52 +2314,97 @@
                                     const dotsContainer = document.createElement("div");
                                     dotsContainer.className = "note-dots-container";
                                     
-                                    // On limite les points affichés
                                     typesForDay.slice(0, maxDots).reverse().forEach((typeName, idx) => {
                                         const typeObj = noteTypes.find(t => t.name === typeName);
-                                        const dot = document.createElement("span");
-                                        dot.className = "note-dot";
-                                        dot.style.backgroundColor = typeObj ? typeObj.color : "#3498db";
-                                        const noteText = userNotes[dateId][typeName] || "";
+                                        let dot;
+                                        let tooltip;
 
-                                        // Tooltip custom (affichage instantané)
-                                        const tooltip = document.createElement("div");
-                                        tooltip.className = "note-dot-tooltip";
-                                        tooltip.innerHTML = `
-                                            <span class="tooltip-dot" style="background:${typeObj ? typeObj.color : "#3498db"}"></span>
-                                            <strong>${typeName}</strong><br>
-                                            ${noteText.length > 70 ? noteText.substring(0, 70) + '…' : noteText}
-                                        `;
-                                        dot.appendChild(tooltip);
-                                        dot.addEventListener("mouseenter", function() {
-                                            dot.classList.add("show-tooltip");
-                                        });
-                                        dot.addEventListener("mouseleave", function() {
-                                            dot.classList.remove("show-tooltip");
-                                        });
+                                        // --- DOT MÉDICAMENT (💊) ---
+                                        if (typeName.toLowerCase().includes('médic') || typeName.toLowerCase().includes('anti')) {
+                                            dot = document.createElement("span");
+                                            // Utilise à la fois med-icone-tooltip (pour style) et med-indicator (pour CSS du tooltip)
+                                            dot.className = "med-icone-tooltip med-indicator";
+                                            dot.textContent = "💊";
+
+                                            // Cherche les infos du médicament
+                                            const medData = userMedsData[dateId];
+                                            const medType = medData?.type || "Anti-inflammatoire";
+                                            const medQty = medData?.qty !== undefined ? medData.qty : "";
+
+                                            tooltip = document.createElement("div");
+                                            tooltip.className = "note-dot-tooltip";
+                                            tooltip.innerHTML = `
+                                                <span class="med-icone-tooltip" style="font-size:15px; transform: rotate(135deg);">💊</span>
+                                                <strong>${medType}</strong>
+                                                ${medQty ? `<span style="font-size:13px; font-weight:400;"> (×${medQty})</span>` : ""}
+                                            `;
+                                            dot.appendChild(tooltip);
+
+                                            // Tooltip au survol (utilise la même mécanique que les autres)
+                                            dot.addEventListener("mouseenter", function() {
+                                                dot.classList.add("show-tooltip");
+                                            });
+                                            dot.addEventListener("mouseleave", function() {
+                                                dot.classList.remove("show-tooltip");
+                                            });
+
+                                        // --- DOT NOTE CLASSIQUE ---
+                                        } else {
+                                            dot = document.createElement("span");
+                                            dot.className = "note-dot";
+                                            dot.style.backgroundColor = typeObj ? typeObj.color : "#3498db";
+
+                                            tooltip = document.createElement("div");
+                                            tooltip.className = "note-dot-tooltip";
+                                            const noteText = userNotes[dateId] && userNotes[dateId][typeName] ? userNotes[dateId][typeName] : "";
+                                            tooltip.innerHTML = `
+                                                <span class="note-dot" style="background:${typeObj ? typeObj.color : "#3498db"}"></span>
+                                                <strong>${typeName}</strong><br>
+                                                ${noteText.length > 70 ? noteText.substring(0, 70) + '…' : noteText}
+                                            `;
+                                            dot.appendChild(tooltip);
+
+                                            dot.addEventListener("mouseenter", function() {
+                                                dot.classList.add("show-tooltip");
+                                            });
+                                            dot.addEventListener("mouseleave", function() {
+                                                dot.classList.remove("show-tooltip");
+                                            });
+                                        }
 
                                         dotsContainer.appendChild(dot);
                                     });
 
-                                    // Si on dépasse la limite, on ajoute "…"
-                                    if (typesForDay.length > maxDots) {
-                                        const more = document.createElement("span");
-                                        more.textContent ;
-                                        more.style.fontSize = "13px";
-                                        more.style.marginLeft = "3px";
-                                        more.style.lineHeight = "8px";
-                                        dotsContainer.appendChild(more);
-                                    }
-                                    dayCell.appendChild(dotsContainer);
+                                    dayCell.appendChild(dotsContainer); // IMPORTANT : ajoute les dots dans la cellule
                                 }
-                                // --- Fin version multi-points avec limitation ---
+                                // --- Fin multi-points ---
                             }
-                            
+                        
                             // Ajouter un indicateur si des anti-inflammatoires ont été pris ce jour
-                            if (userMedsData[dateId]) {
-                                const medIndicator = document.createElement("div");
+                            const medData = userMedsData[dateId];
+                            if (medData && medData.taken) {
+                                const medIndicator = document.createElement("span");
                                 medIndicator.className = "med-indicator";
                                 medIndicator.innerHTML = '<span class="med-icon">💊</span>';
+
+                                // Tooltip JS façon note-dot
+                                const tooltip = document.createElement("div");
+                                tooltip.className = "note-dot-tooltip";
+                                tooltip.innerHTML = `
+                                    <span class="tooltip-dot" style="background:#FF5722"></span>
+                                    <strong>${medData.type ? medData.type : "Anti-inflammatoire"}</strong><br>
+                                    Quantité : <strong>${medData.qty ? medData.qty : 1}</strong>
+                                `;
+                                medIndicator.appendChild(tooltip);
+
+                                // Montre/masque le tooltip au survol
+                                medIndicator.addEventListener("mouseenter", function() {
+                                    medIndicator.classList.add("show-tooltip");
+                                });
+                                medIndicator.addEventListener("mouseleave", function() {
+                                    medIndicator.classList.remove("show-tooltip");
+                                });
+
                                 dayCell.appendChild(medIndicator);
                             }
 
