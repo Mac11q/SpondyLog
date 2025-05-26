@@ -127,7 +127,7 @@
         .note-dots-container {
             position: absolute;
             top: 4px;
-            right: 3px;
+            right: 2px;
             display: flex;
             flex-direction: row-reverse; /* pour coller les points de droite à gauche */
             gap: 2px;
@@ -274,7 +274,7 @@
         .day-number {
             font-weight: bold;
             position: absolute;
-            top: 5px;
+            top: 9px;
             left: 5px;
         }
 
@@ -287,6 +287,15 @@
             align-items: center;
             position: relative;
             border-radius: 2px;
+        }
+
+        @media (max-width: 600px) {
+            .calendar td {
+                height: 13vw !important; /* Ajuste la hauteur pour être égale à la largeur */
+                min-height: 36px;
+                max-height: 60px; /* Facultatif : limite la hauteur max pour éviter l'effet "gros carré" en paysage */
+                padding: 3px;
+            }
         }
 
         /* Vue annuelle */
@@ -473,8 +482,8 @@
         
         .med-indicator {
             position: absolute;
-            bottom: 5px;
-            right: 5px;
+            bottom: -3px;
+            right: 3px;
             font-size: 12px;
             color: #FF5722;
         }
@@ -2284,15 +2293,21 @@
                             if (userNotes[dateId]) {
                                 dayCell.classList.add("note-present");
 
-                                // --- Début nouvelle version multi-points ---
+                                // --- Début nouvelle version multi-points AVEC LIMITATION ---
                                 const typesForDay = Object.keys(userNotes[dateId]).filter(typeName => {
                                     const noteText = userNotes[dateId][typeName];
                                     return noteText && noteText.trim() !== "";
                                 });
+
+                                // Détecte la taille d'écran pour limiter le nombre de points
+                                const maxDots = window.matchMedia("(max-width: 600px)").matches ? 3 : 10;
+
                                 if (typesForDay.length > 0) {
                                     const dotsContainer = document.createElement("div");
                                     dotsContainer.className = "note-dots-container";
-                                    typesForDay.slice().reverse().forEach((typeName, idx) => {
+                                    
+                                    // On limite les points affichés
+                                    typesForDay.slice(0, maxDots).reverse().forEach((typeName, idx) => {
                                         const typeObj = noteTypes.find(t => t.name === typeName);
                                         const dot = document.createElement("span");
                                         dot.className = "note-dot";
@@ -2301,25 +2316,35 @@
 
                                         // Tooltip custom (affichage instantané)
                                         const tooltip = document.createElement("div");
-                                            tooltip.className = "note-dot-tooltip";
-                                            tooltip.innerHTML = `
+                                        tooltip.className = "note-dot-tooltip";
+                                        tooltip.innerHTML = `
                                             <span class="tooltip-dot" style="background:${typeObj ? typeObj.color : "#3498db"}"></span>
                                             <strong>${typeName}</strong><br>
                                             ${noteText.length > 70 ? noteText.substring(0, 70) + '…' : noteText}
-                                            `;
-                                            dot.appendChild(tooltip);
-                                            dot.addEventListener("mouseenter", function() {
-                                                dot.classList.add("show-tooltip");
-                                            });
-                                            dot.addEventListener("mouseleave", function() {
-                                                dot.classList.remove("show-tooltip");
-                                            });
+                                        `;
+                                        dot.appendChild(tooltip);
+                                        dot.addEventListener("mouseenter", function() {
+                                            dot.classList.add("show-tooltip");
+                                        });
+                                        dot.addEventListener("mouseleave", function() {
+                                            dot.classList.remove("show-tooltip");
+                                        });
 
                                         dotsContainer.appendChild(dot);
                                     });
+
+                                    // Si on dépasse la limite, on ajoute "…"
+                                    if (typesForDay.length > maxDots) {
+                                        const more = document.createElement("span");
+                                        more.textContent ;
+                                        more.style.fontSize = "13px";
+                                        more.style.marginLeft = "3px";
+                                        more.style.lineHeight = "8px";
+                                        dotsContainer.appendChild(more);
+                                    }
                                     dayCell.appendChild(dotsContainer);
                                 }
-                                // --- Fin nouvelle version multi-points ---
+                                // --- Fin version multi-points avec limitation ---
                             }
                             
                             // Ajouter un indicateur si des anti-inflammatoires ont été pris ce jour
