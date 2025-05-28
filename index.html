@@ -158,13 +158,14 @@
             pointer-events: none;
             opacity: 0;
             transition: opacity 0.13s;
-            width: 130px;
-            max-width: 140px;
-            min-width: 80px;    
+            width: 148px;
+            max-width: 155px;
+            min-width: 85px;    
             text-align: left;
             line-height: 1.4;
             letter-spacing: 0.01em;
         }
+
         .note-dot.show-tooltip .note-dot-tooltip {
             opacity: 1;
         }
@@ -181,14 +182,6 @@
             margin-right: 3px;
             vertical-align: middle;
             box-shadow: 0 0 2px #444;
-        }
-
-        .med-icone-tooltip {
-            display: inline-block;
-            font-size: 15px;
-            margin-top: -1px;
-            transform: rotate(135deg);
-            vertical-align: middle;
         }
 
         /* Style mis à jour pour la légende */
@@ -494,7 +487,7 @@
         
         .med-indicator {
             position: absolute;
-            bottom: -2px;
+            bottom: -1px;
             right: 1px;
             font-size: 10px;
             color: #FF5722;
@@ -513,8 +506,16 @@
         }
 
         .med-icon {
-            transform: rotate(90deg);
+            transform: rotate(0deg);
             display: inline-block;
+        }
+
+        .tooltip-pill {
+            display: inline-block;
+            font-size: 10px;
+            vertical-align: middle;
+            margin-right: 100px;
+            transform: rotate(0deg);
         }
 
         .view-all-notes {
@@ -687,104 +688,324 @@
             margin-right: 5px;
             vertical-align: middle;
         }
-       /* Styles pour le selecteur de médicament et quantité prise  */
-        #med-type-dropdown {
-            max-width: 250px;
+        
+       /* Mise en forme Type et Quantité pour médicament */
+        .med-fields-group {
+            display: flex;
+            gap: 5px; /* Espace entre les deux champs principaux (desktop) */
+            align-items: flex-end;
+            margin: 12px 0 12px 0;
             width: 100%;
-        }
-        #med-details input[type="number"] {
-            padding: 5px 10px;         /* même que le dropdown ! */
-            border-radius: 4px;
-            border: 1px solid #bbb;
-            font-size: 16px;
-            min-height: 36px;          /* force la même hauteur visuelle que le select ou le faux dropdown */
-            max-width: 90px;
-            width: 100%;
-            box-sizing: border-box;
-            background: #fff;
+            flex-wrap: wrap;
         }
 
-        .med-details-grid {
+        /* Bloc champ individuel */
+        .med-field {
             display: flex;
-            justify-content: flex-start;
-            align-items: flex-start;  /* Pour aligner labels et champs en haut */
-            width: 100%;
-            gap: 6px;   /* Un peu plus d'espace pour le confort visuel */
+            align-items: center;
+            gap: 10px;
+            min-width: 0; /* Permet au dropdown de rétrécir si besoin */
         }
-        .med-type-col {
-            flex: 1 1 70%;   /* Moins extrême, pour laisser de la place à quantité */
-            min-width: 0;
-            display: flex;
-            flex-direction: column;
+
+        /* "Type" occupe tout l’espace restant */
+        .med-field-type {
+            flex: 1 1 220px;
+            min-width: 180px;
+            max-width: 600px;
         }
-        .med-qty-col {
-            flex: 0 0 90px;  /* Donne de l’air à la quantité */
-            min-width: 0;
-            display: flex;
-            flex-direction: column;
-            align-items: flex-start; /* Aligné à gauche comme le type */
+
+        /* "Quantité" toujours taille fixe */
+        .med-field-qty {
+            flex: 0 0 auto;
         }
-        .med-type-col label,
-        .med-qty-col label {
-            margin-bottom: 2px;
+
+        /* Labels */
+        .med-field-label {
             font-size: 16px;
-            text-align: left;
-            width: 100%;
-            letter-spacing: 0.01em;
-            font-weight: 500;
             color: #444;
+            font-weight: 500;
+            white-space: nowrap;
         }
-        #med-details input[type="number"] {
-            padding: 3px 10px;      /* Même padding que le select */
-            border-radius: 4px;
-            border: 1px solid #bbb;
-            font-size: 16px;
-            max-width: 90px;        /* Identique à la colonne */
+
+        /* Dropdown toujours large, à fond de son conteneur */
+        .note-type-container {
+            flex: 1 1 auto;
+            min-width: 120px;
             width: 100%;
-            box-sizing: border-box;
-            background: #fff;
         }
+
+        .selected-note-type {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            min-height: 40px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            padding: 7px 14px;
+            background: #fff;
+            font-size: 17px;
+            width: 100%;
+            cursor: pointer;
+            transition: border 0.15s;
+        }
+        .selected-note-type:focus,
+        .selected-note-type:hover {
+            border-color: #3498db;
+        }
+
+        /* Input quantité verrouillé */
+        .med-field-input[type="number"] {
+            min-width: 75px;
+            max-width: 90px;
+            width: 90px;
+            font-size: 17px;
+            padding: 7px 14px;
+            border-radius: 6px;
+            border: 1px solid #bbb;
+            background: #fff;
+            box-sizing: border-box;
+            text-align: left;
+            outline: none;
+            transition: border 0.15s;
+        }
+        .med-field-input[type="number"]:focus {
+            border-color: #3498db;
+        }
+
+        /* =====================
+        Correction Mobile
+        ===================== */
         @media (max-width: 600px) {
-            .med-details-grid {
+            .med-fields-group {
                 flex-direction: column;
-                gap: 10px;
-            }
-            .med-type-col,
-            .med-qty-col {
-                width: 100%;
+                gap: 1px;       /* Réduit l’espace vertical entre Type et Quantité */
                 align-items: stretch;
+                margin: 10px 0 10px 0;
             }
-            #med-type-dropdown,
-            #med-details select,
-            #med-details input[type="number"] {
+            .med-field {
+                width: 100%;
+                gap: 8px;
+            }
+            .med-field-type,
+            .med-field-qty {
+                width: 100%;
+                min-width: 0;
                 max-width: 100%;
             }
+            .selected-note-type,
+            .med-field-input[type="number"] {
+                width: 100%;
+                min-width: 0;
+                max-width: 100%;
+            }
+            /* Optionnel : Réduit la taille des inputs pour plus de compacité */
+            .selected-note-type {
+                min-height: 38px;
+                font-size: 16px;
+                padding: 7px 10px;
+            }
+            .med-field-input[type="number"] {
+                font-size: 16px;
+                padding: 7px 10px;
+                min-width: 60px;
+                max-width: 80px;
+            }
         }
+
+
+        /* Responsive : champs empilés, plus petits, mais toujours propres */
+        @media (max-width: 600px) {
+        .med-fields-group {
+            flex-direction: column;
+            gap: 14px;
+            align-items: stretch;
+        }
+        .med-field {
+            width: 100%;
+            gap: 8px;
+        }
+        .med-field-type,
+        .med-field-qty {
+            width: 100%;
+            min-width: 0;
+            max-width: 100%;
+        }
+        .selected-note-type,
+        .med-field-input[type="number"] {
+            width: 100%;
+            min-width: 0;
+            max-width: 100%;
+        }
+        }
+
 
         /* Styles pour la pop-up d'ajout/édition de type de note */
         #note-type-modal .modal-content {
             text-align: left;
         }
+
+        /* Une ligne compacte label + input */
+        #note-type-modal .modal-row {
+            display: flex;
+            align-items: center;
+            margin-top: 0;     /* Pas d'espace au-dessus de chaque ligne */
+            margin-bottom: 0;  /* Pas d'espace entre label et input */
+        }
+
+        /* Moins d'espace entre label et input */
         #note-type-modal label {
-            display: block;
-            margin: 10px 0 5px;
-        }
-        #note-type-modal input[type="text"] {
+            min-width: 58px;
+            margin: 0 6px 0 0;
+            display: inline-block;
             font-size: 16px;
-            width: 100%;
-            padding: 5px;
-            margin-bottom: 10px;
-        }
-
-        #type-name-input {
-            font-size: 16px;
-        }
-
-        #note-type-modal input[type="color"] {
-            padding: 0;
-            margin-left: 5px;
             vertical-align: middle;
         }
+
+        /* Input texte bien collé */
+        #note-type-modal input[type="text"] {
+            font-size: 16px;
+            width: 67%;
+            padding: 5px;
+            margin: 0;
+            display: inline-block;
+            vertical-align: middle;
+            box-sizing: border-box;
+        }
+
+        /* Color picker bien collé au label */
+        #note-type-modal input[type="color"] {
+            margin-left: 0;
+            width: 36px;
+            height: 28px;
+            padding: 0;
+            display: inline-block;
+            vertical-align: middle;
+        }
+
+        /* Plus d’espace entre la ligne "Nom" et la ligne "Couleur" */
+        #note-type-modal .modal-row + .modal-row {
+            margin-top: 10px;
+        }
+
+        #med-type-modal label[for="med-type-name-input"],
+        #note-type-modal label[for="type-name-input"] {
+            font-size: 16px !important;
+            margin-top: 10px !important;
+            margin-bottom: 10px !important;
+            margin-right: 6px !important;
+            min-width: 58px;
+            display: inline-block;
+            vertical-align: middle;
+            font-weight: 500;
+            color: #444;
+            letter-spacing: 0.01em;
+        }
+
+        #med-type-modal input[type="text"],
+        #note-type-modal input[type="text"] {
+            font-size: 16px !important;
+            padding: 5px;
+            margin: 0;
+            width: 67%;
+            display: inline-block;
+            vertical-align: middle;
+            box-sizing: border-box;
+        }
+
+        /* Slideur pour la sélection du niveau de douleur */
+        .pain-slider-rect-section {
+            width: 100%;
+            margin: 18px 0 0 0;
+        }
+
+        .pain-slider-label {
+            display: block;
+            font-size: 17px;
+            color: #2c3e50;
+            font-weight: 500;
+            letter-spacing: 0.01em;
+            margin-bottom: 10px; /* Plus d’espace au-dessus de la barre */
+        }
+
+        .pain-slider-rect-bar {
+            position: relative;
+            display: flex;
+            width: 100%;
+            max-width: 370px;
+            height: 32px; /* Barre moins haute pour effet "rectangle" plus élégant */
+            border-radius: 10px;
+            overflow: visible; /* important pour que le cadre dépasse */
+            margin: 0 auto 8px auto;
+            box-shadow: 0 2px 9px rgba(40,60,80,0.09);
+            border: 2px solid #dadada;
+            cursor: pointer;
+        }
+
+        .pain-slider-rect-option {
+            flex: 1 1 0;
+            height: 100%;
+            transition: filter 0.2s;
+            border-right: 1px solid #e2e2e2;
+        }
+        .pain-slider-rect-option:last-child {
+            border-right: none;
+        }
+
+        .pain-slider-rect-selector {
+            position: absolute;
+            left: 0;
+            top: 50%;
+            /* Un peu plus large que la case, pour bien entourer la couleur */
+            width: calc((100% / 6) + 6px);
+            margin-left: -3px; /* Pour bien centrer sur la couleur */
+            height: 40px; /* Plus petit que 48px, mais dépasse encore au-dessus/en dessous */
+            background: transparent;
+            border: 3px solid #3498db;
+            border-radius: 8px;
+            box-shadow: 0 1px 6px rgba(52,152,219,0.11);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            pointer-events: none;
+            transition: left 0.15s cubic-bezier(0.7,0.3,0.2,1.2), top 0.15s;
+            z-index: 10;
+            transform: translateY(-50%);
+        }
+
+        .pain-slider-rect-selector span {
+            color: #3498db;
+            font-weight: bold;
+            font-size: 1.18em;
+            background: rgba(255,255,255,0.85); /* Badge blanc lisible */
+            border-radius: 9px;
+            border: 1px solid #e1e8ee;
+            padding: 2px 12px;
+            box-shadow: 0 1px 3px rgba(52,152,219,0.08);
+            letter-spacing: 0.02em;
+            user-select: none;
+        }
+
+        .pain-slider-rect-labels {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 7px;
+            font-size: 0.98em;
+            color: #444;
+            font-style: italic;
+            padding: 0 4px;
+        }
+
+        @media (max-width: 600px) {
+            .pain-slider-rect-bar { max-width: 98vw; }
+            .pain-slider-rect-section { font-size: 0.93em;}
+            .pain-slider-rect-selector { height: 34px; width: calc((100% / 6) + 4px);}
+            .pain-slider-rect-selector span { font-size: 1em; padding: 2px 8px;}
+        }
+
+
+
+
+        /* Boutons de la modale */
         .modal-actions {
             display: flex;
             align-items: center;
@@ -802,9 +1023,8 @@
             background-color: var(--primary-color);
             color: #fff;
         }
-
         .cancel-btn-style {
-            background-color:#EDEEED; /* même bleu que les autres boutons principaux */
+            background-color: #EDEEED;
             color: #000;
             padding: 4px 16px;
             font-size: 1em;
@@ -814,10 +1034,9 @@
             cursor: pointer;
             transition: background 0.2s, color 0.2s;
         }
-
         .cancel-btn-style:hover {
-            background-color: #ccc;   /* fond gris clair au survol */
-            color: #000;              /* texte noir comme sur ton autre bouton Annuler */
+            background-color: #ccc;
+            color: #000;
         }
 
         /* Bouton “Supprimer” */
@@ -1198,37 +1417,39 @@
                     <input type="checkbox" id="med-taken">
                     <label for="med-taken"><span class="med-icon">💊</span> Anti-inflammatoires</label>
                     <div id="med-details" style="display:none; margin:8px 0 10px 10px;">
-                        <div class="med-details-grid">
-                            <div class="med-type-col">
-                                <label for="med-type-dropdown">Type :</label>
-                                <div id="med-type-dropdown" class="note-type-container" style="max-width:250px;">
-                                    <div id="selected-med-type" class="selected-note-type" style="max-width:250px;">
-                                        <span id="selected-med-type-name">Ibuprofène</span>
-                                        <span class="dropdown-arrow">▼</span>
-                                    </div>
-                                    <ul id="med-type-list" class="note-type-list">
-                                        <li id="add-med-type-item" class="add-type-item">+ Ajouter</li>
-                                    </ul>
+                        <div class="med-fields-group">
+                            <div class="med-field med-field-type">
+                              <label for="med-type-dropdown" class="med-field-label">Type&nbsp;:</label>
+                              <div class="note-type-container">
+                                <div id="selected-med-type" class="selected-note-type">
+                                  <span id="selected-med-type-name">Medicament</span>
+                                  <span class="dropdown-arrow">▼</span>
                                 </div>
+                                <ul id="med-type-list" class="note-type-list">
+                                  <li id="add-med-type-item" class="add-type-item">+ Ajouter</li>
+                                </ul>
+                              </div>
                             </div>
-                            <div class="med-qty-col">
-                                <label for="med-qty">Quantité :</label>
-                                <input type="number" id="med-qty" value="1" min="1" max="20" step="1">
+                            <div class="med-field med-field-qty">
+                              <label for="med-qty" class="med-field-label">Quantité&nbsp;:</label>
+                              <input type="number" id="med-qty" value="1" min="1" max="20" step="1" class="med-field-input">
                             </div>
-                        </div>
+                          </div>                                               
                         <!-- Modal pour ajouter/éditer un type de médicament -->
                         <div id="med-type-modal" class="modal">
                             <div class="modal-content" style="max-width: 350px;">
                                 <h3 id="med-type-modal-title">Ajouter un type d’anti-inflammatoire</h3>
-                                <label for="med-type-name-input">Nom :</label>
-                                <input type="text" id="med-type-name-input" placeholder="Nom du médicament" />
+                                <div class="modal-row">
+                                    <label for="med-type-name-input">Nom :</label>
+                                    <input type="text" id="med-type-name-input" placeholder="Nom du médicament" />
+                                </div>
                                 <div class="modal-actions">
                                     <button id="save-med-type-btn" class="save-btn-style">Enregistrer</button>
                                     <button id="cancel-med-type-btn" class="cancel-btn-style" type="button">Annuler</button>
                                     <button id="delete-med-type-btn" class="delete-btn-style">Supprimer</button>
                                 </div>
                             </div>
-                        </div>
+                    </div>
                     </div>
                 </div>                
                 
@@ -1265,29 +1486,35 @@
                 <div id="note-type-modal" class="modal">
                     <div class="modal-content" style="max-width: 350px;">
                         <h3 id="note-type-modal-title">Ajouter un type de note</h3>
-                        <label for="type-name-input">Nom :</label>
-                        <input type="text" id="type-name-input" placeholder="Nom du type de note" />
-                        <label for="type-color-input">Couleur :</label>
-                        <input type="color" id="type-color-input" value="#3498db" />
+                        <div class="modal-row">
+                            <label for="type-name-input">Nom :</label>
+                            <input type="text" id="type-name-input" placeholder="Nom du type de note" />
+                        </div>
+                        <div class="modal-row">
+                            <label for="type-color-input">Couleur :</label>
+                            <input type="color" id="type-color-input" value="#3498db" />
+                        </div>
                         <div class="modal-actions">
                             <button id="save-type-btn" class="save-btn-style">Enregistrer</button>
-                            <button id="cancel-type-btn" class="cancel-btn-style" >Annuler</button>
+                            <button id="cancel-type-btn" class="cancel-btn-style">Annuler</button>
                             <button id="delete-type-btn" class="delete-btn-style">Supprimer</button>
-                            </button>
                         </div>
                     </div>
                 </div>
             
                 <!-- 3. Section pour le niveau de douleur (efn dernier) -->
-                <div class="modal-section pain-section">
-                    <label for="day-note" style="margin-bottom: 10px; display: inline-block;">Niveau de douleur ressenti : </label>
-                    <div class="pain-options">
-                        <div class="pain-option" data-value="0" style="background-color: #FFFFFF;">0</div>
-                        <div class="pain-option" data-value="1" style="background-color: #00FF00;">1</div>
-                        <div class="pain-option" data-value="2" style="background-color: #FFFF00;">2</div>
-                        <div class="pain-option" data-value="3" style="background-color: #FF8000;">3</div>
-                        <div class="pain-option" data-value="4" style="background-color: #FF4000;">4</div>
-                        <div class="pain-option" data-value="5" style="background-color: #000000; color: white;">5</div>
+                <div class="pain-slider-rect-section">
+                    <label class="pain-slider-label">Niveau de douleur ressenti :</label>
+                    <div class="pain-slider-rect-bar" id="pain-slider-rect-bar">
+                        <div class="pain-slider-rect-option" data-value="0" style="background: #FFFFFF;"></div>
+                        <div class="pain-slider-rect-option" data-value="1" style="background: #00FF00;"></div>
+                        <div class="pain-slider-rect-option" data-value="2" style="background: #FFFF00;"></div>
+                        <div class="pain-slider-rect-option" data-value="3" style="background: #FF8000;"></div>
+                        <div class="pain-slider-rect-option" data-value="4" style="background: #FF4000;"></div>
+                        <div class="pain-slider-rect-option" data-value="5" style="background: #000000;"></div>
+                        <div class="pain-slider-rect-selector" id="pain-slider-rect-selector">
+                          <span id="pain-slider-rect-value">0</span>
+                        </div>
                     </div>
                     <div class="pain-modal-actions">
                         <button id="erase-value" class="erase-option" type="button">Réinitialiser</button>
@@ -1366,6 +1593,19 @@
         let userMedsData = {}; // Variable pour stocker les jours avec prise d'anti-inflammatoires
         let editingTypeName = null;
         
+        (function loadNoteTypesFromStorage() {
+            const typesSaved = localStorage.getItem('spondylogNoteTypes');
+            if (typesSaved) {
+                noteTypes = JSON.parse(typesSaved);
+            } else {
+                // Si aucun type enregistré, on crée un type par défaut
+                noteTypes = [
+                    { name: "Catégorie 1", color: "#3498db" }
+                ];
+                localStorage.setItem('spondylogNoteTypes', JSON.stringify(noteTypes));
+            }
+        })();
+        
         function populateNoteTypeFilter() {
             const filterSelect = document.getElementById('note-type-filter');
             filterSelect.innerHTML = '<option value="all">Tous les types</option>';
@@ -1440,7 +1680,7 @@
                 const data = await response.json();
                 userPainData = data.painData || {};
                 userNotes = data.notes || {};
-                userMedsData = data.medsData || {};
+                userMedsData = migrateOldMedsDataFormat(JSON.parse(localStorage.getItem('spondylogMedsData')) || {});
 
                 renderCalendar(currentMonth, currentYear); // Mettre à jour l'affichage du calendrier
             } catch (error) {
@@ -1803,16 +2043,14 @@
             if (saved) {
                 medTypes = JSON.parse(saved);
             } else {
-                // Par défaut
+                // Par défaut : Medicament (générique) + 3 anti-inflammatoires courants
                 medTypes = [
-                { name: "Ibuprofène" },
-                { name: "Naproxène" },
-                { name: "Kétoprofène" },
-                { name: "Autre" }
+                    { name: "Medicament" },
                 ];
                 localStorage.setItem('spondylogMedTypes', JSON.stringify(medTypes));
             }
-            }
+        }
+
 
             function saveMedTypes() {
             localStorage.setItem('spondylogMedTypes', JSON.stringify(medTypes));
@@ -2077,6 +2315,19 @@
                 localStorage.setItem('spondylogNotes', JSON.stringify(userNotes));}
             }
 
+            function migrateOldMedsDataFormat(medsData) {
+                if (!medsData) return {};
+                let migrated = {};
+                for (const [date, value] of Object.entries(medsData)) {
+                    if (value === true) {
+                        migrated[date] = { taken: true, type: "Medicament", qty: 1 };
+                    } else if (typeof value === "object" && value !== null && "taken" in value) {
+                        migrated[date] = value;
+                    }
+                }
+                return migrated;
+            }
+
             function saveCurrentNote() {
                 if (!selectedDate) return;
                 // Détermine le type actuellement sélectionné
@@ -2101,15 +2352,13 @@
             }
 
             function saveMedDataForDay(dateId) {
-                // Récupère toujours les éléments DOM à chaque appel
                 const medTakenCheckbox = document.getElementById('med-taken');
-                const medTypeSelect = document.getElementById('med-type');
+                const selectedMedType = document.getElementById('selected-med-type-name');
                 const medQtyInput = document.getElementById('med-qty');
-
                 if (medTakenCheckbox && medTakenCheckbox.checked) {
                     userMedsData[dateId] = {
                         taken: true,
-                        type: medTypeSelect ? medTypeSelect.value : 'ibuprofen',
+                        type: selectedMedType ? selectedMedType.textContent : (medTypes[0] && medTypes[0].name),
                         qty: medQtyInput ? Number(medQtyInput.value) || 1 : 1
                     };
                 } else {
@@ -2297,87 +2546,46 @@
                                 dayCell.style.backgroundColor = painColors.default_future;
                             }
                             
-                            // Ajouter un indicateur si une note existe pour cette date
-                            if (userNotes[dateId]) {
+                           // Ajouter un indicateur si une note existe pour cette date
+                           if (userNotes[dateId]) {
                                 dayCell.classList.add("note-present");
 
-                                // --- Début nouvelle version multi-points AVEC LIMITATION ---
+                                // --- Début nouvelle version multi-points ---
                                 const typesForDay = Object.keys(userNotes[dateId]).filter(typeName => {
                                     const noteText = userNotes[dateId][typeName];
                                     return noteText && noteText.trim() !== "";
                                 });
-
-                                // Détecte la taille d'écran pour limiter le nombre de points
-                                const maxDots = window.matchMedia("(max-width: 600px)").matches ? 3 : 10;
-
                                 if (typesForDay.length > 0) {
                                     const dotsContainer = document.createElement("div");
                                     dotsContainer.className = "note-dots-container";
-                                    
-                                    typesForDay.slice(0, maxDots).reverse().forEach((typeName, idx) => {
+                                    typesForDay.slice().reverse().forEach((typeName, idx) => {
                                         const typeObj = noteTypes.find(t => t.name === typeName);
-                                        let dot;
-                                        let tooltip;
+                                        const dot = document.createElement("span");
+                                        dot.className = "note-dot";
+                                        dot.style.backgroundColor = typeObj ? typeObj.color : "#3498db";
+                                        const noteText = userNotes[dateId][typeName] || "";
 
-                                        // --- DOT MÉDICAMENT (💊) ---
-                                        if (typeName.toLowerCase().includes('médic') || typeName.toLowerCase().includes('anti')) {
-                                            dot = document.createElement("span");
-                                            // Utilise à la fois med-icone-tooltip (pour style) et med-indicator (pour CSS du tooltip)
-                                            dot.className = "med-icone-tooltip med-indicator";
-                                            dot.textContent = "💊";
-
-                                            // Cherche les infos du médicament
-                                            const medData = userMedsData[dateId];
-                                            const medType = medData?.type || "Anti-inflammatoire";
-                                            const medQty = medData?.qty !== undefined ? medData.qty : "";
-
-                                            tooltip = document.createElement("div");
+                                        // Tooltip custom (affichage instantané)
+                                        const tooltip = document.createElement("div");
                                             tooltip.className = "note-dot-tooltip";
                                             tooltip.innerHTML = `
-                                                <span class="med-icone-tooltip" style="font-size:15px; transform: rotate(135deg);">💊</span>
-                                                <strong>${medType}</strong>
-                                                ${medQty ? `<span style="font-size:13px; font-weight:400;"> (×${medQty})</span>` : ""}
+                                            <span class="tooltip-dot" style="background:${typeObj ? typeObj.color : "#3498db"}"></span>
+                                            <strong>${typeName}</strong><br>
+                                            ${noteText.length > 70 ? noteText.substring(0, 70) + '…' : noteText}
                                             `;
                                             dot.appendChild(tooltip);
-
-                                            // Tooltip au survol (utilise la même mécanique que les autres)
                                             dot.addEventListener("mouseenter", function() {
                                                 dot.classList.add("show-tooltip");
                                             });
                                             dot.addEventListener("mouseleave", function() {
                                                 dot.classList.remove("show-tooltip");
                                             });
-
-                                        // --- DOT NOTE CLASSIQUE ---
-                                        } else {
-                                            dot = document.createElement("span");
-                                            dot.className = "note-dot";
-                                            dot.style.backgroundColor = typeObj ? typeObj.color : "#3498db";
-
-                                            tooltip = document.createElement("div");
-                                            tooltip.className = "note-dot-tooltip";
-                                            const noteText = userNotes[dateId] && userNotes[dateId][typeName] ? userNotes[dateId][typeName] : "";
-                                            tooltip.innerHTML = `
-                                                <span class="note-dot" style="background:${typeObj ? typeObj.color : "#3498db"}"></span>
-                                                <strong>${typeName}</strong><br>
-                                                ${noteText.length > 70 ? noteText.substring(0, 70) + '…' : noteText}
-                                            `;
-                                            dot.appendChild(tooltip);
-
-                                            dot.addEventListener("mouseenter", function() {
-                                                dot.classList.add("show-tooltip");
-                                            });
-                                            dot.addEventListener("mouseleave", function() {
-                                                dot.classList.remove("show-tooltip");
-                                            });
-                                        }
 
                                         dotsContainer.appendChild(dot);
                                     });
-
-                                    dayCell.appendChild(dotsContainer); // IMPORTANT : ajoute les dots dans la cellule
+                                    dayCell.appendChild(dotsContainer);
                                 }
-                                // --- Fin multi-points ---
+                                // --- Fin nouvelle version multi-points ---
                             }
                         
                             // Ajouter un indicateur si des anti-inflammatoires ont été pris ce jour
@@ -2387,17 +2595,16 @@
                                 medIndicator.className = "med-indicator";
                                 medIndicator.innerHTML = '<span class="med-icon">💊</span>';
 
-                                // Tooltip JS façon note-dot
+                                const medTypeName = medData.type ? medData.type : "(non renseigné)";
                                 const tooltip = document.createElement("div");
                                 tooltip.className = "note-dot-tooltip";
                                 tooltip.innerHTML = `
-                                    <span class="tooltip-dot" style="background:#FF5722"></span>
-                                    <strong>${medData.type ? medData.type : "Anti-inflammatoire"}</strong><br>
+                                    <span class="tooltip-pill" style="color:#FF5722; font-size: 15px; margin-right: 2px;">💊</span>
+                                    <strong>${medTypeName}</strong><br>
                                     Quantité : <strong>${medData.qty ? medData.qty : 1}</strong>
                                 `;
                                 medIndicator.appendChild(tooltip);
 
-                                // Montre/masque le tooltip au survol
                                 medIndicator.addEventListener("mouseenter", function() {
                                     medIndicator.classList.add("show-tooltip");
                                 });
@@ -2407,6 +2614,8 @@
 
                                 dayCell.appendChild(medIndicator);
                             }
+
+
 
                             // Ajouter l'événement de clic pour ouvrir le modal
                             dayCell.addEventListener("click", function() {
@@ -2631,7 +2840,6 @@
             }
 
             function showPainModal(dateId) {
-                // 0️⃣ garde en mémoire la date
                 selectedDate = dateId;
 
                 // Si on vient de la vue année, on mémorise où revenir
@@ -2642,50 +2850,94 @@
                     selectedViewYear  = parseInt(y,10);
                 }
 
-                // 1️⃣ met à jour le titre du modal
+                // Titre de la modale
                 const [y,m,d] = dateId.split('-');
                 const monthNames = ["Janvier","Février","Mars","Avril","Mai","Juin",
                                     "Juillet","Août","Septembre","Octobre","Novembre","Décembre"];
                 modalDateTitle.textContent = `Date – ${d} ${monthNames[parseInt(m,10)-1]} ${y}`;
 
-                // 2️⃣ affiche le niveau de douleur
-                if (userPainData[dateId] != null) {
-                    painOptions.forEach(opt => {
-                    const val = +opt.dataset.value;
-                    if (val === userPainData[dateId]) {
-                        opt.style.transform   = "scale(1.05)";
-                        opt.style.boxShadow   = "0 0 5px rgba(0,0,0,0.3)";
-                    } else {
-                        opt.style.transform   = "none";
-                        opt.style.boxShadow   = "none";
-                    }
-                    });
-                } else {
-                    painOptions.forEach(opt => {
-                    opt.style.transform   = "none";
-                    opt.style.boxShadow   = "none";
-                    });
+                // 🔥 --- DOULEUR : slider RECTANGULAIRE ---
+                // Sélecteur et valeur
+                const painRectSelector = document.getElementById('pain-slider-rect-selector');
+                const painRectValueSpan = document.getElementById('pain-slider-rect-value');
+                const rectBar = document.getElementById('pain-slider-rect-bar');
+                const rectOptions = rectBar.querySelectorAll('.pain-slider-rect-option');
+
+                // Charge la valeur de douleur pour ce jour (0 si rien)
+                let sliderVal = (userPainData[dateId] != null) ? userPainData[dateId] : 0;
+                // Place le sélecteur visuellement
+                moveSelector(sliderVal);
+                // Met à jour le texte dans le cadre
+                painRectValueSpan.textContent = sliderVal;
+                painRectValue = sliderVal;
+
+                // Ajoute events (click + drag)
+                rectOptions.forEach(opt => {
+                    opt.onclick = function() {
+                        const v = Number(this.dataset.value);
+                        moveSelector(v);
+                        userPainData[dateId] = v; // On met à jour la donnée
+                    };
+                });
+
+                // Drag & drop UX
+                rectBar.onmousedown = startDrag;
+                rectBar.ontouchstart = startDrag;
+
+                let isDragging = false;
+                function startDrag(e) {
+                    isDragging = true;
+                    moveAtEvent(e);
+                    document.addEventListener('mousemove', moveAtEvent);
+                    document.addEventListener('touchmove', moveAtEvent, {passive:false});
+                    document.addEventListener('mouseup', stopDrag);
+                    document.addEventListener('touchend', stopDrag);
+                }
+                function stopDrag(e) {
+                    isDragging = false;
+                    document.removeEventListener('mousemove', moveAtEvent);
+                    document.removeEventListener('touchmove', moveAtEvent);
+                    document.removeEventListener('mouseup', stopDrag);
+                    document.removeEventListener('touchend', stopDrag);
+                }
+                function moveAtEvent(e) {
+                    if (!isDragging) return;
+                    let clientX = e.touches ? e.touches[0].clientX : e.clientX;
+                    const rect = rectBar.getBoundingClientRect();
+                    let relX = Math.max(0, Math.min(clientX - rect.left, rect.width));
+                    let idx = Math.floor(relX / (rect.width / rectOptions.length));
+                    idx = Math.max(0, Math.min(idx, 5)); // <-- Limite l’index à 0-5
+                    moveSelector(idx);
+                    painRectValueSpan.textContent = idx;
+                    painRectValue = idx;
+                    userPainData[dateId] = idx;
                 }
 
-                // 3️⃣ type de note par défaut
+                // Fonction pour déplacer le cadre
+                function moveSelector(val) {
+                    const total = rectOptions.length;
+                    painRectSelector.style.left = `calc(${val} * (100% / ${total}))`;
+                    painRectValueSpan.textContent = val;
+                    painRectValue = val;
+                }
+
+                // --- Type de note par défaut
                 const selectedTypeNameEl = document.getElementById("selected-type-name");
                 const selectedTypeDotEl  = document.getElementById("selected-type-dot");
                 let currentType = noteTypes[0];
                 selectedTypeNameEl.textContent         = currentType.name;
                 selectedTypeDotEl.style.backgroundColor = currentType.color;
 
-                // 4️⃣ charge la note de ce type/date
+                // --- Charge la note de ce type/date
                 const noteObj = userNotes[dateId] || {};
                 dayNoteTextarea.value = noteObj[currentType.name] || "";
 
-                // 5️⃣ état anti-inflammatoires
+                // --- état anti-inflammatoires
                 document.getElementById("med-taken").checked = !!userMedsData[dateId];
 
-                // 6️⃣ reconstruit la liste déroulante
+                // --- reconstruit la liste déroulante
                 const noteTypeList = document.getElementById("note-type-list");
                 noteTypeList.innerHTML = "";
-
-                // ⏩ chaque type existant
                 noteTypes.forEach(type => {
                     const li = document.createElement("li");
                     li.dataset.name = type.name;
@@ -2696,24 +2948,24 @@
                     `;
                     noteTypeList.appendChild(li);
                 });
-
-                // ⏩ option Ajouter à la fin
+                // Option "Ajouter" à la fin
                 const addLi = document.createElement("li");
                 addLi.id        = "add-type-item";
                 addLi.className = "add-type-item";
                 addLi.textContent = "+ Ajouter";
                 noteTypeList.appendChild(addLi);
 
-                // 7️⃣ met à jour les badges existants
+                // --- badges existants
                 updateNoteBadges(selectedDate, currentType.name);
 
-                // 8️⃣ affiche le modal
+                // --- affiche la modale
                 painModal.style.display = "flex";
 
+                // --- anti-inflammatoires
                 if (userMedsData[dateId]) {
                     medTakenCheckbox.checked = true;
                     medDetailsDiv.style.display = 'block';
-                    document.getElementById('med-type').value = userMedsData[dateId].type || 'ibuprofen';
+                    document.getElementById('med-type').value = userMedsData[dateId].type || 'Medicament';
                     medQtyInput.value = userMedsData[dateId].qty || 1;
                 } else {
                     medTakenCheckbox.checked = false;
@@ -2721,70 +2973,6 @@
                     medQtyInput.value = 1;
                 }
             }
-
-
-
-
-
-
-
-            
-
-            (function showPainModal(dateId) {
-                selectedDate = dateId;
-                painModal.style.display = "flex";
-
-                // Nom du type de note par défaut (toujours le premier dans noteTypes)
-                const defaultTypeName = noteTypes[0].name;
-
-                // Récupère les notes pour ce jour
-                const notesOfDay = userNotes[dateId] || {};
-
-                // 1. Cas : la note par défaut contient du texte
-                if (notesOfDay[defaultTypeName] && notesOfDay[defaultTypeName].trim() !== "") {
-                    // Sélectionne le type par défaut
-                    document.getElementById("selected-type-name").textContent = defaultTypeName;
-                    document.getElementById("selected-type-dot").style.backgroundColor =
-                        noteTypes.find(t => t.name === defaultTypeName).color;
-                    dayNoteTextarea.value = notesOfDay[defaultTypeName];
-
-                } else {
-                    // 2. Cherche une note d’un autre type qui a du texte
-                    const foundType = Object.keys(notesOfDay).find(type =>
-                        type !== defaultTypeName && notesOfDay[type] && notesOfDay[type].trim() !== ""
-                    );
-
-                    if (foundType) {
-                        // Sélectionne ce type et affiche la note correspondante
-                        document.getElementById("selected-type-name").textContent = foundType;
-                        document.getElementById("selected-type-dot").style.backgroundColor =
-                            noteTypes.find(t => t.name === foundType).color;
-                        dayNoteTextarea.value = notesOfDay[foundType];
-                    } else {
-                        // 3. Aucun texte : affiche la note par défaut vide
-                        document.getElementById("selected-type-name").textContent = defaultTypeName;
-                        document.getElementById("selected-type-dot").style.backgroundColor =
-                            noteTypes.find(t => t.name === defaultTypeName).color;
-                        dayNoteTextarea.value = "";
-                    }
-                }
-
-                // Mets à jour les badges des autres notes présentes pour ce jour (optionnel si tu utilises déjà)
-                updateNoteBadges(dateId, document.getElementById("selected-type-name").textContent);
-            })
-
-
-
-
- 
-
-
-
-
-
-
-
-
 
 
             function closeModal(refresh = false) {
@@ -2993,7 +3181,7 @@
                     if (userMedsData[dateId]) {
                         const medIcon = document.createElement("span");
                         medIcon.className = "med-icon";
-                        medIcon.innerHTML = " 💊";
+                        medIcon.innerHTML = "💊";
                         medIcon.style.marginLeft = "5px";
                         noteDate.appendChild(medIcon);
                     }
@@ -3157,41 +3345,44 @@
         });
 
         function exportData() {
-            // Rassembler les données dans un objet
-            const exportObj = {
-                painData: userPainData,
-                notes:    userNotes,
-                medsData: userMedsData
-            };
+        // Ajoute medTypes à l'export (avec sécurité si la variable n'est pas initialisée)
+        const medTypesSaved = localStorage.getItem('spondylogMedTypes');
+        const exportObj = {
+            painData:  userPainData,
+            notes:     userNotes,
+            medsData:  userMedsData,
+            noteTypes: noteTypes,
+            medTypes:  medTypesSaved ? JSON.parse(medTypesSaved) : (typeof medTypes !== "undefined" ? medTypes : [])
+        };
 
-            // Convertir en JSON joliment indenté
-            const dataStr = JSON.stringify(exportObj, null, 2);
+        // Convertir en JSON joliment indenté
+        const dataStr = JSON.stringify(exportObj, null, 2);
 
-            // Créer un Blob pour le JSON
-            const blob = new Blob([dataStr], { type: "application/json" });
+        // Créer un Blob pour le JSON
+        const blob = new Blob([dataStr], { type: "application/json" });
 
-            // Générer un lien de téléchargement temporaire
-            const url = URL.createObjectURL(blob);
-            const a   = document.createElement("a");
-            a.href    = url;
-            a.download = "spondylog_export.json";
-            document.body.appendChild(a);
-            a.click();
+        // Générer un lien de téléchargement temporaire
+        const url = URL.createObjectURL(blob);
+        const a   = document.createElement("a");
+        a.href    = url;
+        a.download = "spondylog_export.json";
+        document.body.appendChild(a);
+        a.click();
 
-            // Nettoyer
-            document.body.removeChild(a);
-            URL.revokeObjectURL(url);
-            }
+        // Nettoyer
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+    }
 
-            const importFileInput = document.getElementById("import-file-input");
+    const importFileInput = document.getElementById("import-file-input");
 
-            importFileInput.addEventListener("change", (event) => {
-            const file = event.target.files[0];
-            if (!file) return;
+    importFileInput.addEventListener("change", (event) => {
+        const file = event.target.files[0];
+        if (!file) return;
 
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                try {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            try {
                 const importedData = JSON.parse(e.target.result);
 
                 // Vérification que les 3 champs existent
@@ -3201,33 +3392,51 @@
                     userNotes    = importedData.notes;
                     userMedsData = importedData.medsData;
 
-                    // Compatibilité avec l’ancien format de notes (string → { cat: texte })
-                    const defaultCat = noteTypes[0].name; // ex. "Sport"
-                    for (let date in userNotes) {
-                    if (typeof userNotes[date] === "string") {
-                        userNotes[date] = { [defaultCat]: userNotes[date] };
+                    // 🟢 Importer les types de notes (et couleurs)
+                    if (importedData.noteTypes && Array.isArray(importedData.noteTypes)) {
+                        noteTypes = importedData.noteTypes;
+                        localStorage.setItem('spondylogNoteTypes', JSON.stringify(noteTypes));
                     }
+
+                    // 🟢 Importer les types de médicaments personnalisés
+                    if (importedData.medTypes && Array.isArray(importedData.medTypes)) {
+                        medTypes = importedData.medTypes;
+                        localStorage.setItem('spondylogMedTypes', JSON.stringify(medTypes));
+                        // Met à jour le dropdown UI si la fonction existe
+                        if (typeof renderMedTypeDropdown === "function") {
+                            renderMedTypeDropdown(medTypes[0]?.name);
+                        }
+                    }
+
+                    // Compatibilité avec l’ancien format de notes (string → { cat: texte })
+                    const defaultCat = noteTypes[0]?.name || "Catégorie 1"; // sécurité si absent
+                    for (let date in userNotes) {
+                        if (typeof userNotes[date] === "string") {
+                            userNotes[date] = { [defaultCat]: userNotes[date] };
+                        }
                     }
 
                     // Sauvegarde et rafraîchissement de la vue
                     saveUserData();
                     if (currentView === "month") {
-                    renderCalendar(currentMonth, currentYear);
+                        renderCalendar(currentMonth, currentYear);
                     } else {
-                    renderYearView(currentYear);
+                        renderYearView(currentYear);
                     }
 
                     alert("Importation réussie !");
                 } else {
                     alert("Le fichier importé ne contient pas les données attendues.");
                 }
-                } catch (error) {
+            } catch (error) {
                 alert("Erreur lors de la lecture du fichier : " + error.message);
-                }
-            };
+            }
+        };
 
-            reader.readAsText(file);
-        });
+        reader.readAsText(file);
+    });
+
+
 
 
     });
