@@ -380,6 +380,36 @@
             max-width: 400px;
         }
 
+        /* Effet hover pour le bouton "Oui" (comme Réinitialiser) */
+        .confirm-yes {
+            background-color: white;
+            color: black;
+            border: 1px solid #ccc;
+            padding: 10px 20px;
+            cursor: pointer;
+            border-radius: 4px;
+            transition: background 0.2s, color 0.2s;
+        }
+        .confirm-yes:hover {
+            background: #e0e0e0; /* même fond que .erase-option:hover */
+            color: #c00;         /* même couleur texte que .erase-option:hover */
+        }
+
+        /* Effet hover pour le bouton "Non" (comme Enregistrer) */
+        .confirm-no {
+            background-color: #3498db;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            cursor: pointer;
+            border-radius: 4px;
+            transition: background 0.3s, color 0.2s;
+        }
+        .confirm-no:hover {
+            background: #2980b9; /* même fond que .validate-pain-modal-style:hover */
+            color: white;
+        }
+
         .modal-header {
             display: flex;
             justify-content: space-between;
@@ -470,7 +500,6 @@
             border-radius: 5px;
             resize: vertical;
             font-family: inherit;
-            margin-top: 5px;
         }
 
         /* Encadrer la cellule lorsqu'une note est présente */
@@ -690,14 +719,6 @@
         }
         
        /* Mise en forme Type et Quantité pour médicament */
-        .med-fields-group {
-            display: flex;
-            gap: 5px; /* Espace entre les deux champs principaux (desktop) */
-            align-items: flex-end;
-            margin: 12px 0 12px 0;
-            width: 100%;
-            flex-wrap: wrap;
-        }
 
         /* Bloc champ individuel */
         .med-field {
@@ -815,11 +836,6 @@
 
         /* Responsive : champs empilés, plus petits, mais toujours propres */
         @media (max-width: 600px) {
-        .med-fields-group {
-            flex-direction: column;
-            gap: 14px;
-            align-items: stretch;
-        }
         .med-field {
             width: 100%;
             gap: 8px;
@@ -916,15 +932,41 @@
         .pain-slider-rect-section {
             width: 100%;
             margin: 18px 0 0 0;
+            position: relative; /* Nécessaire pour le cadre absolu */
         }
 
+        /* Cadre flottant qui couvre la barre et les cases, mais reste SOUS le sélecteur bleu */
+        .pain-slider-rect-frame {
+            position: absolute;
+            top: -1.8px; /* Distance exacte entre le haut du .section et le haut de la .bar */
+            left: 50%;
+            transform: translateX(-50%);
+            width: calc(100% - 0px);
+            max-width: 370px;
+            margin-left: -0.25px;
+            height: 32.2px;
+            border: 2px solid #e2e2e2; /* à adapter à ta charte */
+            border-radius: 3px;
+            pointer-events: none;
+            box-sizing: border-box;
+            z-index: 2; /* Entre bar/options (1) et sélecteur bleu (10) */
+        }
+
+        @media (max-width: 600px) {
+            .pain-slider-rect-frame {
+                max-width: 98vw;
+                border-radius: 3px;
+            }
+        }
+
+        /* --- Slider existant --- */
         .pain-slider-label {
             display: block;
             font-size: 17px;
             color: #2c3e50;
             font-weight: 500;
             letter-spacing: 0.01em;
-            margin-bottom: 10px; /* Plus d’espace au-dessus de la barre */
+            margin-bottom: 5px;
         }
 
         .pain-slider-rect-bar {
@@ -932,13 +974,14 @@
             display: flex;
             width: 100%;
             max-width: 370px;
-            height: 32px; /* Barre moins haute pour effet "rectangle" plus élégant */
+            height: 32px;
             border-radius: 10px;
-            overflow: visible; /* important pour que le cadre dépasse */
+            overflow: visible;
             margin: 0 auto 8px auto;
-            box-shadow: 0 2px 9px rgba(40,60,80,0.09);
-            border: 2px solid #dadada;
+            border: 2px solid #ffffff;
             cursor: pointer;
+            z-index: 1;
+            background: transparent;
         }
 
         .pain-slider-rect-option {
@@ -946,6 +989,7 @@
             height: 100%;
             transition: filter 0.2s;
             border-right: 1px solid #e2e2e2;
+            z-index: 1;
         }
         .pain-slider-rect-option:last-child {
             border-right: none;
@@ -955,10 +999,9 @@
             position: absolute;
             left: 0;
             top: 50%;
-            /* Un peu plus large que la case, pour bien entourer la couleur */
             width: calc((100% / 6) + 6px);
-            margin-left: -3px; /* Pour bien centrer sur la couleur */
-            height: 40px; /* Plus petit que 48px, mais dépasse encore au-dessus/en dessous */
+            margin-left: -3px;
+            height: 40px;
             background: transparent;
             border: 3px solid #3498db;
             border-radius: 8px;
@@ -976,7 +1019,7 @@
             color: #3498db;
             font-weight: bold;
             font-size: 1.18em;
-            background: rgba(255,255,255,0.85); /* Badge blanc lisible */
+            background: rgba(255,255,255,0.85);
             border-radius: 9px;
             border: 1px solid #e1e8ee;
             padding: 2px 12px;
@@ -986,24 +1029,45 @@
         }
 
         .pain-slider-rect-labels {
-            display: flex;
-            justify-content: space-between;
-            margin-top: 7px;
-            font-size: 0.98em;
-            color: #444;
+            display: grid;
+            grid-template-columns: repeat(6, 1fr);
+            gap: 0;
+            margin-top: 0px;
+            font-size: 10px;
+            color: #b0b0b0;
             font-style: italic;
+            text-align: center;
             padding: 0 4px;
+            width: 100%;
+        }
+
+        .pain-slider-rect-labels span {
+            display: block;
+            width: 100%;
+            text-align: center;
+            white-space: nowrap;
         }
 
         @media (max-width: 600px) {
-            .pain-slider-rect-bar { max-width: 98vw; }
-            .pain-slider-rect-section { font-size: 0.93em;}
-            .pain-slider-rect-selector { height: 34px; width: calc((100% / 6) + 4px);}
-            .pain-slider-rect-selector span { font-size: 1em; padding: 2px 8px;}
+            .pain-slider-rect-bar {
+                max-width: 100vw;
+                border-radius: 9px;
+            }
+            .pain-slider-rect-section {
+                font-size: 0.93em;
+            }
+            .pain-slider-rect-selector {
+                height: 34px;
+                width: calc((100% / 6) + 4px);
+            }
+            .pain-slider-rect-selector span {
+                font-size: 1em;
+                padding: 2px 8px;
+            }
         }
 
 
-
+   
 
         /* Boutons de la modale */
         .modal-actions {
@@ -1093,7 +1157,7 @@
             font-size: 1em;
             border-radius: 4px;
             background: #f5f5f5;
-            color: #333;
+            color: #333333e5;
             border: 1px solid #bbb;
             cursor: pointer;
             transition: background 0.2s, color 0.2s;
@@ -1252,8 +1316,8 @@
         </header>
 
         <div class="view-toggle">
-            <button id="month-view-btn" class="view-btn active">Mensuelle</button>
-            <button id="year-view-btn" class="view-btn">Annuelle</button>
+            <button id="month-view-btn" class="view-btn active">Mensuel</button>
+            <button id="year-view-btn" class="view-btn">Annuel</button>
         </div>
 
         <!-- Vue mensuelle -->
@@ -1513,9 +1577,21 @@
                         <div class="pain-slider-rect-option" data-value="4" style="background: #FF4000;"></div>
                         <div class="pain-slider-rect-option" data-value="5" style="background: #000000;"></div>
                         <div class="pain-slider-rect-selector" id="pain-slider-rect-selector">
-                          <span id="pain-slider-rect-value">0</span>
+                            <span id="pain-slider-rect-value">0</span>
                         </div>
+                    <div class="pain-slider-rect-frame"></div>
                     </div>
+                    <!-- 6 labels, pour 6 cases -->
+                    <div class="pain-slider-rect-labels">
+                        <span>Absente</span>
+                        <span>Légère</span>
+                        <span>Modérée</span>
+                        <span>Forte</span>
+                        <span>Très forte</span>
+                        <span>Extrême</span>
+                    </div>
+                </div>
+                         
                     <div class="pain-modal-actions">
                         <button id="erase-value" class="erase-option" type="button">Réinitialiser</button>
                         <button id="validate-pain-modal" class="validate-pain-modal-style">Enregistrer</button>
@@ -1531,11 +1607,11 @@
                 Êtes-vous sûr de vouloir réinitialiser le jour sélectionné ?
             </p>
             <div style="display: flex; justify-content: space-around;">
-                <button id="confirm-reset-yes" style="background-color: white; color: black; border: 1px solid #ccc; padding: 10px 20px; cursor: pointer;">
-                Oui
+                <button id="confirm-reset-yes" class="confirm-yes">
+                    Oui
                 </button>
-                <button id="confirm-reset-no" style="background-color: #3498db; color: white; border: none; padding: 10px 20px; cursor: pointer;">
-                Non
+                <button id="confirm-reset-no" class="confirm-no">
+                    Non
                 </button>
             </div>
             </div>
@@ -2085,7 +2161,7 @@
             // Ouvre le modal pour ajouter un type
             function openMedTypeModalForAdd() {
             editingMedTypeName = null;
-            document.getElementById('med-type-modal-title').textContent = "Ajouter un type d’anti-inflammatoire";
+            document.getElementById('med-type-modal-title').textContent = "Ajouter un anti-inflammatoire";
             document.getElementById('med-type-name-input').value = "";
             document.getElementById('delete-med-type-btn').style.display = "none";
             document.getElementById('med-type-modal').style.display = "flex";
@@ -2094,7 +2170,7 @@
             // Ouvre le modal pour éditer un type
             function openMedTypeModalForEdit(typeName) {
             editingMedTypeName = typeName;
-            document.getElementById('med-type-modal-title').textContent = "Modifier le type d’anti-inflammatoire";
+            document.getElementById('med-type-modal-title').textContent = "Modifier un anti-inflammatoire";
             document.getElementById('med-type-name-input').value = typeName;
             document.getElementById('delete-med-type-btn').style.display = "inline-block";
             document.getElementById('med-type-modal').style.display = "flex";
@@ -2114,10 +2190,20 @@
             const deleteMedTypeBtn = document.getElementById("delete-med-type-btn");
             const medTypeNameInput = document.getElementById("med-type-name-input");
 
-            // Ouvrir/fermer la dropdown
+           // Ouvrir/fermer la dropdown
             selectedMedTypeArea.addEventListener("click", function(e) {
                 e.stopPropagation();
                 medTypeList.style.display = (medTypeList.style.display === "block" ? "none" : "block");
+            });
+
+            // Fermer la dropdown si clic ailleurs
+            window.addEventListener("click", function(e) {
+                if (
+                    !selectedMedTypeArea.contains(e.target) &&
+                    !medTypeList.contains(e.target)
+                ) {
+                    medTypeList.style.display = "none";
+                }
             });
 
             // Fermer dropdown si clic dehors
@@ -2840,139 +2926,145 @@
             }
 
             function showPainModal(dateId) {
-                selectedDate = dateId;
+            selectedDate = dateId;
 
-                // Si on vient de la vue année, on mémorise où revenir
-                if (currentView === "year") {
-                    selectedFromYearView = true;
-                    const [y, m] = dateId.split('-');
-                    selectedViewMonth = parseInt(m,10)-1;
-                    selectedViewYear  = parseInt(y,10);
-                }
+            // Si on vient de la vue année, on mémorise où revenir
+            if (currentView === "year") {
+                selectedFromYearView = true;
+                const [y, m] = dateId.split('-');
+                selectedViewMonth = parseInt(m,10)-1;
+                selectedViewYear  = parseInt(y,10);
+            }
 
-                // Titre de la modale
-                const [y,m,d] = dateId.split('-');
-                const monthNames = ["Janvier","Février","Mars","Avril","Mai","Juin",
-                                    "Juillet","Août","Septembre","Octobre","Novembre","Décembre"];
-                modalDateTitle.textContent = `Date – ${d} ${monthNames[parseInt(m,10)-1]} ${y}`;
+            // Titre de la modale
+            const [y,m,d] = dateId.split('-');
+            const monthNames = ["Janvier","Février","Mars","Avril","Mai","Juin",
+                                "Juillet","Août","Septembre","Octobre","Novembre","Décembre"];
+            modalDateTitle.textContent = `Date – ${d} ${monthNames[parseInt(m,10)-1]} ${y}`;
 
-                // 🔥 --- DOULEUR : slider RECTANGULAIRE ---
-                // Sélecteur et valeur
-                const painRectSelector = document.getElementById('pain-slider-rect-selector');
-                const painRectValueSpan = document.getElementById('pain-slider-rect-value');
-                const rectBar = document.getElementById('pain-slider-rect-bar');
-                const rectOptions = rectBar.querySelectorAll('.pain-slider-rect-option');
+            // --- DOULEUR : slider RECTANGULAIRE ---
+            const painRectSelector = document.getElementById('pain-slider-rect-selector');
+            const painRectValueSpan = document.getElementById('pain-slider-rect-value');
+            const rectBar = document.getElementById('pain-slider-rect-bar');
+            const rectOptions = rectBar.querySelectorAll('.pain-slider-rect-option');
 
-                // Charge la valeur de douleur pour ce jour (0 si rien)
-                let sliderVal = (userPainData[dateId] != null) ? userPainData[dateId] : 0;
-                // Place le sélecteur visuellement
-                moveSelector(sliderVal);
-                // Met à jour le texte dans le cadre
-                painRectValueSpan.textContent = sliderVal;
-                painRectValue = sliderVal;
+            // Charge la valeur de douleur pour ce jour (0 si rien)
+            let sliderVal = (userPainData[dateId] != null) ? userPainData[dateId] : 0;
+            moveSelector(sliderVal);
+            painRectValueSpan.textContent = sliderVal;
+            painRectValue = sliderVal;
 
-                // Ajoute events (click + drag)
-                rectOptions.forEach(opt => {
-                    opt.onclick = function() {
-                        const v = Number(this.dataset.value);
-                        moveSelector(v);
-                        userPainData[dateId] = v; // On met à jour la donnée
-                    };
-                });
+            rectOptions.forEach(opt => {
+                opt.onclick = function() {
+                    const v = Number(this.dataset.value);
+                    moveSelector(v);
+                    userPainData[dateId] = v;
+                };
+            });
 
-                // Drag & drop UX
-                rectBar.onmousedown = startDrag;
-                rectBar.ontouchstart = startDrag;
+            rectBar.onmousedown = startDrag;
+            rectBar.ontouchstart = startDrag;
 
-                let isDragging = false;
-                function startDrag(e) {
-                    isDragging = true;
-                    moveAtEvent(e);
-                    document.addEventListener('mousemove', moveAtEvent);
-                    document.addEventListener('touchmove', moveAtEvent, {passive:false});
-                    document.addEventListener('mouseup', stopDrag);
-                    document.addEventListener('touchend', stopDrag);
-                }
-                function stopDrag(e) {
-                    isDragging = false;
-                    document.removeEventListener('mousemove', moveAtEvent);
-                    document.removeEventListener('touchmove', moveAtEvent);
-                    document.removeEventListener('mouseup', stopDrag);
-                    document.removeEventListener('touchend', stopDrag);
-                }
-                function moveAtEvent(e) {
-                    if (!isDragging) return;
-                    let clientX = e.touches ? e.touches[0].clientX : e.clientX;
-                    const rect = rectBar.getBoundingClientRect();
-                    let relX = Math.max(0, Math.min(clientX - rect.left, rect.width));
-                    let idx = Math.floor(relX / (rect.width / rectOptions.length));
-                    idx = Math.max(0, Math.min(idx, 5)); // <-- Limite l’index à 0-5
-                    moveSelector(idx);
-                    painRectValueSpan.textContent = idx;
-                    painRectValue = idx;
-                    userPainData[dateId] = idx;
-                }
+            let isDragging = false;
+            function startDrag(e) {
+                isDragging = true;
+                moveAtEvent(e);
+                document.addEventListener('mousemove', moveAtEvent);
+                document.addEventListener('touchmove', moveAtEvent, {passive:false});
+                document.addEventListener('mouseup', stopDrag);
+                document.addEventListener('touchend', stopDrag);
+            }
+            function stopDrag(e) {
+                isDragging = false;
+                document.removeEventListener('mousemove', moveAtEvent);
+                document.removeEventListener('touchmove', moveAtEvent);
+                document.removeEventListener('mouseup', stopDrag);
+                document.removeEventListener('touchend', stopDrag);
+            }
+            function moveAtEvent(e) {
+                if (!isDragging) return;
+                let clientX = e.touches ? e.touches[0].clientX : e.clientX;
+                const rect = rectBar.getBoundingClientRect();
+                let relX = Math.max(0, Math.min(clientX - rect.left, rect.width));
+                let idx = Math.floor(relX / (rect.width / rectOptions.length));
+                idx = Math.max(0, Math.min(idx, 5));
+                moveSelector(idx);
+                painRectValueSpan.textContent = idx;
+                painRectValue = idx;
+                userPainData[dateId] = idx;
+            }
+            function moveSelector(val) {
+                const total = rectOptions.length;
+                painRectSelector.style.left = `calc(${val} * (100% / ${total}))`;
+                painRectValueSpan.textContent = val;
+                painRectValue = val;
+            }
 
-                // Fonction pour déplacer le cadre
-                function moveSelector(val) {
-                    const total = rectOptions.length;
-                    painRectSelector.style.left = `calc(${val} * (100% / ${total}))`;
-                    painRectValueSpan.textContent = val;
-                    painRectValue = val;
-                }
+            // --- Type de note par défaut
+            const selectedTypeNameEl = document.getElementById("selected-type-name");
+            const selectedTypeDotEl  = document.getElementById("selected-type-dot");
+            let currentType = noteTypes[0]; // Type par défaut
+            const noteObj = userNotes[dateId] || {};
 
-                // --- Type de note par défaut
-                const selectedTypeNameEl = document.getElementById("selected-type-name");
-                const selectedTypeDotEl  = document.getElementById("selected-type-dot");
-                let currentType = noteTypes[0];
-                selectedTypeNameEl.textContent         = currentType.name;
-                selectedTypeDotEl.style.backgroundColor = currentType.color;
-
-                // --- Charge la note de ce type/date
-                const noteObj = userNotes[dateId] || {};
-                dayNoteTextarea.value = noteObj[currentType.name] || "";
-
-                // --- état anti-inflammatoires
-                document.getElementById("med-taken").checked = !!userMedsData[dateId];
-
-                // --- reconstruit la liste déroulante
-                const noteTypeList = document.getElementById("note-type-list");
-                noteTypeList.innerHTML = "";
-                noteTypes.forEach(type => {
-                    const li = document.createElement("li");
-                    li.dataset.name = type.name;
-                    li.innerHTML = `
-                    <span class="color-dot" style="background:${type.color}"></span>
-                    <span class="note-type-name-option">${type.name}</span>
-                    <button class="edit-type-btn" data-name="${type.name}">…</button>
-                    `;
-                    noteTypeList.appendChild(li);
-                });
-                // Option "Ajouter" à la fin
-                const addLi = document.createElement("li");
-                addLi.id        = "add-type-item";
-                addLi.className = "add-type-item";
-                addLi.textContent = "+ Ajouter";
-                noteTypeList.appendChild(addLi);
-
-                // --- badges existants
-                updateNoteBadges(selectedDate, currentType.name);
-
-                // --- affiche la modale
-                painModal.style.display = "flex";
-
-                // --- anti-inflammatoires
-                if (userMedsData[dateId]) {
-                    medTakenCheckbox.checked = true;
-                    medDetailsDiv.style.display = 'block';
-                    document.getElementById('med-type').value = userMedsData[dateId].type || 'Medicament';
-                    medQtyInput.value = userMedsData[dateId].qty || 1;
-                } else {
-                    medTakenCheckbox.checked = false;
-                    medDetailsDiv.style.display = 'none';
-                    medQtyInput.value = 1;
+            // --- LOGIQUE AJOUTÉE POUR SÉLECTIONNER UN AUTRE TYPE SI LE TYPE PAR DÉFAUT EST VIDE ---
+            let selectedTypeName = currentType.name;
+            if ((!noteObj[selectedTypeName] || noteObj[selectedTypeName].trim() === "") && Object.keys(noteObj).length > 0) {
+                // Trouve le premier type avec une note non vide
+                for (const typeName in noteObj) {
+                    if (noteObj[typeName] && noteObj[typeName].trim() !== "") {
+                        selectedTypeName = typeName;
+                        currentType = noteTypes.find(t => t.name === typeName) || currentType;
+                        break;
+                    }
                 }
             }
+
+            // --- Affiche le type sélectionné et le texte de la note
+            selectedTypeNameEl.textContent = selectedTypeName;
+            selectedTypeDotEl.style.backgroundColor = currentType.color;
+            dayNoteTextarea.value = noteObj[selectedTypeName] || "";
+
+            // --- état anti-inflammatoires
+            document.getElementById("med-taken").checked = !!userMedsData[dateId];
+
+            // --- reconstruit la liste déroulante
+            const noteTypeList = document.getElementById("note-type-list");
+            noteTypeList.innerHTML = "";
+            noteTypes.forEach(type => {
+                const li = document.createElement("li");
+                li.dataset.name = type.name;
+                li.innerHTML = `
+                <span class="color-dot" style="background:${type.color}"></span>
+                <span class="note-type-name-option">${type.name}</span>
+                <button class="edit-type-btn" data-name="${type.name}">…</button>
+                `;
+                noteTypeList.appendChild(li);
+            });
+            const addLi = document.createElement("li");
+            addLi.id        = "add-type-item";
+            addLi.className = "add-type-item";
+            addLi.textContent = "+ Ajouter";
+            noteTypeList.appendChild(addLi);
+
+            // --- badges existants
+            updateNoteBadges(selectedDate, selectedTypeName);
+
+            // --- affiche la modale
+            painModal.style.display = "flex";
+
+            // --- anti-inflammatoires
+            if (userMedsData[dateId]) {
+                medTakenCheckbox.checked = true;
+                medDetailsDiv.style.display = 'block';
+                document.getElementById('med-type').value = userMedsData[dateId].type || 'Medicament';
+                medQtyInput.value = userMedsData[dateId].qty || 1;
+            } else {
+                medTakenCheckbox.checked = false;
+                medDetailsDiv.style.display = 'none';
+                medQtyInput.value = 1;
+            }
+        }
+
 
 
             function closeModal(refresh = false) {
