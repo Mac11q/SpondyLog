@@ -125,64 +125,75 @@
         }
 
         .note-dots-container {
-            position: absolute;
-            top: 3px;
-            right: 2px;
-            display: flex;
-            flex-direction: row-reverse; /* pour coller les points de droite à gauche */
-            gap: 2px;
-            z-index: 2;
-        }
+        position: absolute;
+        top: 3px;
+        right: 2px;
+        display: flex;
+        flex-direction: row-reverse;
+        gap: 2px;
+        z-index: 1;
+    }
 
-        .note-dot {
-            width: 8px;
-            height: 8px;
-            border-radius: 50%;
-            display: inline-block;
-            margin-top: -1px;
-        }
+    .note-dot,
+    .med-indicator {
+        position: relative; /* Pour le positionnement du tooltip */
+    }
 
-        .note-dot-tooltip {
-            position: absolute;
-            top: 18px;
-            right: 0;
-            background: #222;
-            color: #fff;
-            padding: 8px 12px;
-            border-radius: 7px;
-            font-size: 14px;
-            font-family: inherit;
-            white-space: normal;
-            word-break: break-word;
-            z-index: 10;
-            pointer-events: none;
-            opacity: 0;
-            transition: opacity 0.13s;
-            width: 148px;
-            max-width: 155px;
-            min-width: 85px;    
-            text-align: left;
-            line-height: 1.4;
-            letter-spacing: 0.01em;
-        }
+    .note-dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        display: inline-block;
+        margin-top: -1px;
+    }
 
-        .note-dot.show-tooltip .note-dot-tooltip {
-            opacity: 1;
-        }
+    /* Tooltip (note ET médicament) ouvrant vers la gauche */
+    .note-dot-tooltip {
+        position: absolute;
+        top: 18px;           /* Distance verticale sous le point */
+        right: 14px;         /* Décale le tooltip vers la gauche (8px du point + 6px de marge) */
+        left: auto;          /* (assure le calcul depuis la droite) */
+        background: #222;
+        color: #fff;
+        padding: 8px 12px;
+        border-radius: 7px;
+        font-size: 14px;
+        font-family: inherit;
+        white-space: normal;
+        word-break: break-word;
+        z-index: 10;
+        pointer-events: none;
+        opacity: 0;
+        transition: opacity 0.13s;
+        width: 148px;
+        max-width: 155px;
+        min-width: 85px;
+        text-align: left;
+        line-height: 1.4;
+        letter-spacing: 0.01em;
+    }
 
-        .med-indicator.show-tooltip .note-dot-tooltip {
-            opacity: 1;
-        }
+    .note-dot.show-tooltip .note-dot-tooltip {
+        opacity: 1;
+    }
+    .med-indicator.show-tooltip .note-dot-tooltip {
+        opacity: 1;
+    }
 
-        .tooltip-dot {
-            display: inline-block;
-            width: 11px;
-            height: 11px;
-            border-radius: 50%;
-            margin-right: 3px;
-            vertical-align: middle;
-            box-shadow: 0 0 2px #444;
-        }
+    .tooltip-dot {
+        display: inline-block;
+        width: 11px;
+        height: 11px;
+        border-radius: 50%;
+        margin-right: 3px;
+        vertical-align: middle;
+        box-shadow: 0 0 2px #444;
+    }
+
+    .calendar td.note-tooltip-open {
+        z-index: 100;
+        position: relative;
+    }
 
         /* Style mis à jour pour la légende */
         .legend {
@@ -793,9 +804,7 @@
             border-color: #3498db;
         }
 
-        /* =====================
-        Correction Mobile
-        ===================== */
+
         @media (max-width: 600px) {
             .med-fields-group {
                 flex-direction: column;
@@ -1841,22 +1850,7 @@
                 noteTypeList.style.display = "none";
             }
         });
-    
 
-        // 1) Ouvrir / fermer la dropdown
-        selectedTypeArea.addEventListener("click", function(e) {
-        e.stopPropagation();
-        noteTypeList.style.display =
-            noteTypeList.style.display === "block" ? "none" : "block";
-        });
-
-        // 2) Fermer la dropdown si clic en-dehors
-        window.addEventListener("click", function(e) {
-        const container = document.querySelector(".note-type-container");
-        if (!container.contains(e.target)) {
-            noteTypeList.style.display = "none";
-        }
-        });
 
         // 4) + Ajouter un type
         addTypeItem.addEventListener("click", function(e) {
@@ -2167,13 +2161,14 @@
                 document.getElementById('med-type-modal').style.display = "flex";
             }
 
-            // Intégration avec l’UI
             document.addEventListener("DOMContentLoaded", function() {
                 loadMedTypes();
                 renderMedTypeDropdown();
 
-                const selectedMedTypeArea = document.getElementById("selected-med-type");
+                // === Sélecteurs pour dropdown médicament ===
+                const medTypeContainer = document.querySelector('#med-details .note-type-container');
                 const medTypeList = document.getElementById("med-type-list");
+                const selectedMedTypeArea = document.getElementById("selected-med-type");
                 const addMedTypeItem = document.getElementById("add-med-type-item");
                 const medTypeModal = document.getElementById("med-type-modal");
                 const saveMedTypeBtn = document.getElementById("save-med-type-btn");
@@ -2181,45 +2176,65 @@
                 const deleteMedTypeBtn = document.getElementById("delete-med-type-btn");
                 const medTypeNameInput = document.getElementById("med-type-name-input");
 
-                // Ouvrir/fermer la dropdown
-                selectedMedTypeArea.addEventListener("click", function(e) {
+                // === Sélecteurs pour dropdown note ===
+                const noteTypeContainer = document.querySelector('#pain-modal .note-type-container');
+                const noteTypeList = document.getElementById("note-type-list");
+                const selectedTypeArea = document.getElementById("selected-note-type");
+
+                // Fonction qui ferme toutes les dropdowns sauf exception
+                function closeAllDropdowns(except = null) {
+                    if (except !== 'note') noteTypeList.style.display = "none";
+                    if (except !== 'med') medTypeList.style.display = "none";
+                }
+
+                // --- OUVERTURE/FERMETURE DROPDOWN NOTE ---
+                selectedTypeArea.addEventListener("click", function(e) {
                     e.stopPropagation();
-                    medTypeList.style.display = (medTypeList.style.display === "block" ? "none" : "block");
+                    if (noteTypeList.style.display !== "block") {
+                        closeAllDropdowns('note');
+                        noteTypeList.style.display = "block";
+                    } else {
+                        noteTypeList.style.display = "none";
+                    }
                 });
 
-                // Fermer la dropdown si clic ailleurs
-                window.addEventListener("click", function(e) {
-                    if (
-                        !selectedMedTypeArea.contains(e.target) &&
-                        !medTypeList.contains(e.target)
-                    ) {
+                // --- OUVERTURE/FERMETURE DROPDOWN MEDICAMENT ---
+                selectedMedTypeArea.addEventListener("click", function(e) {
+                    e.stopPropagation();
+                    if (medTypeList.style.display !== "block") {
+                        closeAllDropdowns('med');
+                        medTypeList.style.display = "block";
+                    } else {
                         medTypeList.style.display = "none";
                     }
                 });
 
-                // Fermer dropdown si clic dehors
+                // --- FERMETURE TOUTE DROPDOWN SI CLIC DEHORS ---
                 window.addEventListener("click", function(e) {
-                    if (!document.getElementById("med-type-dropdown").contains(e.target)) {
-                    medTypeList.style.display = "none";
+                    if (
+                        !noteTypeContainer.contains(e.target) &&
+                        !medTypeContainer.contains(e.target)
+                    ) {
+                        closeAllDropdowns();
                     }
                 });
 
-                // Gestion sélection dans la liste
+                // --- Gestion sélection dans la liste (MED) ---
                 medTypeList.addEventListener("click", function(e) {
                     e.stopPropagation();
                     const li = e.target.closest("li");
                     if (!li) return;
                     if (li.id === "add-med-type-item") {
-                    openMedTypeModalForAdd();
+                        openMedTypeModalForAdd();
                     } else if (e.target.classList.contains("edit-type-btn")) {
-                    openMedTypeModalForEdit(li.dataset.name);
+                        openMedTypeModalForEdit(li.dataset.name);
                     } else {
-                    document.getElementById("selected-med-type-name").textContent = li.dataset.name;
-                    medTypeList.style.display = "none";
+                        document.getElementById("selected-med-type-name").textContent = li.dataset.name;
+                        medTypeList.style.display = "none";
                     }
                 });
 
-                // Ajout/édition d’un type
+                // --- Ajout/édition d’un type (MED) ---
                 saveMedTypeBtn.addEventListener("click", function(e) {
                     e.preventDefault();
                     const name = medTypeNameInput.value.trim();
@@ -2260,13 +2275,12 @@
                     medTypeModal.style.display = "none";
                 });
 
-
-                // Annuler l’ajout/édition
+                // --- Annuler l’ajout/édition ---
                 cancelMedTypeBtn.addEventListener("click", function() {
                     medTypeModal.style.display = "none";
                 });
 
-                // Suppression
+                // --- Suppression ---
                 deleteMedTypeBtn.addEventListener("click", function() {
                     if (!editingMedTypeName) return;
                     if (medTypes.length <= 1) { alert("Gardez au moins un type."); return; }
@@ -2277,11 +2291,13 @@
                     medTypeModal.style.display = "none";
                 });
 
-                // Fermer modal si clic dehors
+                // --- Fermer modal si clic dehors ---
                 medTypeModal.addEventListener("click", function(e) {
                     if (e.target === medTypeModal) medTypeModal.style.display = "none";
                 });
+
             });
+
 
             // Sauvegarder la sélection dans les données du jour lors de la validation
             function saveMedDataForDay(dateId) {
@@ -2691,9 +2707,12 @@
                                             dot.appendChild(tooltip);
                                             dot.addEventListener("mouseenter", function() {
                                                 dot.classList.add("show-tooltip");
+                                                // Met la classe spéciale sur la cellule parente
+                                                dayCell.closest("td").classList.add("note-tooltip-open");
                                             });
                                             dot.addEventListener("mouseleave", function() {
                                                 dot.classList.remove("show-tooltip");
+                                                dayCell.closest("td").classList.remove("note-tooltip-open");
                                             });
 
                                         dotsContainer.appendChild(dot);
@@ -2722,9 +2741,11 @@
 
                                 medIndicator.addEventListener("mouseenter", function() {
                                     medIndicator.classList.add("show-tooltip");
+                                    dayCell.closest("td").classList.add("note-tooltip-open");
                                 });
                                 medIndicator.addEventListener("mouseleave", function() {
                                     medIndicator.classList.remove("show-tooltip");
+                                    dayCell.closest("td").classList.remove("note-tooltip-open");
                                 });
 
                                 dayCell.appendChild(medIndicator);
@@ -3109,6 +3130,8 @@
 
                 // --- affiche la modale ---
                 painModal.style.display = "flex";
+
+                
             }
 
 
@@ -3838,8 +3861,8 @@
             
         }
 
-         // Fonction pour sauvegarder le pense-bête dans le localStorage
-         function savePenseBete() {
+        // Fonction pour sauvegarder le pense-bête dans le localStorage
+        function savePenseBete() {
             const penseBeteTextarea = document.getElementById("pense-bête-note");
             if (penseBeteTextarea) {
                 localStorage.setItem("spondylogPenseBete", penseBeteTextarea.value);
