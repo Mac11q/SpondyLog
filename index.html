@@ -1479,7 +1479,7 @@
                 <!-- 1. Section pour les anti-inflammatoires (en premier) -->
                 <div class="modal-section med-section">
                     <input type="checkbox" id="med-taken">
-                    <label for="med-taken"><span class="med-icon">💊</span> Anti-inflammatoires</label>
+                    <label for="med-taken"><span class="med-icon">💊</span> Anti-inflammatoire</label>
                     <div id="med-details" style="display:none; margin:8px 0 10px 10px;">
                         <div class="med-fields-group">
                             <div class="med-field med-field-type">
@@ -2158,138 +2158,167 @@
             }
             }
 
-            // Ouvre le modal pour ajouter un type
-            function openMedTypeModalForAdd() {
-            editingMedTypeName = null;
-            document.getElementById('med-type-modal-title').textContent = "Ajouter un anti-inflammatoire";
-            document.getElementById('med-type-name-input').value = "";
-            document.getElementById('delete-med-type-btn').style.display = "none";
-            document.getElementById('med-type-modal').style.display = "flex";
-            }
-
             // Ouvre le modal pour éditer un type
             function openMedTypeModalForEdit(typeName) {
-            editingMedTypeName = typeName;
-            document.getElementById('med-type-modal-title').textContent = "Modifier un anti-inflammatoire";
-            document.getElementById('med-type-name-input').value = typeName;
-            document.getElementById('delete-med-type-btn').style.display = "inline-block";
-            document.getElementById('med-type-modal').style.display = "flex";
+                editingMedTypeName = typeName;
+                document.getElementById('med-type-modal-title').textContent = "Modifier le type de médicament ";
+                document.getElementById('med-type-name-input').value = typeName;
+                document.getElementById('delete-med-type-btn').style.display = "inline-block";
+                document.getElementById('med-type-modal').style.display = "flex";
             }
 
             // Intégration avec l’UI
             document.addEventListener("DOMContentLoaded", function() {
-            loadMedTypes();
-            renderMedTypeDropdown();
+                loadMedTypes();
+                renderMedTypeDropdown();
 
-            const selectedMedTypeArea = document.getElementById("selected-med-type");
-            const medTypeList = document.getElementById("med-type-list");
-            const addMedTypeItem = document.getElementById("add-med-type-item");
-            const medTypeModal = document.getElementById("med-type-modal");
-            const saveMedTypeBtn = document.getElementById("save-med-type-btn");
-            const cancelMedTypeBtn = document.getElementById("cancel-med-type-btn");
-            const deleteMedTypeBtn = document.getElementById("delete-med-type-btn");
-            const medTypeNameInput = document.getElementById("med-type-name-input");
+                const selectedMedTypeArea = document.getElementById("selected-med-type");
+                const medTypeList = document.getElementById("med-type-list");
+                const addMedTypeItem = document.getElementById("add-med-type-item");
+                const medTypeModal = document.getElementById("med-type-modal");
+                const saveMedTypeBtn = document.getElementById("save-med-type-btn");
+                const cancelMedTypeBtn = document.getElementById("cancel-med-type-btn");
+                const deleteMedTypeBtn = document.getElementById("delete-med-type-btn");
+                const medTypeNameInput = document.getElementById("med-type-name-input");
 
-           // Ouvrir/fermer la dropdown
-            selectedMedTypeArea.addEventListener("click", function(e) {
-                e.stopPropagation();
-                medTypeList.style.display = (medTypeList.style.display === "block" ? "none" : "block");
-            });
+                // Ouvrir/fermer la dropdown
+                selectedMedTypeArea.addEventListener("click", function(e) {
+                    e.stopPropagation();
+                    medTypeList.style.display = (medTypeList.style.display === "block" ? "none" : "block");
+                });
 
-            // Fermer la dropdown si clic ailleurs
-            window.addEventListener("click", function(e) {
-                if (
-                    !selectedMedTypeArea.contains(e.target) &&
-                    !medTypeList.contains(e.target)
-                ) {
+                // Fermer la dropdown si clic ailleurs
+                window.addEventListener("click", function(e) {
+                    if (
+                        !selectedMedTypeArea.contains(e.target) &&
+                        !medTypeList.contains(e.target)
+                    ) {
+                        medTypeList.style.display = "none";
+                    }
+                });
+
+                // Fermer dropdown si clic dehors
+                window.addEventListener("click", function(e) {
+                    if (!document.getElementById("med-type-dropdown").contains(e.target)) {
                     medTypeList.style.display = "none";
-                }
-            });
+                    }
+                });
 
-            // Fermer dropdown si clic dehors
-            window.addEventListener("click", function(e) {
-                if (!document.getElementById("med-type-dropdown").contains(e.target)) {
-                medTypeList.style.display = "none";
-                }
-            });
+                // Gestion sélection dans la liste
+                medTypeList.addEventListener("click", function(e) {
+                    e.stopPropagation();
+                    const li = e.target.closest("li");
+                    if (!li) return;
+                    if (li.id === "add-med-type-item") {
+                    openMedTypeModalForAdd();
+                    } else if (e.target.classList.contains("edit-type-btn")) {
+                    openMedTypeModalForEdit(li.dataset.name);
+                    } else {
+                    document.getElementById("selected-med-type-name").textContent = li.dataset.name;
+                    medTypeList.style.display = "none";
+                    }
+                });
 
-            // Gestion sélection dans la liste
-            medTypeList.addEventListener("click", function(e) {
-                e.stopPropagation();
-                const li = e.target.closest("li");
-                if (!li) return;
-                if (li.id === "add-med-type-item") {
-                openMedTypeModalForAdd();
-                } else if (e.target.classList.contains("edit-type-btn")) {
-                openMedTypeModalForEdit(li.dataset.name);
-                } else {
-                document.getElementById("selected-med-type-name").textContent = li.dataset.name;
-                medTypeList.style.display = "none";
-                }
-            });
+                // Ajout/édition d’un type
+                saveMedTypeBtn.addEventListener("click", function(e) {
+                    e.preventDefault();
+                    const name = medTypeNameInput.value.trim();
+                    if (!name) { 
+                        alert("Veuillez saisir un nom."); 
+                        return; 
+                    }
+                    // Doublon ?
+                    if (editingMedTypeName === null && medTypes.some(t => t.name.toLowerCase() === name.toLowerCase())) {
+                        alert("Ce type existe déjà."); 
+                        return;
+                    }
+                    if (editingMedTypeName === null) {
+                        medTypes.push({ name });
+                    } else {
+                        // Renommer l’item
+                        const obj = medTypes.find(t => t.name === editingMedTypeName);
+                        if (obj) obj.name = name;
 
-            // Ajout/édition d’un type
-            saveMedTypeBtn.addEventListener("click", function(e) {
-                e.preventDefault();
-                const name = medTypeNameInput.value.trim();
-                if (!name) { alert("Veuillez saisir un nom."); return; }
-                // Doublon ?
-                if (editingMedTypeName === null && medTypes.some(t => t.name.toLowerCase() === name.toLowerCase())) {
-                alert("Ce type existe déjà."); return;
-                }
-                if (editingMedTypeName === null) {
-                medTypes.push({ name });
-                } else {
-                // Renommer l’item
-                const obj = medTypes.find(t => t.name === editingMedTypeName);
-                if (obj) obj.name = name;
-                // Mettre à jour la sélection courante si besoin
-                if (document.getElementById("selected-med-type-name").textContent === editingMedTypeName)
-                    document.getElementById("selected-med-type-name").textContent = name;
-                }
-                saveMedTypes();
-                renderMedTypeDropdown(name);
-                medTypeModal.style.display = "none";
-            });
+                        // === Mise à jour de userMedsData pour tous les jours concernés ===
+                        for (let date in userMedsData) {
+                            if (
+                                userMedsData[date] && 
+                                userMedsData[date].type === editingMedTypeName
+                            ) {
+                                userMedsData[date].type = name;
+                            }
+                        }
+                        // Sauvegarder le userMedsData après modification
+                        localStorage.setItem('spondylogMedsData', JSON.stringify(userMedsData));
 
-            // Annuler l’ajout/édition
-            cancelMedTypeBtn.addEventListener("click", function() {
-                medTypeModal.style.display = "none";
-            });
+                        // Mettre à jour la sélection courante si besoin
+                        if (document.getElementById("selected-med-type-name").textContent === editingMedTypeName)
+                            document.getElementById("selected-med-type-name").textContent = name;
+                    }
+                    saveMedTypes();
+                    renderMedTypeDropdown(name);
+                    medTypeModal.style.display = "none";
+                });
 
-            // Suppression
-            deleteMedTypeBtn.addEventListener("click", function() {
-                if (!editingMedTypeName) return;
-                if (medTypes.length <= 1) { alert("Gardez au moins un type."); return; }
-                if (!confirm(`Supprimer "${editingMedTypeName}" ?`)) return;
-                medTypes = medTypes.filter(t => t.name !== editingMedTypeName);
-                saveMedTypes();
-                renderMedTypeDropdown(medTypes[0] && medTypes[0].name);
-                medTypeModal.style.display = "none";
-            });
 
-            // Fermer modal si clic dehors
-            medTypeModal.addEventListener("click", function(e) {
-                if (e.target === medTypeModal) medTypeModal.style.display = "none";
-            });
+                // Annuler l’ajout/édition
+                cancelMedTypeBtn.addEventListener("click", function() {
+                    medTypeModal.style.display = "none";
+                });
+
+                // Suppression
+                deleteMedTypeBtn.addEventListener("click", function() {
+                    if (!editingMedTypeName) return;
+                    if (medTypes.length <= 1) { alert("Gardez au moins un type."); return; }
+                    if (!confirm(`Supprimer "${editingMedTypeName}" ?`)) return;
+                    medTypes = medTypes.filter(t => t.name !== editingMedTypeName);
+                    saveMedTypes();
+                    renderMedTypeDropdown(medTypes[0] && medTypes[0].name);
+                    medTypeModal.style.display = "none";
+                });
+
+                // Fermer modal si clic dehors
+                medTypeModal.addEventListener("click", function(e) {
+                    if (e.target === medTypeModal) medTypeModal.style.display = "none";
+                });
             });
 
             // Sauvegarder la sélection dans les données du jour lors de la validation
             function saveMedDataForDay(dateId) {
-            const medTakenCheckbox = document.getElementById('med-taken');
-            const selectedMedType = document.getElementById('selected-med-type-name');
-            const medQtyInput = document.getElementById('med-qty');
-            if (medTakenCheckbox && medTakenCheckbox.checked) {
-                userMedsData[dateId] = {
-                taken: true,
-                type: selectedMedType ? selectedMedType.textContent : (medTypes[0] && medTypes[0].name),
-                qty: medQtyInput ? Number(medQtyInput.value) || 1 : 1
-                };
-            } else {
-                delete userMedsData[dateId];
+                const medTakenCheckbox = document.getElementById('med-taken');
+                const selectedMedType = document.getElementById('selected-med-type-name');
+                const medQtyInput = document.getElementById('med-qty');
+
+                // Liste des types de médocs (peut être utile si jamais tu veux default)
+                let medTypes = JSON.parse(localStorage.getItem('spondylogMedTypes') || '[]');
+                if (!Array.isArray(medTypes)) medTypes = [];
+
+                if (medTakenCheckbox && medTakenCheckbox.checked) {
+                    const type = selectedMedType
+                        ? selectedMedType.textContent
+                        : (medTypes[0] && medTypes[0].name) || "Medicament";
+                    const qty = medQtyInput ? Number(medQtyInput.value) || 1 : 1;
+
+                    // Stocke la donnée pour ce jour
+                    userMedsData[dateId] = {
+                        taken: true,
+                        type: type,
+                        qty: qty
+                    };
+
+                    // Mémorise dans le localStorage pour la prochaine ouverture (nouveau jour vierge)
+                    localStorage.setItem("spondylogLastMedType", type);
+                    localStorage.setItem("spondylogLastMedQty", qty);
+
+                } else {
+                    delete userMedsData[dateId];
+                }
+
+                // Persiste tout dans le localStorage
+                localStorage.setItem("spondylogMedsData", JSON.stringify(userMedsData));
+                saveUserData();
             }
-            saveUserData();
-            }
+
 
 
             // Affiche/masque la sélection des détails pour les anti-inflammatoires
@@ -2926,144 +2955,162 @@
             }
 
             function showPainModal(dateId) {
-            selectedDate = dateId;
+                selectedDate = dateId;
 
-            // Si on vient de la vue année, on mémorise où revenir
-            if (currentView === "year") {
-                selectedFromYearView = true;
-                const [y, m] = dateId.split('-');
-                selectedViewMonth = parseInt(m,10)-1;
-                selectedViewYear  = parseInt(y,10);
-            }
+                // Si on vient de la vue année, on mémorise où revenir
+                if (currentView === "year") {
+                    selectedFromYearView = true;
+                    const [y, m] = dateId.split('-');
+                    selectedViewMonth = parseInt(m,10)-1;
+                    selectedViewYear  = parseInt(y,10);
+                }
 
-            // Titre de la modale
-            const [y,m,d] = dateId.split('-');
-            const monthNames = ["Janvier","Février","Mars","Avril","Mai","Juin",
-                                "Juillet","Août","Septembre","Octobre","Novembre","Décembre"];
-            modalDateTitle.textContent = `Date – ${d} ${monthNames[parseInt(m,10)-1]} ${y}`;
+                // Titre de la modale
+                const [y,m,d] = dateId.split('-');
+                const monthNames = ["Janvier","Février","Mars","Avril","Mai","Juin",
+                                    "Juillet","Août","Septembre","Octobre","Novembre","Décembre"];
+                modalDateTitle.textContent = `Date – ${d} ${monthNames[parseInt(m,10)-1]} ${y}`;
 
-            // --- DOULEUR : slider RECTANGULAIRE ---
-            const painRectSelector = document.getElementById('pain-slider-rect-selector');
-            const painRectValueSpan = document.getElementById('pain-slider-rect-value');
-            const rectBar = document.getElementById('pain-slider-rect-bar');
-            const rectOptions = rectBar.querySelectorAll('.pain-slider-rect-option');
+                // --- SLIDER DOULEUR RECTANGULAIRE ---
+                const painRectSelector = document.getElementById('pain-slider-rect-selector');
+                const painRectValueSpan = document.getElementById('pain-slider-rect-value');
+                const rectBar = document.getElementById('pain-slider-rect-bar');
+                const rectOptions = rectBar.querySelectorAll('.pain-slider-rect-option');
 
-            // Charge la valeur de douleur pour ce jour (0 si rien)
-            let sliderVal = (userPainData[dateId] != null) ? userPainData[dateId] : 0;
-            moveSelector(sliderVal);
-            painRectValueSpan.textContent = sliderVal;
-            painRectValue = sliderVal;
+                // Charge la valeur de douleur pour ce jour (0 si rien)
+                let sliderVal = (userPainData[dateId] != null) ? userPainData[dateId] : 0;
+                moveSelector(sliderVal);
+                painRectValueSpan.textContent = sliderVal;
+                painRectValue = sliderVal;
 
-            rectOptions.forEach(opt => {
-                opt.onclick = function() {
-                    const v = Number(this.dataset.value);
-                    moveSelector(v);
-                    userPainData[dateId] = v;
-                };
-            });
+                rectOptions.forEach(opt => {
+                    opt.onclick = function() {
+                        const v = Number(this.dataset.value);
+                        moveSelector(v);
+                        userPainData[dateId] = v;
+                    };
+                });
 
-            rectBar.onmousedown = startDrag;
-            rectBar.ontouchstart = startDrag;
+                rectBar.onmousedown = startDrag;
+                rectBar.ontouchstart = startDrag;
 
-            let isDragging = false;
-            function startDrag(e) {
-                isDragging = true;
-                moveAtEvent(e);
-                document.addEventListener('mousemove', moveAtEvent);
-                document.addEventListener('touchmove', moveAtEvent, {passive:false});
-                document.addEventListener('mouseup', stopDrag);
-                document.addEventListener('touchend', stopDrag);
-            }
-            function stopDrag(e) {
-                isDragging = false;
-                document.removeEventListener('mousemove', moveAtEvent);
-                document.removeEventListener('touchmove', moveAtEvent);
-                document.removeEventListener('mouseup', stopDrag);
-                document.removeEventListener('touchend', stopDrag);
-            }
-            function moveAtEvent(e) {
-                if (!isDragging) return;
-                let clientX = e.touches ? e.touches[0].clientX : e.clientX;
-                const rect = rectBar.getBoundingClientRect();
-                let relX = Math.max(0, Math.min(clientX - rect.left, rect.width));
-                let idx = Math.floor(relX / (rect.width / rectOptions.length));
-                idx = Math.max(0, Math.min(idx, 5));
-                moveSelector(idx);
-                painRectValueSpan.textContent = idx;
-                painRectValue = idx;
-                userPainData[dateId] = idx;
-            }
-            function moveSelector(val) {
-                const total = rectOptions.length;
-                painRectSelector.style.left = `calc(${val} * (100% / ${total}))`;
-                painRectValueSpan.textContent = val;
-                painRectValue = val;
-            }
+                let isDragging = false;
+                function startDrag(e) {
+                    isDragging = true;
+                    moveAtEvent(e);
+                    document.addEventListener('mousemove', moveAtEvent);
+                    document.addEventListener('touchmove', moveAtEvent, {passive:false});
+                    document.addEventListener('mouseup', stopDrag);
+                    document.addEventListener('touchend', stopDrag);
+                }
+                function stopDrag(e) {
+                    isDragging = false;
+                    document.removeEventListener('mousemove', moveAtEvent);
+                    document.removeEventListener('touchmove', moveAtEvent);
+                    document.removeEventListener('mouseup', stopDrag);
+                    document.removeEventListener('touchend', stopDrag);
+                }
+                function moveAtEvent(e) {
+                    if (!isDragging) return;
+                    let clientX = e.touches ? e.touches[0].clientX : e.clientX;
+                    const rect = rectBar.getBoundingClientRect();
+                    let relX = Math.max(0, Math.min(clientX - rect.left, rect.width));
+                    let idx = Math.floor(relX / (rect.width / rectOptions.length));
+                    idx = Math.max(0, Math.min(idx, 5));
+                    moveSelector(idx);
+                    painRectValueSpan.textContent = idx;
+                    painRectValue = idx;
+                    userPainData[dateId] = idx;
+                }
+                function moveSelector(val) {
+                    const total = rectOptions.length;
+                    painRectSelector.style.left = `calc(${val} * (100% / ${total}))`;
+                    painRectValueSpan.textContent = val;
+                    painRectValue = val;
+                }
 
-            // --- Type de note par défaut
-            const selectedTypeNameEl = document.getElementById("selected-type-name");
-            const selectedTypeDotEl  = document.getElementById("selected-type-dot");
-            let currentType = noteTypes[0]; // Type par défaut
-            const noteObj = userNotes[dateId] || {};
+                // --- NOTES (type & texte associé) ---
+                const selectedTypeNameEl = document.getElementById("selected-type-name");
+                const selectedTypeDotEl  = document.getElementById("selected-type-dot");
+                let currentType = noteTypes[0]; // Type par défaut
+                const noteObj = userNotes[dateId] || {};
 
-            // --- LOGIQUE AJOUTÉE POUR SÉLECTIONNER UN AUTRE TYPE SI LE TYPE PAR DÉFAUT EST VIDE ---
-            let selectedTypeName = currentType.name;
-            if ((!noteObj[selectedTypeName] || noteObj[selectedTypeName].trim() === "") && Object.keys(noteObj).length > 0) {
-                // Trouve le premier type avec une note non vide
-                for (const typeName in noteObj) {
-                    if (noteObj[typeName] && noteObj[typeName].trim() !== "") {
-                        selectedTypeName = typeName;
-                        currentType = noteTypes.find(t => t.name === typeName) || currentType;
-                        break;
+                // LOGIQUE : si une note est déjà présente pour ce jour sur un type, l’afficher !
+                let selectedTypeName = currentType.name;
+                if ((!noteObj[selectedTypeName] || noteObj[selectedTypeName].trim() === "") && Object.keys(noteObj).length > 0) {
+                    // Trouve le premier type avec une note non vide
+                    for (const typeName in noteObj) {
+                        if (noteObj[typeName] && noteObj[typeName].trim() !== "") {
+                            selectedTypeName = typeName;
+                            currentType = noteTypes.find(t => t.name === typeName) || currentType;
+                            break;
+                        }
                     }
                 }
+
+                selectedTypeNameEl.textContent = selectedTypeName;
+                selectedTypeDotEl.style.backgroundColor = currentType.color;
+                dayNoteTextarea.value = noteObj[selectedTypeName] || "";
+
+                // --- RECONSTRUIT la dropdown des types de notes ---
+                const noteTypeList = document.getElementById("note-type-list");
+                noteTypeList.innerHTML = "";
+                noteTypes.forEach(type => {
+                    const li = document.createElement("li");
+                    li.dataset.name = type.name;
+                    li.innerHTML = `
+                    <span class="color-dot" style="background:${type.color}"></span>
+                    <span class="note-type-name-option">${type.name}</span>
+                    <button class="edit-type-btn" data-name="${type.name}">…</button>
+                    `;
+                    noteTypeList.appendChild(li);
+                });
+                const addLi = document.createElement("li");
+                addLi.id        = "add-type-item";
+                addLi.className = "add-type-item";
+                addLi.textContent = "+ Ajouter";
+                noteTypeList.appendChild(addLi);
+
+                // --- Badges de notes présentes
+                updateNoteBadges(selectedDate, selectedTypeName);
+
+                // === ANTI-INFLAMMATOIRES ===
+                // Variables DOM
+                const medTakenCheckbox = document.getElementById("med-taken");
+                const medDetailsDiv = document.getElementById("med-details");
+                const medTypeNameSpan = document.getElementById("selected-med-type-name");
+                const medQtyInput = document.getElementById("med-qty");
+
+                // --- gestion des types de médicaments ---
+                let medTypes = JSON.parse(localStorage.getItem('spondylogMedTypes') || '[]');
+                if (!Array.isArray(medTypes)) medTypes = [];
+
+                // Dernier type utilisé (stocké en localStorage)
+                let lastUsedMedType = localStorage.getItem("spondylogLastMedType") || (medTypes.length ? medTypes[0].name : "Medicament");
+                let lastUsedMedQty = localStorage.getItem("spondylogLastMedQty") || "1";
+
+                const medData = userMedsData[dateId];
+
+                let typeToShow, qtyToShow;
+                if (medData && medData.type) {
+                    typeToShow = medData.type;
+                    qtyToShow = medData.qty || "1";
+                } else {
+                    typeToShow = lastUsedMedType || (medTypes.length ? medTypes[0].name : "Medicament");
+                    qtyToShow = lastUsedMedQty || "1";
+                }
+
+                medTypeNameSpan.textContent = typeToShow;
+                medQtyInput.value = qtyToShow;
+
+                // --- Gère l’état de la checkbox (prise de médoc)
+                medTakenCheckbox.checked = !!(medData && medData.type);
+                medDetailsDiv.style.display = medTakenCheckbox.checked ? "block" : "none";
+
+                // --- affiche la modale ---
+                painModal.style.display = "flex";
             }
 
-            // --- Affiche le type sélectionné et le texte de la note
-            selectedTypeNameEl.textContent = selectedTypeName;
-            selectedTypeDotEl.style.backgroundColor = currentType.color;
-            dayNoteTextarea.value = noteObj[selectedTypeName] || "";
-
-            // --- état anti-inflammatoires
-            document.getElementById("med-taken").checked = !!userMedsData[dateId];
-
-            // --- reconstruit la liste déroulante
-            const noteTypeList = document.getElementById("note-type-list");
-            noteTypeList.innerHTML = "";
-            noteTypes.forEach(type => {
-                const li = document.createElement("li");
-                li.dataset.name = type.name;
-                li.innerHTML = `
-                <span class="color-dot" style="background:${type.color}"></span>
-                <span class="note-type-name-option">${type.name}</span>
-                <button class="edit-type-btn" data-name="${type.name}">…</button>
-                `;
-                noteTypeList.appendChild(li);
-            });
-            const addLi = document.createElement("li");
-            addLi.id        = "add-type-item";
-            addLi.className = "add-type-item";
-            addLi.textContent = "+ Ajouter";
-            noteTypeList.appendChild(addLi);
-
-            // --- badges existants
-            updateNoteBadges(selectedDate, selectedTypeName);
-
-            // --- affiche la modale
-            painModal.style.display = "flex";
-
-            // --- anti-inflammatoires
-            if (userMedsData[dateId]) {
-                medTakenCheckbox.checked = true;
-                medDetailsDiv.style.display = 'block';
-                document.getElementById('med-type').value = userMedsData[dateId].type || 'Medicament';
-                medQtyInput.value = userMedsData[dateId].qty || 1;
-            } else {
-                medTakenCheckbox.checked = false;
-                medDetailsDiv.style.display = 'none';
-                medQtyInput.value = 1;
-            }
-        }
 
 
 
@@ -3310,228 +3357,224 @@
 
         // Événements pour le graphique
         document.addEventListener("DOMContentLoaded", function() {
-        // 1. Récupérer les éléments
-        const showChartBtn    = document.getElementById("show-chart-btn");
-        const chartModal      = document.getElementById("chart-modal");
-        const dateRangeSelect = document.getElementById("date-range");
-        const customDateRange = document.getElementById("custom-date-range");
-        const startDateInput  = document.getElementById("start-date");
-        const endDateInput    = document.getElementById("end-date");
+            // 1. Récupérer les éléments
+            const showChartBtn    = document.getElementById("show-chart-btn");
+            const chartModal      = document.getElementById("chart-modal");
+            const dateRangeSelect = document.getElementById("date-range");
+            const customDateRange = document.getElementById("custom-date-range");
+            const startDateInput  = document.getElementById("start-date");
+            const endDateInput    = document.getElementById("end-date");
 
-        // 2. Calculer aujourd'hui et il y a 30 jours
-        const today         = new Date();
-        const thirtyDaysAgo = new Date();
-        thirtyDaysAgo.setDate(today.getDate() - 30);
+            // 2. Calculer aujourd'hui et il y a 30 jours
+            const today         = new Date();
+            const thirtyDaysAgo = new Date();
+            thirtyDaysAgo.setDate(today.getDate() - 30);
 
-        // 3. Fonction utilitaire pour formater YYYY‑MM‑JJ (pour <input type="date">)
-        function formatForInput(date) {
-            const yyyy = date.getFullYear();
-            const mm   = String(date.getMonth()+1).padStart(2,"0");
-            const dd   = String(date.getDate()  ).padStart(2,"0");
-            return `${yyyy}-${mm}-${dd}`;
-        }
+            // 3. Fonction utilitaire pour formater YYYY‑MM‑JJ (pour <input type="date">)
+            function formatForInput(date) {
+                const yyyy = date.getFullYear();
+                const mm   = String(date.getMonth()+1).padStart(2,"0");
+                const dd   = String(date.getDate()  ).padStart(2,"0");
+                return `${yyyy}-${mm}-${dd}`;
+            }
 
-        // 4. Initialiser une fois, au chargement, les dates personnalisées
-        startDateInput.value = formatForInput(thirtyDaysAgo);
-        endDateInput  .value = formatForInput(today);
-
-        // 5. Gérer le clic sur « Voir graphique »
-        showChartBtn.addEventListener("click", function() {
-            // a) Toujours remettre la période sur « 30 » :
-            dateRangeSelect.value = "30";
-
-            // b) Masquer le form de dates custom au cas où :
-            customDateRange.style.display = "none";
-
-            // c) (Re)Initialiser les valeurs des deux calendar inputs :
+            // 4. Initialiser une fois, au chargement, les dates personnalisées
             startDateInput.value = formatForInput(thirtyDaysAgo);
             endDateInput  .value = formatForInput(today);
 
-            // d) Générer le graphique pour 30 jours
-            generateChart(30);
+            // 5. Gérer le clic sur « Voir graphique »
+            showChartBtn.addEventListener("click", function() {
+                // a) Toujours remettre la période sur « 30 » :
+                dateRangeSelect.value = "30";
 
-            // e) Ouvrir la modal
-            chartModal.style.display = "flex";
-        });
-        
-        // Événement pour afficher le graphique
-        showChartBtn.addEventListener("click", function() {
-        generateChart(30); // Génère le graphique pour les 30 derniers jours
-        chartModal.style.display = "flex"; // Affiche le modal sans forcer le changement de vue
-        });
-        
-        // Fermer le modal du graphique
-        closeChartBtn.addEventListener("click", function() {
-            chartModal.style.display = "none";
-        });
-        
-        // Fermer le modal si clic en dehors
-        window.addEventListener("click", function(event) {
-            if (event.target === chartModal) {
-                chartModal.style.display = "none";
-            }
-        });
-        
-        // Événement pour le changement de période
-        dateRangeSelect.addEventListener("change", function() {
-            const range = this.value;
-            
-            if (range === "custom") {
-                customDateRange.style.display = "block";
-            } else {
+                // b) Masquer le form de dates custom au cas où :
                 customDateRange.style.display = "none";
-                generateChart(parseInt(range));
-            }
-        });
-        
-        // Événement pour appliquer les dates personnalisées
-        applyCustomDatesBtn.addEventListener("click", function() {
-            const startDate = new Date(startDateInput.value);
-            const endDate = new Date(endDateInput.value);
+
+                // c) (Re)Initialiser les valeurs des deux calendar inputs :
+                startDateInput.value = formatForInput(thirtyDaysAgo);
+                endDateInput  .value = formatForInput(today);
+
+                // d) Générer le graphique pour 30 jours
+                generateChart(30);
+
+                // e) Ouvrir la modal
+                chartModal.style.display = "flex";
+            });
             
-            if (startDate && endDate && startDate <= endDate) {
-                generateCustomChart(startDate, endDate);
-            } else {
-                alert("Veuillez sélectionner des dates valides (la date de début doit être antérieure ou égale à la date de fin).");
-            }
-        });
-
-        // Sélectionner les éléments
-        const importExportBtn = document.getElementById("import-export-btn");
-        const importExportDropdown = document.getElementById("import-export-dropdown");
-        const importOption = document.getElementById("import-option");
-        const exportOption = document.getElementById("export-option");
-        const statItems = document.querySelectorAll('.stat-item');
-        statItems.forEach(item => {
-        item.style.margin = '0 5px';
-        item.style.padding = '3px'});
-
-        // Afficher/Masquer le menu déroulant
-        importExportBtn.addEventListener("click", () => {
-        // Toggle l'affichage
-        if (importExportDropdown.style.display === "none" || importExportDropdown.style.display === "") {
-            importExportDropdown.style.display = "block";
-        } else {
-            importExportDropdown.style.display = "none";
-        }
-        });
-
-        // Fermer le dropdown si clic en dehors
-        window.addEventListener("click", (event) => {
-        if (!document.getElementById("import-export-container").contains(event.target)) {
-            importExportDropdown.style.display = "none";
-        }
-        });
-
-        // Gestion du clic sur l'option "Exporter"
-        exportOption.addEventListener("click", () => {
-        exportData();
-        importExportDropdown.style.display = "none";
-        });
-
-        // Gestion du clic sur l'option "Importer"
-        importOption.addEventListener("click", () => {
-        // Déclencher le click sur un input file caché
-        document.getElementById("import-file-input").click();
-        importExportDropdown.style.display = "none";
-        });
-
-        function exportData() {
-        // Ajoute medTypes à l'export (avec sécurité si la variable n'est pas initialisée)
-        const medTypesSaved = localStorage.getItem('spondylogMedTypes');
-        const exportObj = {
-            painData:  userPainData,
-            notes:     userNotes,
-            medsData:  userMedsData,
-            noteTypes: noteTypes,
-            medTypes:  medTypesSaved ? JSON.parse(medTypesSaved) : (typeof medTypes !== "undefined" ? medTypes : [])
-        };
-
-        // Convertir en JSON joliment indenté
-        const dataStr = JSON.stringify(exportObj, null, 2);
-
-        // Créer un Blob pour le JSON
-        const blob = new Blob([dataStr], { type: "application/json" });
-
-        // Générer un lien de téléchargement temporaire
-        const url = URL.createObjectURL(blob);
-        const a   = document.createElement("a");
-        a.href    = url;
-        a.download = "spondylog_export.json";
-        document.body.appendChild(a);
-        a.click();
-
-        // Nettoyer
-        document.body.removeChild(a);
-        URL.revokeObjectURL(url);
-    }
-
-    const importFileInput = document.getElementById("import-file-input");
-
-    importFileInput.addEventListener("change", (event) => {
-        const file = event.target.files[0];
-        if (!file) return;
-
-        const reader = new FileReader();
-        reader.onload = function(e) {
-            try {
-                const importedData = JSON.parse(e.target.result);
-
-                // Vérification que les 3 champs existent
-                if (importedData.painData && importedData.notes && importedData.medsData) {
-                    // Mise à jour des données
-                    userPainData = importedData.painData;
-                    userNotes    = importedData.notes;
-                    userMedsData = importedData.medsData;
-
-                    // 🟢 Importer les types de notes (et couleurs)
-                    if (importedData.noteTypes && Array.isArray(importedData.noteTypes)) {
-                        noteTypes = importedData.noteTypes;
-                        localStorage.setItem('spondylogNoteTypes', JSON.stringify(noteTypes));
-                    }
-
-                    // 🟢 Importer les types de médicaments personnalisés
-                    if (importedData.medTypes && Array.isArray(importedData.medTypes)) {
-                        medTypes = importedData.medTypes;
-                        localStorage.setItem('spondylogMedTypes', JSON.stringify(medTypes));
-                        // Met à jour le dropdown UI si la fonction existe
-                        if (typeof renderMedTypeDropdown === "function") {
-                            renderMedTypeDropdown(medTypes[0]?.name);
-                        }
-                    }
-
-                    // Compatibilité avec l’ancien format de notes (string → { cat: texte })
-                    const defaultCat = noteTypes[0]?.name || "Catégorie 1"; // sécurité si absent
-                    for (let date in userNotes) {
-                        if (typeof userNotes[date] === "string") {
-                            userNotes[date] = { [defaultCat]: userNotes[date] };
-                        }
-                    }
-
-                    // Sauvegarde et rafraîchissement de la vue
-                    saveUserData();
-                    if (currentView === "month") {
-                        renderCalendar(currentMonth, currentYear);
-                    } else {
-                        renderYearView(currentYear);
-                    }
-
-                    alert("Importation réussie !");
-                } else {
-                    alert("Le fichier importé ne contient pas les données attendues.");
+            // Événement pour afficher le graphique
+            showChartBtn.addEventListener("click", function() {
+            generateChart(30); // Génère le graphique pour les 30 derniers jours
+            chartModal.style.display = "flex"; // Affiche le modal sans forcer le changement de vue
+            });
+            
+            // Fermer le modal du graphique
+            closeChartBtn.addEventListener("click", function() {
+                chartModal.style.display = "none";
+            });
+            
+            // Fermer le modal si clic en dehors
+            window.addEventListener("click", function(event) {
+                if (event.target === chartModal) {
+                    chartModal.style.display = "none";
                 }
-            } catch (error) {
-                alert("Erreur lors de la lecture du fichier : " + error.message);
+            });
+            
+            // Événement pour le changement de période
+            dateRangeSelect.addEventListener("change", function() {
+                const range = this.value;
+                
+                if (range === "custom") {
+                    customDateRange.style.display = "block";
+                } else {
+                    customDateRange.style.display = "none";
+                    generateChart(parseInt(range));
+                }
+            });
+            
+            // Événement pour appliquer les dates personnalisées
+            applyCustomDatesBtn.addEventListener("click", function() {
+                const startDate = new Date(startDateInput.value);
+                const endDate = new Date(endDateInput.value);
+                
+                if (startDate && endDate && startDate <= endDate) {
+                    generateCustomChart(startDate, endDate);
+                } else {
+                    alert("Veuillez sélectionner des dates valides (la date de début doit être antérieure ou égale à la date de fin).");
+                }
+            });
+
+            // Sélectionner les éléments
+            const importExportBtn = document.getElementById("import-export-btn");
+            const importExportDropdown = document.getElementById("import-export-dropdown");
+            const importOption = document.getElementById("import-option");
+            const exportOption = document.getElementById("export-option");
+            const statItems = document.querySelectorAll('.stat-item');
+            statItems.forEach(item => {
+            item.style.margin = '0 5px';
+            item.style.padding = '3px'});
+
+            // Afficher/Masquer le menu déroulant
+            importExportBtn.addEventListener("click", () => {
+                // Toggle l'affichage
+                if (importExportDropdown.style.display === "none" || importExportDropdown.style.display === "") {
+                    importExportDropdown.style.display = "block";
+                } else {
+                    importExportDropdown.style.display = "none";
+                }
+            });
+
+            // Fermer le dropdown si clic en dehors
+            window.addEventListener("click", (event) => {
+                if (!document.getElementById("import-export-container").contains(event.target)) {
+                    importExportDropdown.style.display = "none";
+                }
+            });
+
+            // Gestion du clic sur l'option "Exporter"
+            exportOption.addEventListener("click", () => {
+                exportData();
+                importExportDropdown.style.display = "none";
+            });
+
+            // Gestion du clic sur l'option "Importer"
+            importOption.addEventListener("click", () => {
+                // Déclencher le click sur un input file caché
+                document.getElementById("import-file-input").click();
+                importExportDropdown.style.display = "none";
+            });
+
+            function exportData() {
+            // Ajoute medTypes à l'export (avec sécurité si la variable n'est pas initialisée)
+            const medTypesSaved = localStorage.getItem('spondylogMedTypes');
+            const exportObj = {
+                painData:  userPainData,
+                notes:     userNotes,
+                medsData:  userMedsData,
+                noteTypes: noteTypes,
+                medTypes:  medTypesSaved ? JSON.parse(medTypesSaved) : (typeof medTypes !== "undefined" ? medTypes : [])
+            };
+
+            // Convertir en JSON joliment indenté
+            const dataStr = JSON.stringify(exportObj, null, 2);
+
+            // Créer un Blob pour le JSON
+            const blob = new Blob([dataStr], { type: "application/json" });
+
+            // Générer un lien de téléchargement temporaire
+            const url = URL.createObjectURL(blob);
+            const a   = document.createElement("a");
+                a.href    = url;
+                a.download = "spondylog_export.json";
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
             }
-        };
 
-        reader.readAsText(file);
-    });
+            const importFileInput = document.getElementById("import-file-input");
 
+            importFileInput.addEventListener("change", (event) => {
+                const file = event.target.files[0];
+                if (!file) return;
 
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    try {
+                        const importedData = JSON.parse(e.target.result);
 
+                        // Vérification que les 3 champs existent
+                        if (importedData.painData && importedData.notes && importedData.medsData) {
+                            // Mise à jour des données
+                            userPainData = importedData.painData;
+                            userNotes    = importedData.notes;
+                            userMedsData = importedData.medsData;
 
-    });
+                            // 🟢 Importer les types de notes (et couleurs)
+                            if (importedData.noteTypes && Array.isArray(importedData.noteTypes)) {
+                                noteTypes = importedData.noteTypes;
+                                localStorage.setItem('spondylogNoteTypes', JSON.stringify(noteTypes));
+                            }
+
+                            // 🟢 Importer les types de médicaments personnalisés
+                            if (importedData.medTypes && Array.isArray(importedData.medTypes)) {
+                                medTypes = importedData.medTypes;
+                                localStorage.setItem('spondylogMedTypes', JSON.stringify(medTypes));
+                                // Met à jour le dropdown UI si la fonction existe
+                                if (typeof renderMedTypeDropdown === "function") {
+                                    renderMedTypeDropdown(medTypes[0]?.name);
+                                }
+                            }
+
+                            // Compatibilité avec l’ancien format de notes (string → { cat: texte })
+                            const defaultCat = noteTypes[0]?.name || "Catégorie 1"; // sécurité si absent
+                            for (let date in userNotes) {
+                                if (typeof userNotes[date] === "string") {
+                                    userNotes[date] = { [defaultCat]: userNotes[date] };
+                                }
+                            }
+
+                            // Sauvegarde et rafraîchissement de la vue
+                            saveUserData();
+                            if (currentView === "month") {
+                                renderCalendar(currentMonth, currentYear);
+                            } else {
+                                renderYearView(currentYear);
+                            }
+
+                            alert("Importation réussie !");
+                        } else {
+                            alert("Le fichier importé ne contient pas les données attendues.");
+                        }
+                    } catch (error) {
+                        alert("Erreur lors de la lecture du fichier : " + error.message);
+                    }
+                };
+                
+        
+            reader.readAsText(file);
+            });
+
+        });
 
         // Fonction pour formater une date pour les champs input de type date
         function formatDateForInput(date) {
@@ -3794,27 +3837,34 @@
             chartContainer.insertBefore(legendContainer, document.getElementById('pain-chart'));
             
         }
-        // Fonction pour sauvegarder le pense-bête dans le localStorage
-        function savePenseBete() {
-            const penseBeteText = document.getElementById("pense-bête-note").value;
-            localStorage.setItem("spondylogPenseBete", penseBeteText);
+
+         // Fonction pour sauvegarder le pense-bête dans le localStorage
+         function savePenseBete() {
+            const penseBeteTextarea = document.getElementById("pense-bête-note");
+            if (penseBeteTextarea) {
+                localStorage.setItem("spondylogPenseBete", penseBeteTextarea.value);
             }
+        }
 
-            // Fonction pour charger le pense-bête depuis le localStorage
-            function loadPenseBete() {
-            const savedPenseBete = localStorage.getItem("spondylogPenseBete");
-            if (savedPenseBete) {
-                document.getElementById("pense-bête-note").value = savedPenseBete;
-            }}
+        // Fonction pour charger le pense-bête depuis le localStorage
+        function loadPenseBete() {
+            const penseBeteTextarea = document.getElementById("pense-bête-note");
+            if (penseBeteTextarea) {
+                const savedPenseBete = localStorage.getItem("spondylogPenseBete");
+                penseBeteTextarea.value = savedPenseBete || "";
+            }
+        }
 
-            // Appeler loadPenseBete() au chargement de la page
-            document.addEventListener("DOMContentLoaded", function() {
+        // Appeler loadPenseBete() au chargement de la page
+        document.addEventListener("DOMContentLoaded", function() {
             loadPenseBete();
 
             // Sauvegarder automatiquement lorsque le contenu change
             const penseBeteTextarea = document.getElementById("pense-bête-note");
-            penseBeteTextarea.addEventListener("input", savePenseBete);
-            })
+            if (penseBeteTextarea) {
+                penseBeteTextarea.addEventListener("input", savePenseBete);
+            }
+        });
     </script>
 
 </body>
