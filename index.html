@@ -2152,15 +2152,24 @@
             }
             }
 
-            // Ouvre le modal pour éditer un type
-            function openMedTypeModalForEdit(typeName) {
-                editingMedTypeName = typeName;
-                document.getElementById('med-type-modal-title').textContent = "Modifier le type de médicament ";
-                document.getElementById('med-type-name-input').value = typeName;
-                document.getElementById('delete-med-type-btn').style.display = "inline-block";
-                document.getElementById('med-type-modal').style.display = "flex";
+            // Ouvre le modal pour ajouter un type
+            function openMedTypeModalForAdd() {
+            editingMedTypeName = null;
+            document.getElementById('med-type-modal-title').textContent = "Ajouter un type d’anti-inflammatoire";
+            document.getElementById('med-type-name-input').value = "";
+            document.getElementById('delete-med-type-btn').style.display = "none";
+            document.getElementById('med-type-modal').style.display = "flex";
             }
 
+            // Ouvre le modal pour éditer un type
+            function openMedTypeModalForEdit(typeName) {
+            editingMedTypeName = typeName;
+            document.getElementById('med-type-modal-title').textContent = "Modifier le type d’anti-inflammatoire";
+            document.getElementById('med-type-name-input').value = typeName;
+            document.getElementById('delete-med-type-btn').style.display = "inline-block";
+            document.getElementById('med-type-modal').style.display = "flex";
+            }
+            
             document.addEventListener("DOMContentLoaded", function() {
                 loadMedTypes();
                 renderMedTypeDropdown();
