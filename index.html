@@ -1,3 +1,4 @@
+<!doctype html
 <!DOCTYPE html>
 <html lang="fr">
 <head>
@@ -1372,7 +1373,25 @@
             </div>
         </div>
 
-        <div class="legend">
+    
+        <!-- Bouton pour voir toutes les notes -->
+            <div class="view-all-notes">
+                <button id="show-notes-btn" class="view-btn">Voir toutes les notes</button>
+                <button id="show-chart-btn" class="view-btn">Voir graphique</button>
+            </div>
+        </div>
+
+        <!-- Bouton Import/Export -->
+        <div id="import-export-container">
+            <button id="import-export-btn">Import/Export</button>
+            <div id="import-export-dropdown">
+                <div id="import-option" style="padding: 10px; cursor: pointer;">Importer</div>
+                <div id="export-option" style="padding: 10px; cursor: pointer;">Exporter</div>
+            </div>
+        </div>
+        </div>
+
+          <div class="legend">
             <h3>Légende des niveaux de douleur</h3>
             <div class="color-scale">
                 <div class="color-item">
@@ -1400,23 +1419,6 @@
                     <span>5 - Extrême</span>
                 </div>
             </div>
-        </div>
-    
-        <!-- Bouton pour voir toutes les notes -->
-            <div class="view-all-notes">
-                <button id="show-notes-btn" class="view-btn">Voir toutes les notes</button>
-                <button id="show-chart-btn" class="view-btn">Voir graphique</button>
-            </div>
-        </div>
-
-        <!-- Bouton Import/Export -->
-        <div id="import-export-container">
-            <button id="import-export-btn">Import/Export</button>
-            <div id="import-export-dropdown">
-                <div id="import-option" style="padding: 10px; cursor: pointer;">Importer</div>
-                <div id="export-option" style="padding: 10px; cursor: pointer;">Exporter</div>
-            </div>
-        </div>
         </div>
 
         <!-- Modal pour afficher le graphique -->
