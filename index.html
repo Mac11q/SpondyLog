@@ -92,19 +92,23 @@
             background: var(--primary-color);
         }
 
-        .calendar-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 15px;
-        }
+calendar-header {
+    /* On espace le header du calendrier */
+    margin-bottom: 20px;
+}
 
-        .calendar-nav {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
+.calendar-toolbar {
+    display: flex;
+    align-items: center;      /* alignement vertical parfait */
+    justify-content: space-between; /* nav à gauche, bouton à droite */
+    gap: 24px;                /* espace entre nav et bouton */
+}
 
+.calendar-nav {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
         .nav-btn-style {
             background: var(--primary-color);
             color: white;
@@ -1259,7 +1263,7 @@
 
         #import-export-container {
             position: relative; /* au lieu de fixed */
-            margin-top: 20px;   /* espace en haut */
+            margin-bottom: 5px;   /* espace en haut */
             text-align: right;  /* aligne à droite */
             z-index: 99;
         }
@@ -1331,32 +1335,39 @@
         </div>
 
         <!-- Vue mensuelle -->
-        <div id="month-view" class="month-view">
-            <div class="calendar-header">
-                <div class="calendar-nav">
-                    <button id="prev-month" class="nav-btn-style">←</button>
-                    <div id="current-month" class="current-month"></div>
-                    <button id="next-month" class="nav-btn-style">→</button>
+<div id="month-view" class="month-view">
+    <div class="calendar-header">
+        <div class="calendar-toolbar">
+            <!-- NAVIGATION MOIS & BOUTON IMPORT/EXPORT SUR LA MÊME LIGNE ! -->
+            <button id="prev-month" class="nav-btn-style">←</button>
+            <div id="current-month" class="current-month">Juin 2025</div>
+            <button id="next-month" class="nav-btn-style">→</button>
+            <div id="import-export-container">
+                <button id="import-export-btn">📁</button>
+                <div id="import-export-dropdown">
+                    <div id="import-option" style="padding: 10px; cursor: pointer;">Importer</div>
+                    <div id="export-option" style="padding: 10px; cursor: pointer;">Exporter</div>
                 </div>
             </div>
-
-            <table class="calendar" id="calendar">
-                <thead>
-                    <tr>
-                        <th>Lun</th>
-                        <th>Mar</th>
-                        <th>Mer</th>
-                        <th>Jeu</th>
-                        <th>Ven</th>
-                        <th>Sam</th>
-                        <th>Dim</th>
-                    </tr>
-                </thead>
-                <tbody id="calendar-body">
-                    <!-- Le contenu du calendrier sera généré dynamiquement par JavaScript -->
-                </tbody>
-            </table>
         </div>
+    </div>
+    <table class="calendar" id="calendar">
+        <thead>
+            <tr>
+                <th>Lun</th>
+                <th>Mar</th>
+                <th>Mer</th>
+                <th>Jeu</th>
+                <th>Ven</th>
+                <th>Sam</th>
+                <th>Dim</th>
+            </tr>
+        </thead>
+        <tbody id="calendar-body">
+            <!-- Le contenu du calendrier sera généré dynamiquement par JavaScript -->
+        </tbody>
+    </table>
+</div>
 
         <!-- Vue annuelle -->
         <div id="year-view" class="year-view">
@@ -1379,16 +1390,6 @@
                 <button id="show-notes-btn" class="view-btn">Voir toutes les notes</button>
                 <button id="show-chart-btn" class="view-btn">Voir graphique</button>
             </div>
-        </div>
-
-        <!-- Bouton Import/Export -->
-        <div id="import-export-container">
-            <button id="import-export-btn">Import/Export</button>
-            <div id="import-export-dropdown">
-                <div id="import-option" style="padding: 10px; cursor: pointer;">Importer</div>
-                <div id="export-option" style="padding: 10px; cursor: pointer;">Exporter</div>
-            </div>
-        </div>
         </div>
 
           <div class="legend">
