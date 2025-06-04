@@ -1862,7 +1862,6 @@
         saveTypeBtn.addEventListener('click', function(e) {
             e.preventDefault();
 
-            // Récupérer le nom et la couleur choisis
             const newName  = typeNameInput.value.trim();
             const newColor = typeColorInput.value;
 
@@ -1912,6 +1911,11 @@
                 dayNoteTextarea.value = "";
                 // 7. Mettre à jour les badges
                 updateNoteBadges(selectedDate, newName);
+
+                // 8. Rafraîchir toutes les vues concernées
+                renderCalendar(currentMonth, currentYear);
+                renderNotesList();
+                populateNoteTypeFilter();
                 return;
             }
 
@@ -1920,22 +1924,31 @@
             const typeObj = noteTypes.find(t => t.name === editingTypeName);
             if (typeObj) {
                 // 1. Mettre à jour nom & couleur
+                const wasNameChanged = (typeObj.name !== newName);
                 typeObj.name  = newName;
                 typeObj.color = newColor;
-                // 2. Mettre à jour les clés dans userNotes pour conserver les notes existantes
-                for (let date in userNotes) {
-                    if (userNotes[date][editingTypeName] !== undefined) {
-                        userNotes[date][newName] = userNotes[date][editingTypeName];
-                        delete userNotes[date][editingTypeName];
+                // 2. Mettre à jour les clés dans userNotes si renommage
+                if (wasNameChanged) {
+                    for (let date in userNotes) {
+                        if (userNotes[date][editingTypeName] !== undefined) {
+                            userNotes[date][newName] = userNotes[date][editingTypeName];
+                            delete userNotes[date][editingTypeName];
+                        }
                     }
                 }
                 // 3. Persister types et notes
                 localStorage.setItem('spondylogNoteTypes', JSON.stringify(noteTypes));
                 localStorage.setItem('spondylogNotes',    JSON.stringify(userNotes));
-                // 4. Mettre à jour l’affichage du modal de notes
+
+                // 4. Rafraîchir toutes les vues concernées
+                renderCalendar(currentMonth, currentYear);
+                renderNotesList();
+                populateNoteTypeFilter();
+
+                // 5. Mettre à jour l’affichage du modal de notes (si ouvert)
                 showPainModal(selectedDate);
 
-                // 5. 👉 Forcer la sélection de la nouvelle catégorie dans la modale
+                // 6. 👉 Forcer la sélection de la catégorie (nouveau nom si renommé)
                 setTimeout(function() {
                     const liToSelect = document.querySelector(`#note-type-list li[data-name="${newName}"]`);
                     if (liToSelect) liToSelect.click();
@@ -1945,6 +1958,7 @@
             // Fermer le modal d’ajout/édition
             noteTypeModal.style.display = "none";
         });
+
 
 
 
