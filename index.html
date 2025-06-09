@@ -1470,10 +1470,13 @@
                             <div>
                                 <label for="end-date">Au :</label>
                                 <input type="date" id="end-date">
-                            </div>
                         </div>
                         <button id="apply-custom-dates" class="view-btn" style="margin-top: 5px; padding: 4px 12px; font-size: 0.9em; display: block; margin-left: auto; margin-right: auto;">Appliquer</button>
                     </div>
+                </div>
+                <div style="margin-top: 10px; display: flex; align-items: center; gap: 10px;">
+                    <label for="chart-note-types">Types de notes :</label>
+                    <select id="chart-note-types" multiple style="min-width: 150px;"></select>
                 </div>
                 <div class="chart-container" style="position: relative; height: 350px; margin-bottom: 10px;">
                     <canvas id="pain-chart"></canvas>
@@ -3489,6 +3492,7 @@
         const startDateInput = document.getElementById("start-date");
         const endDateInput = document.getElementById("end-date");
         const applyCustomDatesBtn = document.getElementById("apply-custom-dates");
+        const chartNoteTypesSelect = document.getElementById("chart-note-types");
 
         // Événements pour le graphique
         document.addEventListener("DOMContentLoaded", function() {
@@ -3499,6 +3503,7 @@
             const customDateRange = document.getElementById("custom-date-range");
             const startDateInput  = document.getElementById("start-date");
             const endDateInput    = document.getElementById("end-date");
+            const chartNoteTypesSelect = document.getElementById("chart-note-types");
 
             // 2. Calculer aujourd'hui et il y a 30 jours
             const today         = new Date();
@@ -3565,6 +3570,21 @@
                     generateChart(parseInt(range));
                 }
             });
+
+            // Filtre des types de notes affichés sur le graphique
+            if (chartNoteTypesSelect) {
+                chartNoteTypesSelect.addEventListener('change', () => {
+                    const selected = Array.from(chartNoteTypesSelect.selectedOptions).map(o => o.value);
+                    localStorage.setItem('spondylogChartNoteFilter', JSON.stringify(selected));
+                    if (dateRangeSelect.value === 'custom') {
+                        const s = new Date(startDateInput.value);
+                        const e = new Date(endDateInput.value);
+                        generateCustomChart(s, e);
+                    } else {
+                        generateChart(parseInt(dateRangeSelect.value));
+                    }
+                });
+            }
             
             // Événement pour appliquer les dates personnalisées
             applyCustomDatesBtn.addEventListener("click", function() {
@@ -3739,6 +3759,10 @@
             // Réinitialiser les dates à minuit pour une comparaison correcte
             startDate.setHours(0, 0, 0, 0);
             endDate.setHours(23, 59, 59, 999); // Fin de journée
+
+            const selectedTypes = Array.from(document.getElementById('chart-note-types')?.selectedOptions || []).map(o => o.value);
+            const noteDatasetsMap = {};
+            selectedTypes.forEach(t => noteDatasetsMap[t] = []);
             
             // Préparer les données
             const dates = [];
@@ -3780,6 +3804,22 @@
                 // Ajuster la valeur affichée : si douleur=0 et anti-inflammatoire pris, utiliser 0.3
                 const displayValue = (painValue === 0 && medTaken) ? 0.05 : painValue;
                 painData.push(displayValue);
+
+                selectedTypes.forEach((t, idx) => {
+                    const noteText = userNotes[dateId] && userNotes[dateId][t];
+                    if (noteText && noteText.trim() !== '') {
+                        const base = painValue !== null ? painValue : 0;
+                        const yVal = base + 0.2 + idx * 0.2;
+                        noteDatasetsMap[t].push({
+                            x: dates.length - 1,
+                            y: yVal,
+                            note: noteText,
+                            date: `${day}/${month}/${currentDate.getFullYear()}`,
+                            color: (noteTypes.find(n => n.name === t) || {}).color || '#3498db',
+                            typeName: t
+                        });
+                    }
+                });
                 
                 // Passer au jour suivant
                 currentDate.setDate(currentDate.getDate() + 1);
@@ -3810,6 +3850,29 @@
             // Si anti-inflammatoire pris ce jour-là, bordure bleue, sinon bordure rouge
             return medData[index] ? 'rgba(54, 162, 235, 1)' : 'rgba(255, 99, 132, 1)';
         });
+
+        const yMax = Math.max(5, maxPain) + selectedTypes.length * 0.4 + 0.5;
+
+        const noteDatasets = selectedTypes.map((t, idx) => {
+            const color = (noteTypes.find(n => n.name === t) || {}).color || '#3498db';
+            return {
+                type: 'scatter',
+                label: t,
+                data: noteDatasetsMap[t],
+                backgroundColor: color,
+                borderColor: color,
+                showLine: false,
+                order: 2,
+                pointRadius: ctx => {
+                    const w = ctx.chart.chartArea.width / dates.length;
+                    return Math.max(3, w / 4);
+                },
+                pointHoverRadius: ctx => {
+                    const w = ctx.chart.chartArea.width / dates.length;
+                    return Math.max(3, w / 3);
+                }
+            };
+        });
         
         // Détruire le graphique existant s'il y en a un
         if (painChart) {
@@ -3828,7 +3891,7 @@
                     backgroundColor: barColors,
                     borderColor: borderColors,
                     borderWidth: 1
-                }]
+                }].concat(noteDatasets)
             },
             options: {
                 responsive: true,
@@ -3849,7 +3912,7 @@
                             text: 'Niveau de douleur'
                         },
                         min: 0,
-                        max: 5,
+                        max: yMax,
                         ticks: {
                             stepSize: 1
                         }
@@ -3859,17 +3922,22 @@
                     tooltip: {
                         callbacks: {
                             title: function(tooltipItems) {
-                                const index = tooltipItems[0].dataIndex;
+                                const ctx = tooltipItems[0];
+                                if (ctx.dataset.type === 'scatter') {
+                                    return ctx.raw.date;
+                                }
+                                const index = ctx.dataIndex;
                                 const currentDate = new Date(startDate);
                                 currentDate.setDate(startDate.getDate() + index);
-                                
                                 const day = String(currentDate.getDate()).padStart(2, '0');
                                 const month = String(currentDate.getMonth() + 1).padStart(2, '0');
                                 const year = currentDate.getFullYear();
-                                
                                 return `${day}/${month}/${year}`;
                             },
                             label: function(context) {
+                                if (context.dataset.type === 'scatter') {
+                                    return `Type: ${context.raw.typeName}`;
+                                }
                                 const value = context.parsed.y;
                                 if (value === null) return 'Niveau de douleur: Non renseigné';
                                 return `Niveau de douleur: ${value}`;
@@ -3886,11 +3954,12 @@
                                 currentDate.setDate(startDate.getDate() + index);
                                 
                                 const dateId = `${currentDate.getFullYear()}-${currentDate.getMonth() + 1}-${currentDate.getDate()}`;
-                                const note = userNotes[dateId];
-                                
-                                if (note) {
-                                    // Limiter la longueur de la note à afficher dans l'infobulle
-                                    return [medText, `Note: ${note.length > 50 ? note.substring(0, 50) + '...' : note}`];
+                                const noteObj = userNotes[dateId];
+                                if (noteObj && typeof noteObj === 'object') {
+                                    const texts = Object.values(noteObj).filter(v => v && v.trim() !== '');
+                                    if (texts.length) {
+                                        return [medText, `Note: ${texts[0].substring(0,50)}${texts[0].length>50?'...':''}`];
+                                    }
                                 }
                                 
                                 return medText;
