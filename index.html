@@ -92,23 +92,23 @@
             background: var(--primary-color);
         }
 
-calendar-header {
-    /* On espace le header du calendrier */
-    margin-bottom: 20px;
-}
+        calendar-header {
+            /* On espace le header du calendrier */
+            margin-bottom: 20px;
+        }
 
-.calendar-toolbar {
-    display: flex;
-    align-items: center;      /* alignement vertical parfait */
-    justify-content: space-between; /* nav à gauche, bouton à droite */
-    gap: 24px;                /* espace entre nav et bouton */
-}
+        .calendar-toolbar {
+            display: flex;
+            align-items: center;      /* alignement vertical parfait */
+            justify-content: space-between; /* nav à gauche, bouton à droite */
+            gap: 24px;                /* espace entre nav et bouton */
+        }
 
-.calendar-nav {
-    display: flex;
-    align-items: center;
-    gap: 16px;
-}
+        .calendar-nav {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
         .nav-btn-style {
             background: var(--primary-color);
             color: white;
@@ -140,9 +140,9 @@ calendar-header {
     }
 
     .note-dot,
-    .med-indicator {
-        position: relative; /* Pour le positionnement du tooltip */
-    }
+        .med-indicator {
+            position: relative; /* Pour le positionnement du tooltip */
+        }
 
     .note-dot {
         width: 8px;
@@ -200,7 +200,7 @@ calendar-header {
         position: relative;
     }
 
-        /* Style mis à jour pour la légende */
+    /* Style mis à jour pour la légende */
         .legend {
             margin: 20px 0;
             padding: 15px;
@@ -1262,9 +1262,9 @@ calendar-header {
         }
 
         #import-export-container {
-            position: relative; /* au lieu de fixed */
-            margin-bottom: 5px;   /* espace en haut */
-            text-align: right;  /* aligne à droite */
+            position: relative;
+            text-align: center;
+            margin: 5px 0;
             z-index: 99;
         }
 
@@ -1335,13 +1335,39 @@ calendar-header {
         </div>
 
         <!-- Vue mensuelle -->
-<div id="month-view" class="month-view">
-    <div class="calendar-header">
-        <div class="calendar-toolbar">
-            <!-- NAVIGATION MOIS & BOUTON IMPORT/EXPORT SUR LA MÊME LIGNE ! -->
-            <button id="prev-month" class="nav-btn-style">←</button>
-            <div id="current-month" class="current-month">Juin 2025</div>
-            <button id="next-month" class="nav-btn-style">→</button>
+        <div id="month-view" class="month-view">
+            <div class="calendar-header">
+                <div class="calendar-toolbar">
+                    <!-- NAVIGATION MOIS & BOUTON IMPORT/EXPORT SUR LA MÊME LIGNE ! -->
+                    <!-- NAVIGATION MOIS -->
+                    <button id="prev-month" class="nav-btn-style">←</button>
+                    <div id="current-month" class="current-month">Juin 2025</div>
+                    <button id="next-month" class="nav-btn-style">→</button>
+                    <div id="import-export-container">
+                        <button id="import-export-btn">📁</button>
+                        <div id="import-export-dropdown">
+                            <div id="import-option" style="padding: 10px; cursor: pointer;">Importer</div>
+                            <div id="export-option" style="padding: 10px; cursor: pointer;">Exporter</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <table class="calendar" id="calendar">
+                <thead>
+                    <tr>
+                        <th>Lun</th>
+                        <th>Mar</th>
+                        <th>Mer</th>
+                        <th>Jeu</th>
+                        <th>Ven</th>
+                        <th>Sam</th>
+                        <th>Dim</th>
+                    </tr>
+                </thead>
+                <tbody id="calendar-body">
+                    <!-- Le contenu du calendrier sera généré dynamiquement par JavaScript -->
+                </tbody>
+            </table>
             <div id="import-export-container">
                 <button id="import-export-btn">📁</button>
                 <div id="import-export-dropdown">
@@ -1350,24 +1376,6 @@ calendar-header {
                 </div>
             </div>
         </div>
-    </div>
-    <table class="calendar" id="calendar">
-        <thead>
-            <tr>
-                <th>Lun</th>
-                <th>Mar</th>
-                <th>Mer</th>
-                <th>Jeu</th>
-                <th>Ven</th>
-                <th>Sam</th>
-                <th>Dim</th>
-            </tr>
-        </thead>
-        <tbody id="calendar-body">
-            <!-- Le contenu du calendrier sera généré dynamiquement par JavaScript -->
-        </tbody>
-    </table>
-</div>
 
         <!-- Vue annuelle -->
         <div id="year-view" class="year-view">
@@ -2792,10 +2800,36 @@ calendar-header {
                     }
                     
                     calendarBody.appendChild(row);
-                    
                     // Arrêter si nous avons affiché tous les jours du mois
                     if (date > daysInMonth) {
                         break;
+                    }
+                }
+
+                // Positionner le bouton import/export
+                const container = document.getElementById("import-export-container");
+                if (container) {
+                    // Retirer le conteneur de son parent actuel
+                    if (container.parentElement) {
+                        container.parentElement.removeChild(container);
+                    }
+                    const rows = calendarBody.querySelectorAll("tr");
+                    if (rows.length) {
+                        const lastRow = rows[rows.length - 1];
+                        const cellCount = lastRow.children.length;
+                        if (cellCount < 7 && cellCount > 0) {
+                            const cell = document.createElement("td");
+                            cell.colSpan = 7 - cellCount;
+                            cell.appendChild(container);
+                            lastRow.appendChild(cell);
+                        } else {
+                            const newRow = document.createElement("tr");
+                            const cell = document.createElement("td");
+                            cell.colSpan = 7;
+                            cell.appendChild(container);
+                            newRow.appendChild(cell);
+                            calendarBody.appendChild(newRow);
+                        }
                     }
                 }
             }
