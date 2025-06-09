@@ -1257,14 +1257,16 @@
         }
 
         #import-export-container {
-            position: relative; /* au lieu de fixed */
-            margin-top: 20px;   /* espace en haut */
-            text-align: right;  /* aligne à droite */
+            position: relative;
             z-index: 99;
+            text-align: right;
+            width: auto;
+            padding: 0;
+            background: none;
         }
 
         #import-export-btn {
-            background-color: white;/*var(--primary-color)*/
+            background-color: white;
             color: white;
             border: none;
             padding: 8px 12px;
@@ -1336,9 +1338,15 @@
                     <button id="prev-month" class="nav-btn-style">←</button>
                     <div id="current-month" class="current-month"></div>
                     <button id="next-month" class="nav-btn-style">→</button>
+                    <div id="import-export-container">
+                        <button id="import-export-btn">📎</button>
+                        <div id="import-export-dropdown">
+                            <div id="import-option" style="padding: 10px; cursor: pointer;">Importer</div>
+                            <div id="export-option" style="padding: 10px; cursor: pointer;">Exporter</div>
+                        </div>
+                    </div>
                 </div>
             </div>
-
             <table class="calendar" id="calendar">
                 <thead>
                     <tr>
@@ -1355,16 +1363,6 @@
                     <!-- Le contenu du calendrier sera généré dynamiquement par JavaScript -->
                 </tbody>
             </table>
-        </div>
-
-        <!-- Bouton Import/Export -->
-        <div id="import-export-container">
-            <button id="import-export-btn">📎</button>
-            <div id="import-export-dropdown">
-                <div id="import-option" style="padding: 10px; cursor: pointer;">Importer</div>
-                <div id="export-option" style="padding: 10px; cursor: pointer;">Exporter</div>
-            </div>
-        </div>
         </div>
 
         <!-- Vue annuelle -->
