@@ -165,9 +165,9 @@
         pointer-events: none;
         opacity: 0;
         transition: opacity 0.13s;
-        width: 148px;
-        max-width: 155px;
-        min-width: 85px;
+        width: 232px;
+        max-width: 232px;
+        min-width: 127px;
         text-align: left;
         line-height: 1.4;
         letter-spacing: 0.01em;
@@ -2757,8 +2757,7 @@
                                             tooltip.className = "note-dot-tooltip";
                                             tooltip.innerHTML = `
                                             <span class="tooltip-dot" style="background:${typeObj ? typeObj.color : "#3498db"}"></span>
-                                            <strong>${typeName}</strong><br>
-                                            ${noteText.length > 70 ? noteText.substring(0, 70) + '…' : noteText}
+                                            <strong>${typeName}</strong> : ${noteText.length > 70 ? noteText.substring(0, 70) + '…' : noteText}
                                             `;
                                             dot.appendChild(tooltip);
                                             dot.addEventListener("mouseenter", function() {
@@ -3009,7 +3008,7 @@
                                             if (text && text.trim() !== "") {
                                                 const typeObj = noteTypes.find(t => t.name === typeName);
                                                 const color = typeObj ? typeObj.color : "#3498db";
-                                                parts.push(`<span class="tooltip-dot" style="background:${color}"></span><strong>${typeName}</strong><br>${text.length > 70 ? text.substring(0,70)+'…' : text}`);
+                                                parts.push(`<span class="tooltip-dot" style="background:${color}"></span><strong>${typeName}</strong> : ${text.length > 70 ? text.substring(0,70)+'…' : text}`);
                                             }
                                         }
                                     }
