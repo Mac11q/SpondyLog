@@ -2718,6 +2718,9 @@
                            // Ajouter un indicateur si une note existe pour cette date
                            if (userNotes[dateId]) {
                                 dayCell.classList.add("note-present");
+                                const typeNameForDay = userLastNoteType[dateId];
+                                const typeObjBorder = noteTypes.find(t => t.name === typeNameForDay);
+                                dayCell.style.borderColor = typeObjBorder ? typeObjBorder.color : (noteTypes[0]?.color || "#3498db");
 
                                 // --- Début nouvelle version multi-points ---
                                 const typesForDay = Object.keys(userNotes[dateId]).filter(typeName => {
@@ -2946,6 +2949,9 @@
                                 } else if (userNotes && userNotes[dateId]) {
                                     // Utiliser la classe mini-note-present au lieu du style inline
                                     miniDay.classList.add("mini-note-present");
+                                    const typeNameForDay = userLastNoteType[dateId];
+                                    const typeObjBorder = noteTypes.find(t => t.name === typeNameForDay);
+                                    miniDay.style.borderColor = typeObjBorder ? typeObjBorder.color : (noteTypes[0]?.color || "#3498db");
                                     
                                     // Si tu veux également ajouter l'indicateur de note (le petit point)
                                     //const noteIndicator = document.createElement("div");
