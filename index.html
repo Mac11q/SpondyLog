@@ -176,7 +176,8 @@
     .note-dot.show-tooltip .note-dot-tooltip {
         opacity: 1;
     }
-    .med-indicator.show-tooltip .note-dot-tooltip {
+
+    .mini-day.show-tooltip .note-dot-tooltip {
         opacity: 1;
     }
 
@@ -195,6 +196,11 @@
         position: relative;
     }
 
+    .mini-calendar td.note-tooltip-open {
+        z-index: 100;
+        position: relative;
+    }
+    
         /* Style mis à jour pour la légende */
         .legend {
             margin: 20px 0;
@@ -328,7 +334,7 @@
         .month-card {
             border: 1px solid var(--border-color);
             border-radius: 5px;
-            overflow: hidden;
+            overflow: visible; /* allow tooltips to escape month bounds */
         }
 
         .month-name {
@@ -1310,7 +1316,7 @@
             #import-export-container {
             right: 8px;
         }
-}
+ }
 
     </style>
 
@@ -2967,6 +2973,47 @@
                                 miniDay.addEventListener("click", function() {
                                     showPainModal(dateId);
                                 });
+
+                                // Tooltip pour la vue annuelle
+                                const painInfo = (userPainData[dateId] !== undefined);
+                                const medData  = userMedsData[dateId];
+                                const medInfo  = medData && medData.taken;
+                                const noteObjY = userNotes[dateId];
+                                const notesInfo = noteObjY && Object.values(noteObjY).some(t => t && t.trim() !== "");
+                                if (painInfo || medInfo || notesInfo) {
+                                    const tooltip = document.createElement("div");
+                                    tooltip.className = "note-dot-tooltip";
+                                    let parts = [];
+                                    if (painInfo) {
+                                        const level = userPainData[dateId];
+                                        const dotColor = painColors[level];
+                                        parts.push(`<span class="tooltip-dot" style="background:${dotColor}"></span><strong>Douleur</strong> : <strong>${level}</strong>`);
+                                    }
+                                    if (medInfo) {
+                                        const medType = medData.type ? medData.type : "(non renseigné)";
+                                        const qty = medData.qty ? medData.qty : 1;
+                                        parts.push(`<span class="tooltip-pill" style="color:#FF5722; font-size: 15px; margin-right: 2px;">💊</span><strong>${medType}</strong> x <strong>${qty}</strong>`);
+                                    }
+                                    if (notesInfo) {
+                                        for (const [typeName, text] of Object.entries(noteObjY)) {
+                                            if (text && text.trim() !== "") {
+                                                const typeObj = noteTypes.find(t => t.name === typeName);
+                                                const color = typeObj ? typeObj.color : "#3498db";
+                                                parts.push(`<span class="tooltip-dot" style="background:${color}"></span><strong>${typeName}</strong><br>${text.length > 70 ? text.substring(0,70)+'…' : text}`);
+                                            }
+                                        }
+                                    }
+                                    tooltip.innerHTML = parts.join('<br>');
+                                    miniDay.appendChild(tooltip);
+                                    miniDay.addEventListener("mouseenter", function() {
+                                        miniDay.classList.add("show-tooltip");
+                                        miniDay.closest("td").classList.add("note-tooltip-open");
+                                    });
+                                    miniDay.addEventListener("mouseleave", function() {
+                                        miniDay.classList.remove("show-tooltip");
+                                        miniDay.closest("td").classList.remove("note-tooltip-open");
+                                    });
+                                }
                                 
                                 cell.appendChild(miniDay);
                                 date++;
@@ -3348,7 +3395,7 @@
                     const noteDate = document.createElement("div");
                     noteDate.className = "note-date";
 
-                    let painLevelText = "Niveau non renseigné";
+                    let painLevelText = "Niveau 0";
                     if (userPainData[dateId] !== undefined) {
                         const painLevel = document.createElement("span");
                         painLevel.className = "note-pain-level";
