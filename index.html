@@ -1683,6 +1683,7 @@
         let userNotes = {}; // Nouvelle variable pour stocker les notes
         let noteTypes = [];  // Liste des types de notes personnalisées (objets { name, color })
         let userMedsData = {}; // Variable pour stocker les jours avec prise d'anti-inflammatoires
+        let userLastNoteType = {}; // Mémorise pour chaque jour le dernier type de note utilisé
         let editingTypeName = null;
         
         (function loadNoteTypesFromStorage() {
@@ -1773,6 +1774,7 @@
                 userPainData = data.painData || {};
                 userNotes = data.notes || {};
                 userMedsData = migrateOldMedsDataFormat(JSON.parse(localStorage.getItem('spondylogMedsData')) || {});
+                userLastNoteType = data.lastNoteType || {};
 
                 renderCalendar(currentMonth, currentYear); // Mettre à jour l'affichage du calendrier
             } catch (error) {
@@ -2044,6 +2046,7 @@
                     if (selectedDate) {
                         saveCurrentNote();
                         saveMedDataForDay(selectedDate);
+                        userLastNoteType[selectedDate] = document.getElementById('selected-type-name').textContent;
                         // Sauvegarder le niveau de douleur :
                         const selectedPain = document.querySelector(".pain-option.selected");
                         if (selectedPain) {
@@ -2068,6 +2071,7 @@
                     if (selectedDate) {
                         saveCurrentNote();
                         saveMedDataForDay(selectedDate);
+                        userLastNoteType[selectedDate] = document.getElementById('selected-type-name').textContent;
                         const selectedPain = document.querySelector(".pain-option.selected");
                         if (selectedPain) {
                             userPainData[selectedDate] = Number(selectedPain.getAttribute("data-value"));
@@ -2426,6 +2430,7 @@
             localStorage.setItem('spondylogNotes', JSON.stringify(userNotes));
             localStorage.setItem('spondylogMedsData', JSON.stringify(userMedsData));
             localStorage.setItem('spondylogNoteTypes', JSON.stringify(noteTypes));
+            localStorage.setItem('spondylogLastNoteType', JSON.stringify(userLastNoteType));
             }
 
         
@@ -2435,9 +2440,11 @@
             const savedNotes      = localStorage.getItem('spondylogNotes');
             const savedMedsData   = localStorage.getItem('spondylogMedsData');
             const savedNoteTypes  = localStorage.getItem('spondylogNoteTypes');
+            const savedLastType   = localStorage.getItem('spondylogLastNoteType');
 
             if (savedPainData)   userPainData = JSON.parse(savedPainData);
             if (savedMedsData)   userMedsData = JSON.parse(savedMedsData);
+            if (savedLastType)   userLastNoteType = JSON.parse(savedLastType);
 
             // 2) Initialiser les types de notes AVANT conversion des anciennes notes
             if (savedNoteTypes) {
@@ -2533,6 +2540,7 @@
                     delete userPainData[selectedDate];
                     delete userNotes[selectedDate];    // supprime toutes les notes de ce jour
                     delete userMedsData[selectedDate];
+                    delete userLastNoteType[selectedDate];
                     saveUserData();
                     closeModal(true);
                 }
@@ -3086,10 +3094,19 @@
                 let currentType = noteTypes[0]; // Type par défaut
                 const noteObj = userNotes[dateId] || {};
 
-                // LOGIQUE : si une note est déjà présente pour ce jour sur un type, l’afficher !
-                let selectedTypeName = currentType.name;
+                // Choix du type à afficher : dernier type utilisé pour ce jour si disponible
+                let selectedTypeName = userLastNoteType[dateId] || currentType.name;
+
+                // Vérifie que ce type existe toujours sinon prend le type par défaut
+                let tmp = noteTypes.find(t => t.name === selectedTypeName);
+                if (tmp) {
+                    currentType = tmp;
+                } else {
+                    selectedTypeName = currentType.name;
+                }
+
+                // Si aucune note sur ce type mais d'autres notes existent, montrer la première non vide
                 if ((!noteObj[selectedTypeName] || noteObj[selectedTypeName].trim() === "") && Object.keys(noteObj).length > 0) {
-                    // Trouve le premier type avec une note non vide
                     for (const typeName in noteObj) {
                         if (noteObj[typeName] && noteObj[typeName].trim() !== "") {
                             selectedTypeName = typeName;
@@ -3205,6 +3222,8 @@
                 // 2️⃣ Sauvegarder la note du type de note actuellement sélectionné
                 //    Cette fonction gère correctement userNotes[selectedDate] en tant qu'objet
                 saveCurrentNote();
+                // Mémorise le dernier type utilisé pour ce jour
+                userLastNoteType[selectedDate] = document.getElementById('selected-type-name').textContent;
 
                 // 3️⃣ Sauvegarder l’état des anti-inflammatoires
                 if (document.getElementById('med-taken').checked) {
@@ -3230,6 +3249,7 @@
 
                     // Supprimer l'information sur les anti-inflammatoires
                     delete userMedsData[selectedDate];
+                    delete userLastNoteType[selectedDate];
                     
                     // Sauvegarder les données
                     saveUserData();
@@ -3544,7 +3564,8 @@
                 notes:     userNotes,
                 medsData:  userMedsData,
                 noteTypes: noteTypes,
-                medTypes:  medTypesSaved ? JSON.parse(medTypesSaved) : (typeof medTypes !== "undefined" ? medTypes : [])
+                medTypes:  medTypesSaved ? JSON.parse(medTypesSaved) : (typeof medTypes !== "undefined" ? medTypes : []),
+                lastNoteType: userLastNoteType
             };
 
             // Convertir en JSON joliment indenté
@@ -3596,6 +3617,11 @@
                                 if (typeof renderMedTypeDropdown === "function") {
                                     renderMedTypeDropdown(medTypes[0]?.name);
                                 }
+                            }
+
+                            // 🟢 Importer le dernier type de note sélectionné par jour
+                            if (importedData.lastNoteType && typeof importedData.lastNoteType === 'object') {
+                                userLastNoteType = importedData.lastNoteType;
                             }
 
                             // Compatibilité avec l’ancien format de notes (string → { cat: texte })
