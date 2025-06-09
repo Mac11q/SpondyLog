@@ -173,7 +173,16 @@
         letter-spacing: 0.01em;
     }
 
+    /* Increase tooltip width specifically for the yearly view */
+    .mini-day .note-dot-tooltip {
+        width: 263px;
+        max-width: 285px;
+    }
+
     .note-dot.show-tooltip .note-dot-tooltip {
+        opacity: 1;
+    }
+    .med-indicator.show-tooltip .note-dot-tooltip {
         opacity: 1;
     }
 
@@ -2975,7 +2984,8 @@
                                 });
 
                                 // Tooltip pour la vue annuelle
-                                const painInfo = (userPainData[dateId] !== undefined);
+                                const painLevel = userPainData[dateId];
+                                const painInfo = (painLevel !== undefined && painLevel !== 0);
                                 const medData  = userMedsData[dateId];
                                 const medInfo  = medData && medData.taken;
                                 const noteObjY = userNotes[dateId];
@@ -2985,7 +2995,7 @@
                                     tooltip.className = "note-dot-tooltip";
                                     let parts = [];
                                     if (painInfo) {
-                                        const level = userPainData[dateId];
+                                        const level = painLevel;
                                         const dotColor = painColors[level];
                                         parts.push(`<span class="tooltip-dot" style="background:${dotColor}"></span><strong>Douleur</strong> : <strong>${level}</strong>`);
                                     }
