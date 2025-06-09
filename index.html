@@ -1257,19 +1257,21 @@
         }
 
         #import-export-container {
-            position: relative;
+            position: absolute;
+            top: 50%;
+            right: 0;
+            transform: translateY(-50%);
             z-index: 99;
             text-align: right;
-            width: auto;
-            padding: 0;
             background: none;
+            padding: 0;
         }
 
         #import-export-btn {
             background-color: white;
             color: white;
             border: none;
-            padding: 8px 12px;
+            padding: 8px 1px;
             border-radius: 4px;
             cursor: pointer;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif!important;
@@ -1304,6 +1306,11 @@
                 white-space: pre-line; /* permet d'interpréter les \n comme des retours à la ligne */
              }
         }
+        @media (max-width: 600px) {
+            #import-export-container {
+            right: 8px;
+        }
+}
 
     </style>
 
@@ -1333,17 +1340,17 @@
 
         <!-- Vue mensuelle -->
         <div id="month-view" class="month-view">
-            <div class="calendar-header">
+            <div class="calendar-header" style="position: relative;">
                 <div class="calendar-nav">
                     <button id="prev-month" class="nav-btn-style">←</button>
                     <div id="current-month" class="current-month"></div>
                     <button id="next-month" class="nav-btn-style">→</button>
-                    <div id="import-export-container">
-                        <button id="import-export-btn">📎</button>
-                        <div id="import-export-dropdown">
-                            <div id="import-option" style="padding: 10px; cursor: pointer;">Importer</div>
-                            <div id="export-option" style="padding: 10px; cursor: pointer;">Exporter</div>
-                        </div>
+                </div>
+                <div id="import-export-container">
+                    <button id="import-export-btn">📎</button>
+                    <div id="import-export-dropdown">
+                        <div id="import-option" style="padding: 10px; cursor: pointer;">Importer</div>
+                        <div id="export-option" style="padding: 10px; cursor: pointer;">Exporter</div>
                     </div>
                 </div>
             </div>
