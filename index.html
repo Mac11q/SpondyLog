@@ -528,10 +528,16 @@
             font-family: inherit;
         }
 
-        /* Encadrer la cellule lorsqu'une note est présente */
-        .note-present {
+          /* Encadrer la cellule lorsqu'une note est présente */
+          .note-present {
             border: 2px solid var(--primary-color);
             border-radius: 5px;
+            box-sizing: border-box;
+        }
+
+        /* Ajuste la position du numéro du jour lorsque la bordure est appliquée */
+        .note-present .day-number {
+            top: 7px;
         }
 
         .mini-note-present {
@@ -1271,7 +1277,7 @@
             font-size: 1.2rem;
         }
 
-        #import-export-container {
+        .import-export-container {
             position: absolute;
             top: 50%;
             right: 0;
@@ -1282,7 +1288,7 @@
             padding: 0;
         }
 
-        #import-export-btn {
+        .import-export-btn {
             background-color: white;
             color: white;
             border: none;
@@ -1292,7 +1298,7 @@
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif!important;
         }
 
-        #import-export-dropdown {
+        .import-export-dropdown {
             display: none;
             position: absolute;
             bottom: -250%;
@@ -1322,10 +1328,10 @@
              }
         }
         @media (max-width: 600px) {
-            #import-export-container {
-            right: 8px;
+            .import-export-container {
+                right: 8px;
         }
- }
+    }
 
     </style>
 
@@ -1361,11 +1367,11 @@
                     <div id="current-month" class="current-month"></div>
                     <button id="next-month" class="nav-btn-style">→</button>
                 </div>
-                <div id="import-export-container">
-                    <button id="import-export-btn">📁</button>
-                    <div id="import-export-dropdown">
-                        <div id="import-option" style="padding: 10px; cursor: pointer;">Importer</div>
-                        <div id="export-option" style="padding: 10px; cursor: pointer;">Exporter</div>
+                <div class="import-export-container">
+                    <button class="import-export-btn">📁</button>
+                    <div class="import-export-dropdown">
+                        <div class="import-option" style="padding: 10px; cursor: pointer;">Importer</div>
+                        <div class="export-option" style="padding: 10px; cursor: pointer;">Exporter</div>
                     </div>
                 </div>
             </div>
@@ -1389,11 +1395,18 @@
 
         <!-- Vue annuelle -->
         <div id="year-view" class="year-view">
-            <div class="calendar-header">
+            <div class="calendar-header" style="position: relative;">
                 <div class="calendar-nav">
                     <button id="prev-year" class="nav-btn-style">←</button>
                     <div id="current-year" class="current-year"></div>
                     <button id="next-year" class="nav-btn-style">→</button>
+                </div>
+                <div class="import-export-container">
+                    <button class="import-export-btn">📁</button>
+                    <div class="import-export-dropdown">
+                        <div class="import-option" style="padding: 10px; cursor: pointer;">Importer</div>
+                        <div class="export-option" style="padding: 10px; cursor: pointer;">Exporter</div>
+                    </div>
                 </div>
             </div>
 
@@ -3579,43 +3592,45 @@
             });
 
             // Sélectionner les éléments
-            const importExportBtn = document.getElementById("import-export-btn");
-            const importExportDropdown = document.getElementById("import-export-dropdown");
-            const importOption = document.getElementById("import-option");
-            const exportOption = document.getElementById("export-option");
+            const importExportContainers = document.querySelectorAll('.import-export-container');
             const statItems = document.querySelectorAll('.stat-item');
             statItems.forEach(item => {
             item.style.margin = '0 5px';
             item.style.padding = '3px'});
 
-            // Afficher/Masquer le menu déroulant
-            importExportBtn.addEventListener("click", () => {
-                // Toggle l'affichage
-                if (importExportDropdown.style.display === "none" || importExportDropdown.style.display === "") {
-                    importExportDropdown.style.display = "block";
-                } else {
-                    importExportDropdown.style.display = "none";
-                }
-            });
+            importExportContainers.forEach(container => {
+                const btn = container.querySelector('.import-export-btn');
+                const dropdown = container.querySelector('.import-export-dropdown');
+                const importOption = container.querySelector('.import-option');
+                const exportOption = container.querySelector('.export-option');
+            
+                // Afficher/Masquer le menu déroulant
+                    btn.addEventListener('click', () => {
+                    if (dropdown.style.display === 'none' || dropdown.style.display === '') {
+                        dropdown.style.display = 'block';
+                    } else {
+                        dropdown.style.display = 'none';
+                    }
+                });
 
-            // Fermer le dropdown si clic en dehors
-            window.addEventListener("click", (event) => {
-                if (!document.getElementById("import-export-container").contains(event.target)) {
-                    importExportDropdown.style.display = "none";
-                }
-            });
+                // Fermer le dropdown si clic en dehors
+                    window.addEventListener('click', (event) => {
+                    if (!container.contains(event.target)) {
+                        dropdown.style.display = 'none';
+                    }
+                });
 
-            // Gestion du clic sur l'option "Exporter"
-            exportOption.addEventListener("click", () => {
-                exportData();
-                importExportDropdown.style.display = "none";
-            });
+                // Gestion du clic sur l'option "Exporter"
+                    exportOption.addEventListener('click', () => {
+                    exportData();
+                    dropdown.style.display = 'none';
+                });
 
-            // Gestion du clic sur l'option "Importer"
-            importOption.addEventListener("click", () => {
-                // Déclencher le click sur un input file caché
-                document.getElementById("import-file-input").click();
-                importExportDropdown.style.display = "none";
+                // Gestion du clic sur l'option "Importer"
+                    importOption.addEventListener('click', () => {
+                    document.getElementById('import-file-input').click();
+                    dropdown.style.display = 'none';
+                });
             });
 
             function exportData() {
