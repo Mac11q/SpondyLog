@@ -610,13 +610,35 @@
             margin-bottom: 5px;
         }
 
-        .note-pain-level {
+        .pain-level-display {
+            position: relative;
             display: inline-block;
-            width: 20px;
-            height: 20px;
-            border-radius: 50%;
-            margin-right: 10px;
+            width: 16px;
+            height: 16px;
+            margin: 0 5px;
             vertical-align: middle;
+        }
+
+        .pain-level-number {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 12px;
+            z-index: 1;
+        }
+        .note-pain-level {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
         }
 
         .note-text {
@@ -3417,19 +3439,25 @@
                     const noteDate = document.createElement("div");
                     noteDate.className = "note-date";
 
-                    let painLevelText = "Niveau 0";
-                    if (userPainData[dateId] !== undefined) {
-                        const painLevel = document.createElement("span");
-                        painLevel.className = "note-pain-level";
-                        painLevel.style.backgroundColor = painColors[userPainData[dateId]];
-                        if (userPainData[dateId] === 5) {
-                            painLevel.style.color = "white";
-                            painLevel.style.borderColor = "white";
-                        }
-                        painLevelText = `Niveau ${userPainData[dateId]}`;
-                        noteDate.appendChild(painLevel);
+                    const painValue = userPainData[dateId] !== undefined ? userPainData[dateId] : 0;
+                    const painContainer = document.createElement("span");
+                    painContainer.className = "pain-level-display";
+
+                    const painNumber = document.createElement("span");
+                    painNumber.className = "pain-level-number";
+                    painNumber.textContent = painValue;
+
+                    const painDot = document.createElement("span");
+                    painDot.className = "note-pain-level";
+                    painDot.style.backgroundColor = painColors[painValue];
+                    if (painValue === 5) {
+                        painDot.style.borderColor = "white";
                     }
-                    noteDate.innerHTML += ` ${formattedDate} - ${painLevelText}`;
+                    painContainer.appendChild(painNumber);
+                    painContainer.appendChild(painDot);
+
+                    noteDate.textContent = `${formattedDate} - `;
+                    noteDate.appendChild(painContainer);
                     noteEntry.appendChild(noteDate);
 
                     const noteText = document.createElement("div");
