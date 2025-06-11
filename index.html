@@ -1780,6 +1780,7 @@
         let editingTypeName = null;
         let chartStartDate = null;
         let chartEndDate = null;
+        let noteDotRadius = 6;
         
         (function loadNoteTypesFromStorage() {
             const typesSaved = localStorage.getItem('spondylogNoteTypes');
@@ -4009,8 +4010,10 @@
 
         // Espace sous le graphique
         const chartCanvas = document.getElementById('pain-chart');
+;
         chartCanvas.style.marginBottom = '30px';
 
+        updateNoteDotRadius();
         window.dispatchEvent(new CustomEvent('chartRendered'));
         }
 
@@ -4145,19 +4148,28 @@
             );
         }
 
+        function updateNoteDotRadius() {
+            if (!painChart) return;
+            const barPoints = painChart.getDatasetMeta(0).data;
+            if (barPoints.length) {
+                const bp = barPoints[0];
+                const barWidth = bp.width || (bp.x2 ? bp.x2 - bp.x1 : 10);
+                noteDotRadius = Math.max(2, Math.min(10, barWidth * 0.35));
+            } else {
+                noteDotRadius = 6;
+            }
+        }
+
         function drawNoteDots(selectedTypes) {
             const overlay = document.getElementById('note-dots-overlay');
             if (!overlay || !painChart || !chartStartDate) return;
             overlay.innerHTML = '';
 
+            updateNoteDotRadius();
+
             const barPoints = painChart.getDatasetMeta(0).data;
             const days = barPoints.length;
-            let radius = 6;
-            if (barPoints.length) {
-                const bp = barPoints[0];
-                const barWidth = bp.width || (bp.x2 ? bp.x2 - bp.x1 : 10);
-                radius = Math.max(2, Math.min(10, barWidth * 0.35));
-            }
+
 
             barPoints.forEach((bar, idx) => {
                 const date = new Date(chartStartDate);
@@ -4176,10 +4188,10 @@
                     const dot = document.createElement('div');
                     dot.className = 'chart-note-dot';
                     dot.style.backgroundColor = color;
-                    dot.style.width = `${radius*2}px`;
-                    dot.style.height = `${radius*2}px`;
+                    dot.style.width = `${noteDotRadius*2}px`;
+                    dot.style.height = `${noteDotRadius*2}px`;
                     dot.style.left = `${bar.x}px`;
-                    dot.style.top = `${bar.y - radius - 4 - stack}px`;
+                    dot.style.top = `${bar.y - noteDotRadius - -30 - stack}px`;
                     dot.style.transform = 'translate(-50%, -100%)';
 
                     const tooltip = document.createElement('div');
@@ -4190,7 +4202,7 @@
                     dot.onmouseleave = () => { tooltip.style.display = 'none'; };
 
                     overlay.appendChild(dot);
-                    stack += radius*2 + 4;
+                    stack += noteDotRadius*2 + 4;
                 }
             });
         }
@@ -4198,6 +4210,8 @@
         ReactDOM.render(<NoteDotsApp />, document.getElementById('note-feature-root'));
     </script>
 
+</script>
+    
 
 </body>
 </html>
