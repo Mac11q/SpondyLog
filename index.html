@@ -4014,7 +4014,9 @@
         chartCanvas.style.marginBottom = '30px';
 
         updateNoteDotRadius();
-        window.dispatchEvent(new CustomEvent('chartRendered'));
+        setTimeout(() => {
+            window.dispatchEvent(new CustomEvent('chartRendered'));
+        }, 0);
         }
 
         // Fonction pour ajouter une légende personnalisée
@@ -4115,11 +4117,19 @@
 
     <script type="text/babel">
         function NoteDotsApp() {
-            const [selected, setSelected] = React.useState([]);
+            const [choice, setChoice] = React.useState(() =>
+                localStorage.getItem('spondylogChartNoteChoice') || ''
+            );
+
+            const selected = React.useMemo(() => {
+                if (choice === 'all') return noteTypes.map(t => t.name);
+                if (choice === '') return [];
+                return [choice];
+            }, [choice]);
 
             React.useEffect(() => {
-                setSelected(noteTypes.map(t => t.name));
-            }, []);
+                localStorage.setItem('spondylogChartNoteChoice', choice);
+            }, [choice]);
 
             React.useEffect(() => {
                 function redraw() { drawNoteDots(selected); }
@@ -4129,18 +4139,14 @@
             }, [selected]);
 
             function handleChange(e) {
-                const values = Array.from(e.target.selectedOptions).map(o => o.value);
-                if (values.includes('all')) {
-                    setSelected(noteTypes.map(t => t.name));
-                } else {
-                    setSelected(values);
-                }
+                setChoice(e.target.value);
             }
 
             return (
                 <div className="range-option" style={{display:'flex',alignItems:'center',gap:'10px',marginBottom:'10px'}}>
-                    <label htmlFor="note-type-select">Type de notes</label>
-                    <select id="note-type-select" multiple onChange={handleChange} style={{padding:'4px 8px'}}>
+                    <label htmlFor="note-type-select">Type de note</label>
+                    <select id="note-type-select" value={choice} onChange={handleChange} style={{padding:'4px 8px'}}>
+                        <option value="">Aucune</option>
                         <option value="all">Tous les types</option>
                         {noteTypes.map(t => <option key={t.name} value={t.name}>{t.name}</option>)}
                     </select>
