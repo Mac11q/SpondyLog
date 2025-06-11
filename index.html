@@ -4152,7 +4152,12 @@
 
             const barPoints = painChart.getDatasetMeta(0).data;
             const days = barPoints.length;
-            const radius = days <= 7 ? 8 : days <= 14 ? 7 : days <= 30 ? 6 : 5;
+            let radius = 6;
+            if (barPoints.length) {
+                const bp = barPoints[0];
+                const barWidth = bp.width || (bp.x2 ? bp.x2 - bp.x1 : 10);
+                radius = Math.max(2, Math.min(10, barWidth * 0.35));
+            }
 
             barPoints.forEach((bar, idx) => {
                 const date = new Date(chartStartDate);
@@ -4192,6 +4197,7 @@
 
         ReactDOM.render(<NoteDotsApp />, document.getElementById('note-feature-root'));
     </script>
+
 
 </body>
 </html>
