@@ -1550,9 +1550,10 @@
                         </div>
                         <button id="apply-custom-dates" class="view-btn" style="margin-top: 5px; padding: 4px 12px; font-size: 0.9em; display: block; margin-left: auto; margin-right: auto;">Appliquer</button>
                     </div>
+                    <div id="note-feature-root" style="margin-top: 10px; margin-bottom: -10px;"> 
+                    </div>
                 </div>
-                <div id="note-feature-root"></div>
-                <div class="chart-container" style="position: relative; height: 350px; margin-bottom: 10px;">
+                <div class="chart-container" style="position: relative; height: 350px; margin-bottom: 0px;">
                     <canvas id="pain-chart"></canvas>
                     <div id="note-dots-overlay" style="position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;"></div>
                 </div>
@@ -4146,9 +4147,9 @@
 
             return (
                 <div className="range-option" style={{display:'flex',alignItems:'center',gap:'10px',marginBottom:'10px'}}>
-                    <label htmlFor="note-type-select">Type de note</label>
+                    <label htmlFor="note-type-select">Type de note :</label>
                     <select id="note-type-select" value={choice} onChange={handleChange} style={{padding:'4px 8px'}}>
-                        <option value="">Aucune</option>
+                        <option value="">Aucun</option>
                         <option value="all">Tous les types</option>
                         {noteTypes.map(t => <option key={t.name} value={t.name}>{t.name}</option>)}
                     </select>
