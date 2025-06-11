@@ -4001,6 +4001,12 @@
                     legend: {
                         display: false
                     }
+                },
+                animation: {
+                    onComplete: () => {
+                        updateNoteDotRadius();
+                        window.dispatchEvent(new CustomEvent('chartRendered'));
+                    }
                 }
             }
         });
@@ -4013,10 +4019,6 @@
 ;
         chartCanvas.style.marginBottom = '30px';
 
-        updateNoteDotRadius();
-        setTimeout(() => {
-            window.dispatchEvent(new CustomEvent('chartRendered'));
-        }, 0);
         }
 
         // Fonction pour ajouter une légende personnalisée
