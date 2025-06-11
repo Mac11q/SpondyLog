@@ -5,6 +5,9 @@
     <link rel="apple-touch-icon" href="icon-192.png">
     <meta name="theme-color" content="#3498db">
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.3.0"></script>
+    <script src="https://unpkg.com/react@18/umd/react.development.js" crossorigin></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js" crossorigin></script>
+    <script src="https://unpkg.com/babel-standalone@6/babel.min.js"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SpondyLog - Suivi des crises inflammatoires</title>
@@ -1368,6 +1371,31 @@
         }
     }
 
+    .chart-note-dot {
+        position: absolute;
+        border-radius: 50%;
+        pointer-events: auto;
+    }
+
+    .chart-note-tooltip {
+        position: absolute;
+        bottom: 100%;
+        left: 50%;
+        transform: translate(-50%, -4px);
+        background: #222;
+        color: #fff;
+        padding: 4px 8px;
+        border-radius: 4px;
+        font-size: 12px;
+        white-space: nowrap;
+        display: none;
+        z-index: 10;
+    }
+
+    .chart-note-dot:hover .chart-note-tooltip {
+        display: block;
+    }
+
     </style>
 
 <script>
@@ -1523,8 +1551,10 @@
                         <button id="apply-custom-dates" class="view-btn" style="margin-top: 5px; padding: 4px 12px; font-size: 0.9em; display: block; margin-left: auto; margin-right: auto;">Appliquer</button>
                     </div>
                 </div>
+                <div id="note-feature-root"></div>
                 <div class="chart-container" style="position: relative; height: 350px; margin-bottom: 10px;">
                     <canvas id="pain-chart"></canvas>
+                    <div id="note-dots-overlay" style="position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;"></div>
                 </div>
                 <div class="chart-stats" style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 5px; padding: 0;">
                     <div class="stat-item" style="padding: 0 2px; background-color: #f5f5f5; border-radius: 4px; text-align: center;">
@@ -1748,6 +1778,8 @@
         let userMedsData = {}; // Variable pour stocker les jours avec prise d'anti-inflammatoires
         let userLastNoteType = {}; // Mémorise pour chaque jour le dernier type de note utilisé
         let editingTypeName = null;
+        let chartStartDate = null;
+        let chartEndDate = null;
         
         (function loadNoteTypesFromStorage() {
             const typesSaved = localStorage.getItem('spondylogNoteTypes');
@@ -3805,6 +3837,8 @@
             // Réinitialiser les dates à minuit pour une comparaison correcte
             startDate.setHours(0, 0, 0, 0);
             endDate.setHours(23, 59, 59, 999); // Fin de journée
+            chartStartDate = new Date(startDate);
+            chartEndDate = new Date(endDate);
             
             // Préparer les données
             const dates = [];
@@ -3975,7 +4009,9 @@
 
         // Espace sous le graphique
         const chartCanvas = document.getElementById('pain-chart');
-        chartCanvas.style.marginBottom = '30px'; 
+        chartCanvas.style.marginBottom = '30px';
+
+        window.dispatchEvent(new CustomEvent('chartRendered'));
         }
 
         // Fonction pour ajouter une légende personnalisée
@@ -4072,6 +4108,94 @@
                 penseBeteTextarea.addEventListener("input", savePenseBete);
             }
         });
+    </script>
+
+    <script type="text/babel">
+        function NoteDotsApp() {
+            const [selected, setSelected] = React.useState([]);
+
+            React.useEffect(() => {
+                setSelected(noteTypes.map(t => t.name));
+            }, []);
+
+            React.useEffect(() => {
+                function redraw() { drawNoteDots(selected); }
+                window.addEventListener('chartRendered', redraw);
+                redraw();
+                return () => window.removeEventListener('chartRendered', redraw);
+            }, [selected]);
+
+            function handleChange(e) {
+                const values = Array.from(e.target.selectedOptions).map(o => o.value);
+                if (values.includes('all')) {
+                    setSelected(noteTypes.map(t => t.name));
+                } else {
+                    setSelected(values);
+                }
+            }
+
+            return (
+                <div className="range-option" style={{display:'flex',alignItems:'center',gap:'10px',marginBottom:'10px'}}>
+                    <label htmlFor="note-type-select">Type de notes</label>
+                    <select id="note-type-select" multiple onChange={handleChange} style={{padding:'4px 8px'}}>
+                        <option value="all">Tous les types</option>
+                        {noteTypes.map(t => <option key={t.name} value={t.name}>{t.name}</option>)}
+                    </select>
+                </div>
+            );
+        }
+
+        function drawNoteDots(selectedTypes) {
+            const overlay = document.getElementById('note-dots-overlay');
+            if (!overlay || !painChart || !chartStartDate) return;
+            overlay.innerHTML = '';
+
+            const barPoints = painChart.getDatasetMeta(0).data;
+            const days = barPoints.length;
+            let radius = 6;
+            if (barPoints.length) {
+                const bp = barPoints[0];
+                const barWidth = bp.width || (bp.x2 ? bp.x2 - bp.x1 : 10);
+                radius = Math.max(4, Math.min(10, barWidth * 0.35));
+            }
+
+            barPoints.forEach((bar, idx) => {
+                const date = new Date(chartStartDate);
+                date.setDate(chartStartDate.getDate() + idx);
+                const dateId = `${date.getFullYear()}-${date.getMonth()+1}-${date.getDate()}`;
+                const notes = userNotes[dateId];
+                if (!notes) return;
+                let stack = 0;
+                for (const type in notes) {
+                    if (!selectedTypes.includes(type)) continue;
+                    const text = notes[type];
+                    if (!text || text.trim() === '') continue;
+                    const typeObj = noteTypes.find(t => t.name === type);
+                    const color = typeObj ? typeObj.color : '#888';
+
+                    const dot = document.createElement('div');
+                    dot.className = 'chart-note-dot';
+                    dot.style.backgroundColor = color;
+                    dot.style.width = `${radius*2}px`;
+                    dot.style.height = `${radius*2}px`;
+                    dot.style.left = `${bar.x}px`;
+                    dot.style.top = `${bar.y - radius - 4 - stack}px`;
+                    dot.style.transform = 'translate(-50%, -100%)';
+
+                    const tooltip = document.createElement('div');
+                    tooltip.className = 'chart-note-tooltip';
+                    tooltip.innerHTML = `<div><span style='color:${color}'>●</span> ${type}</div><div>${text}</div>`;
+                    dot.appendChild(tooltip);
+                    dot.onmouseenter = () => { tooltip.style.display = 'block'; };
+                    dot.onmouseleave = () => { tooltip.style.display = 'none'; };
+
+                    overlay.appendChild(dot);
+                    stack += radius*2 + 4;
+                }
+            });
+        }
+
+        ReactDOM.render(<NoteDotsApp />, document.getElementById('note-feature-root'));
     </script>
 
 </body>
