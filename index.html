@@ -3617,28 +3617,29 @@
 
             // 5. Gérer le clic sur « Voir graphique »
             showChartBtn.addEventListener("click", function() {
-                // a) Toujours remettre la période sur « 30 » :
-                dateRangeSelect.value = "30";
+                const savedRange = localStorage.getItem("spondylogChartRange") || "30";
+                const savedStart = localStorage.getItem("spondylogChartStart");
+                const savedEnd   = localStorage.getItem("spondylogChartEnd");
 
-                // b) Masquer le form de dates custom au cas où :
-                customDateRange.style.display = "none";
+                dateRangeSelect.value = savedRange;
 
-                // c) (Re)Initialiser les valeurs des deux calendar inputs :
-                startDateInput.value = formatForInput(thirtyDaysAgo);
-                endDateInput  .value = formatForInput(today);
-
-                // d) Générer le graphique pour 30 jours
-                generateChart(30);
+                if (savedRange === "custom") {
+                    customDateRange.style.display = "block";
+                    startDateInput.value = savedStart || formatForInput(thirtyDaysAgo);
+                    endDateInput.value   = savedEnd   || formatForInput(today);
+                    generateCustomChart(new Date(startDateInput.value), new Date(endDateInput.value));
+                } else {
+                    customDateRange.style.display = "none";
+                    startDateInput.value = formatForInput(thirtyDaysAgo);
+                    endDateInput.value   = formatForInput(today);
+                    generateChart(parseInt(savedRange));
+                }
 
                 // e) Ouvrir la modal
                 chartModal.style.display = "flex";
             });
-            
-            // Événement pour afficher le graphique
-            showChartBtn.addEventListener("click", function() {
-            generateChart(30); // Génère le graphique pour les 30 derniers jours
-            chartModal.style.display = "flex"; // Affiche le modal sans forcer le changement de vue
-            });
+
+
             
             // Fermer le modal du graphique
             closeChartBtn.addEventListener("click", function() {
@@ -3655,6 +3656,8 @@
             // Événement pour le changement de période
             dateRangeSelect.addEventListener("change", function() {
                 const range = this.value;
+
+                localStorage.setItem("spondylogChartRange", range);
                 
                 if (range === "custom") {
                     customDateRange.style.display = "block";
@@ -3670,6 +3673,9 @@
                 const endDate = new Date(endDateInput.value);
                 
                 if (startDate && endDate && startDate <= endDate) {
+                    localStorage.setItem("spondylogChartRange", "custom");
+                    localStorage.setItem("spondylogChartStart", startDateInput.value);
+                    localStorage.setItem("spondylogChartEnd", endDateInput.value);
                     generateCustomChart(startDate, endDate);
                 } else {
                     alert("Veuillez sélectionner des dates valides (la date de début doit être antérieure ou égale à la date de fin).");
