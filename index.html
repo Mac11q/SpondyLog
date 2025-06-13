@@ -1384,12 +1384,24 @@
         transform: translate(-50%, -4px);
         background: #222;
         color: #fff;
-        padding: 4px 8px;
+        padding: 6px 8px;
         border-radius: 4px;
         font-size: 12px;
         white-space: nowrap;
         display: none;
         z-index: 10;
+        pointer-events: none;
+    }
+
+    .chart-note-tooltip::after {
+        content: '';
+        position: absolute;
+        top: 100%;
+        left: 50%;
+        transform: translateX(-50%);
+        border-width: 6px;
+        border-style: solid;
+        border-color: rgba(0, 0, 0, 0.8) transparent transparent transparent;
     }
 
     .chart-note-dot:hover .chart-note-tooltip {
