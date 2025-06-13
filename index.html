@@ -22,7 +22,7 @@
 
         header h1 a:hover {
             opacity: 0.8;
-            text-decoration: underline;
+            text-decoration: none;
         }
 
         :root {
@@ -1740,11 +1740,13 @@
                 <h3>Historique des notes</h3>
                 <button class="close-btn" id="close-notes-list">&times;</button>
               </div>
-              <div style="margin-bottom: 10px;">
-                <label for="note-type-filter">Filtrer par type :</label>
-                <select id="note-type-filter" style="margin-left: 10px;">
-                  <option value="all">Tous les types</option>
-                </select>
+              <div class="date-range-selector" style="margin-bottom: 10px;">
+                <div class="range-option" style="display: flex; align-items: center; gap: 10px;">
+                  <label for="note-type-filter">Filtrer par type :</label>
+                  <select id="note-type-filter" style="padding: 4px 8px;">
+                    <option value="all">Tous les types</option>
+                  </select>
+                </div>
               </div>
               <div id="notes-list" class="notes-list"></div>
             </div>
@@ -4080,7 +4082,7 @@
             medColor.style.marginRight = '5px';
             
             const medText = document.createElement('span');
-            medText.textContent = 'Avec anti-inflammatoire';
+            medText.textContent ='Avec anti-inflammatoire';
             
             medLegend.appendChild(medColor);
             medLegend.appendChild(medText);
@@ -4169,7 +4171,7 @@
             if (barPoints.length) {
                 const bp = barPoints[0];
                 const barWidth = bp.width || (bp.x2 ? bp.x2 - bp.x1 : 10);
-                noteDotRadius = Math.max(2, Math.min(10, barWidth * 0.35));
+                noteDotRadius = Math.max(1, Math.min(10, barWidth * 0.35));
             } else {
                 noteDotRadius = 6;
             }
@@ -4211,7 +4213,11 @@
 
                     const tooltip = document.createElement('div');
                     tooltip.className = 'chart-note-tooltip';
-                    tooltip.innerHTML = `<div><span style='color:${color}'>●</span> ${type}</div><div>${text}</div>`;
+                    const dayStr = String(date.getDate()).padStart(2, '0');
+                    const monthStr = String(date.getMonth() + 1).padStart(2, '0');
+                    const yearStr = date.getFullYear();
+                    const dateStr = `${dayStr}/${monthStr}/${yearStr}`;
+                    tooltip.innerHTML = `<div><strong>${dateStr}</strong></div><div><span style='color:${color}'>●</span> ${type}</div><div>${text}</div>`;
                     dot.appendChild(tooltip);
                     dot.onmouseenter = () => { tooltip.style.display = 'block'; };
                     dot.onmouseleave = () => { tooltip.style.display = 'none'; };
