@@ -1377,11 +1377,9 @@
         pointer-events: auto;
     }
 
-    .chart-note-tooltip {
+    .chart-note-tooltip,
+    .chart-hist-tooltip {
         position: absolute;
-        bottom: 100%;
-        left: 50%;
-        transform: translate(-50%, -4px);
         background: #222;
         color: #fff;
         padding: 6px 8px;
@@ -1389,20 +1387,59 @@
         font-size: 12px;
         white-space: nowrap;
         display: none;
-        z-index: 10;
+        z-index: 20;
         pointer-events: none;
+        line-height: 1.2;
     }
 
-    .chart-note-tooltip::after {
+    .chart-tooltip-dot {
+        font-size: 20px;
+    }
+
+    .chart-note-tooltip {
+        bottom: 100%;
+        left: 50%;
+        transform: translate(-50%, -4px);
+    }
+
+    .chart-hist-tooltip {
+        transform: translateX(-50%);
+    }
+
+    .chart-note-tooltip div:first-child,
+    .chart-hist-tooltip div:first-child {
+        margin-bottom: 2px;
+    }
+
+    .chart-tooltip-dot {
+        font-size: 18px;
+        margin-right: 2px;
+        vertical-align: middle;
+    }
+
+    .chart-note-tooltip::after,
+    .chart-hist-tooltip::after {
         content: '';
         position: absolute;
         top: 100%;
-        left: 50%;
-        transform: translateX(-50%);
         border-width: 6px;
         border-style: solid;
         border-color: rgba(0, 0, 0, 0.8) transparent transparent transparent;
     }
+
+    .chart-note-tooltip::after {
+        left: 50%;
+        transform: translateX(-50%);
+    }
+
+    .chart-hist-tooltip.left::after {
+        left: 8px;
+    }
+
+    .chart-hist-tooltip.right::after {
+        right: 8px;
+    }
+
 
     .chart-note-dot:hover .chart-note-tooltip {
         display: block;
@@ -1411,9 +1448,9 @@
    /* Reduce legend text size on small screens */
    @media (max-width: 480px) {
         #custom-chart-legend {
-            font-size: 0.75em;
-            margin-top: 18px !important;
-            margin-bottom: 12px !important;
+            font-size: 0.6em;
+            margin-top: 20px !important;
+            margin-bottom: 15px !important;
         }
     }
 
@@ -1576,7 +1613,7 @@
                 </div>
                 <div class="chart-container" style="position: relative; height: 350px; margin-bottom: 0px;">
                     <canvas id="pain-chart"></canvas> 
-                    <div id="note-dots-overlay" style="position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;"></div>
+                    <div id="note-dots-overlay" style="position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:10;"></div>
                 </div>
                 <div class="chart-stats" style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 5px; padding: 0;">
                     <div class="stat-item" style="padding: 0 2px; background-color: #f5f5f5; border-radius: 4px; text-align: center;">
@@ -3756,7 +3793,8 @@
                 medsData:  userMedsData,
                 noteTypes: noteTypes,
                 medTypes:  medTypesSaved ? JSON.parse(medTypesSaved) : (typeof medTypes !== "undefined" ? medTypes : []),
-                lastNoteType: userLastNoteType
+                lastNoteType: userLastNoteType,
+                penseBete: localStorage.getItem('spondylogPenseBete') || ""
             };
 
             // Convertir en JSON joliment indenté
@@ -3813,6 +3851,20 @@
                             // 🟢 Importer le dernier type de note sélectionné par jour
                             if (importedData.lastNoteType && typeof importedData.lastNoteType === 'object') {
                                 userLastNoteType = importedData.lastNoteType;
+                            }
+
+                           // 🟢 Importer le pense-bête s'il existe
+                           if (typeof importedData.penseBete === 'string') {
+                                localStorage.setItem('spondylogPenseBete', importedData.penseBete);
+                                const pb = document.getElementById('pense-bête-note');
+                                if (pb) pb.value = importedData.penseBete;
+                            }   
+
+                            // 🟢 Importer le pense-bête s'il existe
+                            if (typeof importedData.penseBete === 'string') {
+                                localStorage.setItem('spondylogPenseBete', importedData.penseBete);
+                                const pb = document.getElementById('pense-bête-note');
+                                if (pb) pb.value = importedData.penseBete;
                             }
 
                             // Compatibilité avec l’ancien format de notes (string → { cat: texte })
@@ -3988,6 +4040,8 @@
                 },
                 plugins: {
                     tooltip: {
+                        enabled: false,
+                        external: histogramExternalTooltip,
                         callbacks: {
                             title: function(tooltipItems) {
                                 const index = tooltipItems[0].dataIndex;
@@ -4002,8 +4056,10 @@
                             },
                             label: function(context) {
                                 const value = context.parsed.y;
-                                if (value === null) return 'Niveau de douleur: Non renseigné';
-                                return `Niveau de douleur: ${value}`;
+                                const color = barColors[context.dataIndex];
+                                const square = `<span style='display:inline-block;width:10px;height:10px;background:${color};margin-right:4px'></span>`;
+                                if (value === null) return `${square}Niveau de douleur: Non renseigné`;
+                                return `${square}Niveau de douleur: ${value}`;
                             },
                             afterLabel: function(context) {
                                 const index = context.dataIndex;
@@ -4021,9 +4077,8 @@
                                 
                                 if (note) {
                                     // Limiter la longueur de la note à afficher dans l'infobulle
-                                    return [medText, `Note: ${note.length > 50 ? note.substring(0, 50) + '...' : note}`];
+                                    return [medText, note.length > 50 ? note.substring(0, 50) + '...' : note];
                                 }
-                                
                                 return medText;
                             }
                         }
@@ -4186,6 +4241,38 @@
             );
         }
 
+        function histogramExternalTooltip(context) {
+            const {chart, tooltip} = context;
+            let tooltipEl = chart.canvas.parentNode.querySelector('.chart-hist-tooltip');
+            if (!tooltipEl) {
+                tooltipEl = document.createElement('div');
+                tooltipEl.className = 'chart-hist-tooltip';
+                chart.canvas.parentNode.appendChild(tooltipEl);
+            }
+
+            if (tooltip.opacity === 0) {
+                tooltipEl.style.display = 'none';
+                return;
+            }
+
+            const lines = [];
+            if (tooltip.title && tooltip.title.length) {
+                lines.push(`<strong>${tooltip.title[0]}</strong>`);
+            }
+            if (tooltip.body) {
+                lines.push(tooltip.body.map(b => b.lines).flat().join('<br>'));
+            }
+            tooltipEl.innerHTML = `<div>${lines.join('</div><div>')}</div>`;
+            tooltipEl.style.display = 'block';
+
+            const {offsetLeft: positionX, offsetTop: positionY} = chart.canvas;
+            const height = tooltipEl.offsetHeight;
+            const alignRight = tooltip.caretX > chart.width / 2;
+            tooltipEl.className = `chart-hist-tooltip ${alignRight ? 'right' : 'left'}`;
+            tooltipEl.style.left = positionX + tooltip.caretX + 'px';
+            tooltipEl.style.top = positionY + tooltip.caretY - height - 8 + 'px';
+        }
+
         function updateNoteDotRadius() {
             if (!painChart) return;
             const barPoints = painChart.getDatasetMeta(0).data;
@@ -4238,7 +4325,7 @@
                     const monthStr = String(date.getMonth() + 1).padStart(2, '0');
                     const yearStr = date.getFullYear();
                     const dateStr = `${dayStr}/${monthStr}/${yearStr}`;
-                    tooltip.innerHTML = `<div><strong>${dateStr}</strong></div><div><span style='color:${color}'>●</span> ${type}</div><div>${text}</div>`;
+                    tooltip.innerHTML = `<div><strong>${dateStr}</strong></div><div><span class='chart-tooltip-dot' style='color:${color}'>●</span> ${type}</div><div>${text}</div>`;
                     dot.appendChild(tooltip);
                     dot.onmouseenter = () => { tooltip.style.display = 'block'; };
                     dot.onmouseleave = () => { tooltip.style.display = 'none'; };
