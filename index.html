@@ -1408,10 +1408,12 @@
         display: block;
     }
 
-    /* Reduce legend text size on small screens */
-     @media (max-width: 480px) {
+   /* Reduce legend text size on small screens */
+   @media (max-width: 480px) {
         #custom-chart-legend {
-            font-size: 0.6em;
+            font-size: 0.75em;
+            margin-top: 18px !important;
+            margin-bottom: 12px !important;
         }
     }
 
@@ -1450,7 +1452,7 @@
                     <button id="next-month" class="nav-btn-style">→</button>
                 </div>
                 <div class="import-export-container">
-                    <button class="import-export-btn">📁</button>
+                    <button class="import-export-btn">⚙️</button>
                     <div class="import-export-dropdown">
                         <div class="import-option" style="padding: 10px; cursor: pointer;">Importer</div>
                         <div class="export-option" style="padding: 10px; cursor: pointer;">Exporter</div>
@@ -1484,7 +1486,7 @@
                     <button id="next-year" class="nav-btn-style">→</button>
                 </div>
                 <div class="import-export-container">
-                    <button class="import-export-btn">📁</button>
+                    <button class="import-export-btn">⚙️</button>
                     <div class="import-export-dropdown">
                         <div class="import-option" style="padding: 10px; cursor: pointer;">Importer</div>
                         <div class="export-option" style="padding: 10px; cursor: pointer;">Exporter</div>
@@ -1573,7 +1575,7 @@
                     </div>
                 </div>
                 <div class="chart-container" style="position: relative; height: 350px; margin-bottom: 0px;">
-                    <canvas id="pain-chart"></canvas>
+                    <canvas id="pain-chart"></canvas> 
                     <div id="note-dots-overlay" style="position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;"></div>
                 </div>
                 <div class="chart-stats" style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 5px; padding: 0;">
@@ -3999,16 +4001,6 @@
                                 return `${day}/${month}/${year}`;
                             },
                             label: function(context) {
-                                const index = context.dataIndex;
-                                const currentDate = new Date(startDate);
-                                currentDate.setDate(startDate.getDate() + index);
-                                const dateId = `${currentDate.getFullYear()}-${currentDate.getMonth()+1}-${currentDate.getDate()}`;
-                                const pain = userPainData[dateId];
-                                const med = medData[index];
-
-                                if (pain === 0 && med) {
-                                    return 'Niveau de douleur: 0';
-                                }
                                 const value = context.parsed.y;
                                 if (value === null) return 'Niveau de douleur: Non renseigné';
                                 return `Niveau de douleur: ${value}`;
@@ -4052,9 +4044,10 @@
         // Ajouter une légende personnalisée en dehors du graphique
         updateChartLegend();
 
-        // Harmoniser les marges autour du graphique
+        // Espace sous le graphique
         const chartCanvas = document.getElementById('pain-chart');
-        chartCanvas.style.marginBottom = '0';
+;
+        chartCanvas.style.marginBottom = '30px';
 
         }
 
@@ -4072,7 +4065,7 @@
             legendContainer.style.display = 'flex';
             legendContainer.style.justifyContent = 'center';
             legendContainer.style.marginTop = '10px';
-            legendContainer.style.marginBottom = '10px';
+            legendContainer.style.marginBottom = '5px';
             
             // Légende pour les barres rouges (sans anti-inflammatoires)
             const noMedLegend = document.createElement('div');
@@ -4119,9 +4112,9 @@
             legendContainer.appendChild(noMedLegend);
             legendContainer.appendChild(medLegend);
             
-            // Placer la légende sous le graphique
+            // Insérer la légende avant le graphique
             const chartContainer = document.getElementById('pain-chart').parentNode;
-            chartContainer.parentNode.insertBefore(legendContainer, chartContainer.nextSibling);
+            chartContainer.insertBefore(legendContainer, document.getElementById('pain-chart'));
             
         }
 
