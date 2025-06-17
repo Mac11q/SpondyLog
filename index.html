@@ -1008,7 +1008,7 @@
             position: absolute;
             top: -1.8px; /* Distance exacte entre le haut du .section et le haut de la .bar */
             left: 50%;
-            transform: translateX(-50%);
+            transform: none;
             width: calc(100% - 0px);
             max-width: 370px;
             margin-left: -0.25px;
@@ -1421,23 +1421,30 @@
     .chart-hist-tooltip::after {
         content: '';
         position: absolute;
-        top: 100%;
         border-width: 6px;
         border-style: solid;
-        border-color: rgba(0, 0, 0, 0.8) transparent transparent transparent;
     }
 
     .chart-note-tooltip::after {
+        top: 100%;
         left: 50%;
         transform: translateX(-50%);
+        border-color: rgba(0, 0, 0, 0.8) transparent transparent transparent;
+    }
+
+    .chart-hist-tooltip::after {
+        top: 50%;
+        transform: translateY(-50%);
     }
 
     .chart-hist-tooltip.left::after {
-        left: 8px;
+        left: -6px;
+        border-color: transparent transparent transparent rgba(0, 0, 0, 0.8);
     }
 
     .chart-hist-tooltip.right::after {
-        right: 8px;
+        right: -6px;
+        border-color: transparent rgba(0, 0, 0, 0.8) transparent transparent;
     }
 
 
@@ -3991,7 +3998,7 @@
             if (pain === null) return 'rgba(200, 200, 200, 0.5)';
             
             // Si anti-inflammatoire pris ce jour-là, bordure bleue, sinon bordure rouge
-            return medData[index] ? 'rgba(54, 162, 235, 1)' : 'rgba(255, 99, 132, 1)';
+            return medData[index] ? 'rgb(54, 162, 235)' : 'rgb(255, 99, 132)';
         });
         
         // Détruire le graphique existant s'il y en a un
@@ -4055,9 +4062,11 @@
                                 return `${day}/${month}/${year}`;
                             },
                             label: function(context) {
-                                const value = context.parsed.y;
+                                let value = context.parsed.y;
+                                if (Math.abs(value - 0.05) < 0.001) value = 0;
                                 const color = barColors[context.dataIndex];
-                                const square = `<span style='display:inline-block;width:10px;height:10px;background:${color};margin-right:4px'></span>`;
+                                const border = borderColors[context.dataIndex];
+                                const square = `<span style='display:inline-block;width:10px;height:10px;background:${color};border:1px solid ${border};margin-right:4px'></span>`;
                                 if (value === null) return `${square}Niveau de douleur: Non renseigné`;
                                 return `${square}Niveau de douleur: ${value}`;
                             },
@@ -4267,10 +4276,17 @@
 
             const {offsetLeft: positionX, offsetTop: positionY} = chart.canvas;
             const height = tooltipEl.offsetHeight;
+            const width = tooltipEl.offsetWidth;
             const alignRight = tooltip.caretX > chart.width / 2;
             tooltipEl.className = `chart-hist-tooltip ${alignRight ? 'right' : 'left'}`;
-            tooltipEl.style.left = positionX + tooltip.caretX + 'px';
-            tooltipEl.style.top = positionY + tooltip.caretY - height - 8 + 'px';
+    
+                  const offset = 8;
+            if (alignRight) {
+                tooltipEl.style.left = positionX + tooltip.caretX - width - offset + 'px';
+            } else {
+                tooltipEl.style.left = positionX + tooltip.caretX + offset + 'px';
+            }
+            tooltipEl.style.top = positionY + tooltip.caretY - height / 2 + 'px';
         }
 
         function updateNoteDotRadius() {
