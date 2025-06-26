@@ -1433,16 +1433,19 @@
     }
 
     .chart-hist-tooltip::after {
-        bottom: -6px;
-        border-color: rgba(0, 0, 0, 0.8) transparent transparent transparent;
+        top: var(--arrow-offset, 50%);
+        transform: translateY(-50%);
+        border-color: transparent;
     }
 
     .chart-hist-tooltip.left::after {
-        left: 10px;
+        left: -6px;
+        border-right-color: rgba(0, 0, 0, 0.8);
     }
 
     .chart-hist-tooltip.right::after {
-        right: 10px;
+        right: -6px;
+        border-left-color: rgba(0, 0, 0, 0.8);
     }
 
 
@@ -4281,7 +4284,7 @@
             tooltipEl.innerHTML = `<div>${lines.join('</div><div>')}</div>`;
             tooltipEl.style.display = 'block';
 
-            const {offsetLeft: positionX, offsetTop: positionY, offsetWidth: chartW} = chart.canvas;
+            const {offsetLeft: positionX, offsetTop: positionY, offsetWidth: chartW, offsetHeight: chartH} = chart.canvas;
             const height = tooltipEl.offsetHeight;
             const width = tooltipEl.offsetWidth;
             const offset = 8;
@@ -4295,11 +4298,14 @@
                 left = positionX + tooltip.caretX + offset;
                 if (left + width > positionX + chartW) left = positionX + chartW - width;
             }
-            let top = positionY + tooltip.caretY - height - offset;
+            let top = positionY + tooltip.caretY - height / 2;
             if (top < positionY) top = positionY;
+            if (top + height > positionY + chartH) top = positionY + chartH - height;
 
             tooltipEl.style.left = left + 'px';
             tooltipEl.style.top = top + 'px';
+            const arrowOffset = Math.max(0, Math.min(height, tooltip.caretY - top));
+            tooltipEl.style.setProperty('--arrow-offset', `${arrowOffset}px`);
         }
 
         function updateNoteDotRadius() {
