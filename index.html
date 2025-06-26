@@ -1397,10 +1397,6 @@
         line-height: 1.2;
     }
 
-    .chart-tooltip-dot {
-        font-size: 20px;
-    }
-
     .chart-note-tooltip {
         bottom: 100%;
         left: 50%;
@@ -1417,8 +1413,14 @@
     }
 
     .chart-tooltip-dot {
-        font-size: 18px;
-        margin-right: 2px;
+        width: 10px; /* ou la taille de ta pastille */
+        height: 10px;
+        background-color: currentColor; /* ou une autre couleur */
+        border-radius: 50%;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        margin-right: 2x; /* ajusté pour un peu plus d’espace */
         vertical-align: middle;
     }
 
