@@ -703,12 +703,10 @@
         }
         .selected-note-type .color-dot {
             margin-right: 8px;
+            width: 12px;
+            height: 12px;
         }
-        .dropdown-arrow {
-            margin-left: 10px;
-            font-size: 0.8em;
-            color: #555;
-        }
+        
         .note-type-list {
             position: absolute;
             top: 100%;
@@ -828,7 +826,7 @@
         .selected-note-type {
             display: flex;
             align-items: center;
-            justify-content: space-between;
+            justify-content: flex-start;
             min-height: 40px;
             border: 1px solid #ddd;
             border-radius: 6px;
@@ -1421,7 +1419,8 @@
     .chart-hist-tooltip::after {
         content: '';
         position: absolute;
-        border-width: 6px;
+        width: 0;
+        height: 0;
         border-style: solid;
     }
 
@@ -1429,23 +1428,26 @@
         top: 100%;
         left: 50%;
         transform: translateX(-50%);
+        border-width: 6px;
         border-color: rgba(0, 0, 0, 0.8) transparent transparent transparent;
     }
 
-    .chart-hist-tooltip::after {
+    .chart-hist-tooltip.left::after,
+    .chart-hist-tooltip.right::after {
         top: var(--arrow-offset, 50%);
         transform: translateY(-50%);
-        border-color: transparent;
     }
 
     .chart-hist-tooltip.left::after {
         left: -6px;
-        border-right-color: rgba(0, 0, 0, 0.8);
+        border-width: 6px 6px 6px 0;
+        border-color: transparent rgba(0, 0, 0, 0.8) transparent transparent;
     }
 
     .chart-hist-tooltip.right::after {
         right: -6px;
-        border-left-color: rgba(0, 0, 0, 0.8);
+        border-width: 6px 0 6px 6px;
+        border-color: transparent transparent transparent rgba(0, 0, 0, 0.8);
     }
 
 
