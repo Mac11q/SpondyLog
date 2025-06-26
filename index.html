@@ -1403,7 +1403,7 @@
     }
 
     .chart-hist-tooltip {
-        transform: translateX(-50%);
+        transform: none;
     }
 
     .chart-note-tooltip div:first-child,
@@ -1433,18 +1433,16 @@
     }
 
     .chart-hist-tooltip::after {
-        top: 50%;
-        transform: translateY(-50%);
+        bottom: -6px;
+        border-color: rgba(0, 0, 0, 0.8) transparent transparent transparent;
     }
 
     .chart-hist-tooltip.left::after {
-        left: -6px;
-        border-color: transparent transparent transparent rgba(0, 0, 0, 0.8);
+        left: 10px;
     }
 
     .chart-hist-tooltip.right::after {
-        right: -6px;
-        border-color: transparent rgba(0, 0, 0, 0.8) transparent transparent;
+        right: 10px;
     }
 
 
@@ -4067,8 +4065,17 @@
                                 const color = barColors[context.dataIndex];
                                 const border = borderColors[context.dataIndex];
                                 const square = `<span style='display:inline-block;width:10px;height:10px;background:${color};border:1px solid ${border};margin-right:4px'></span>`;
-                                if (value === null) return `${square}Niveau de douleur: Non renseigné`;
-                                return `${square}Niveau de douleur: ${value}`;
+                                if (value === null) return `${square}Niveau de douleur : Non renseigné`;
+                                const painLevels = {
+                                    0: 'Absente',
+                                    1: 'Légère',
+                                    2: 'Modérée',
+                                    3: 'Forte',
+                                    4: 'Très forte',
+                                    5: 'Extrême'
+                                };
+                                const valText = painLevels[value] !== undefined ? `<strong>${painLevels[value]}</strong>` : `<strong>${value}</strong>`;
+                                return `${square}Niveau de douleur : ${valText}`;
                             },
                             afterLabel: function(context) {
                                 const index = context.dataIndex;
@@ -4274,19 +4281,25 @@
             tooltipEl.innerHTML = `<div>${lines.join('</div><div>')}</div>`;
             tooltipEl.style.display = 'block';
 
-            const {offsetLeft: positionX, offsetTop: positionY} = chart.canvas;
+            const {offsetLeft: positionX, offsetTop: positionY, offsetWidth: chartW} = chart.canvas;
             const height = tooltipEl.offsetHeight;
             const width = tooltipEl.offsetWidth;
-            const alignRight = tooltip.caretX > chart.width / 2;
+            const offset = 8;
+            const alignRight = tooltip.caretX + width + offset > chartW;
             tooltipEl.className = `chart-hist-tooltip ${alignRight ? 'right' : 'left'}`;
-    
-                  const offset = 8;
+            let left;
             if (alignRight) {
-                tooltipEl.style.left = positionX + tooltip.caretX - width - offset + 'px';
+                left = positionX + tooltip.caretX - width - offset;
+                if (left < positionX) left = positionX;
             } else {
-                tooltipEl.style.left = positionX + tooltip.caretX + offset + 'px';
+                left = positionX + tooltip.caretX + offset;
+                if (left + width > positionX + chartW) left = positionX + chartW - width;
             }
-            tooltipEl.style.top = positionY + tooltip.caretY - height / 2 + 'px';
+            let top = positionY + tooltip.caretY - height - offset;
+            if (top < positionY) top = positionY;
+
+            tooltipEl.style.left = left + 'px';
+            tooltipEl.style.top = top + 'px';
         }
 
         function updateNoteDotRadius() {
