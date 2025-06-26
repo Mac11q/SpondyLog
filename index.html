@@ -1380,6 +1380,7 @@
         position: absolute;
         border-radius: 50%;
         pointer-events: auto;
+        z-index: 1;
     }
 
     .chart-note-tooltip,
@@ -1392,7 +1393,7 @@
         font-size: 12px;
         white-space: nowrap;
         display: none;
-        z-index: 20;
+        z-index: 2;
         pointer-events: none;
         line-height: 1.2;
     }
@@ -1401,6 +1402,7 @@
         bottom: 100%;
         left: 50%;
         transform: translate(-50%, -4px);
+        z-index: 200;
     }
 
     .chart-hist-tooltip {
@@ -4079,7 +4081,7 @@
                                 const color = barColors[context.dataIndex];
                                 const border = borderColors[context.dataIndex];
                                 const square = `<span style='display:inline-block;width:10px;height:10px;background:${color};border:1px solid ${border};margin-right:4px'></span>`;
-                                if (value === null) return `${square}Niveau de douleur : Non renseigné`;
+                                if (value === null) return `${square}Douleur : Non renseigné`;
                                 const painLevels = {
                                     0: 'Absente',
                                     1: 'Légère',
@@ -4089,7 +4091,7 @@
                                     5: 'Extrême'
                                 };
                                 const valText = painLevels[value] !== undefined ? `<strong>${painLevels[value]}</strong>` : `<strong>${value}</strong>`;
-                                return `${square}Niveau de douleur : ${valText}`;
+                                return `${square}Douleur : ${valText}`;
                             },
                             afterLabel: function(context) {
                                 const index = context.dataIndex;
