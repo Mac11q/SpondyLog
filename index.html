@@ -757,6 +757,13 @@
             vertical-align: middle;
         }
 
+        .dropdown-arrow {
+            margin-left: auto;
+            padding-left: 10px;
+            font-size: 0.8em;
+            color: #555;
+        }
+
         /* Style pour l’option "Ajouter un type" */
         .add-type-item {
             text-align: center;
@@ -1006,7 +1013,7 @@
             position: absolute;
             top: -1.8px; /* Distance exacte entre le haut du .section et le haut de la .bar */
             left: 50%;
-            transform: none;
+            transform: translateX(-50%);
             width: calc(100% - 0px);
             max-width: 370px;
             margin-left: -0.25px;
@@ -1434,8 +1441,8 @@
 
     .chart-hist-tooltip.left::after,
     .chart-hist-tooltip.right::after {
-        top: var(--arrow-offset, 50%);
-        transform: translateY(-50%);
+        top: var(--arrow-offset, 120%);
+        transform: translateY(120%);
     }
 
     .chart-hist-tooltip.left::after {
