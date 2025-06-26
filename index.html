@@ -178,7 +178,7 @@
 
     /* Increase tooltip width specifically for the yearly view */
     .mini-day .note-dot-tooltip {
-        width: 263px;
+        width: 230px;
         max-width: 285px;
     }
 
@@ -198,7 +198,7 @@
         width: 11px;
         height: 11px;
         border-radius: 50%;
-        margin-right: 3px;
+        margin-right: 5px;
         vertical-align: middle;
         box-shadow: 0 0 2px #444;
     }
@@ -754,6 +754,17 @@
             height: 10px;
             border-radius: 50%;
             margin-right: 8px;
+            vertical-align: middle;
+        }
+
+        /* Pastille dans la modale "voir toutes les notes" */
+        .note-list-dot {
+            width: 10px;
+            height: 10px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 2x; /* ajusté pour un peu plus d’espace */
             vertical-align: middle;
         }
 
@@ -1380,7 +1391,7 @@
         position: absolute;
         border-radius: 50%;
         pointer-events: auto;
-        z-index: 1;
+        z-index: 1
     }
 
     .chart-note-tooltip,
@@ -1393,7 +1404,7 @@
         font-size: 12px;
         white-space: nowrap;
         display: none;
-        z-index: 2;
+        z-index: 20;
         pointer-events: none;
         line-height: 1.2;
     }
@@ -1402,7 +1413,7 @@
         bottom: 100%;
         left: 50%;
         transform: translate(-50%, -4px);
-        z-index: 200;
+        z-index: 20;
     }
 
     .chart-hist-tooltip {
@@ -1510,7 +1521,7 @@
                     <button id="next-month" class="nav-btn-style">→</button>
                 </div>
                 <div class="import-export-container">
-                    <button class="import-export-btn">⚙️</button>
+                    <button class="import-export-btn">📁</button>
                     <div class="import-export-dropdown">
                         <div class="import-option" style="padding: 10px; cursor: pointer;">Importer</div>
                         <div class="export-option" style="padding: 10px; cursor: pointer;">Exporter</div>
@@ -1544,7 +1555,7 @@
                     <button id="next-year" class="nav-btn-style">→</button>
                 </div>
                 <div class="import-export-container">
-                    <button class="import-export-btn">⚙️</button>
+                    <button class="import-export-btn">📁</button>
                     <div class="import-export-dropdown">
                         <div class="import-option" style="padding: 10px; cursor: pointer;">Importer</div>
                         <div class="export-option" style="padding: 10px; cursor: pointer;">Exporter</div>
@@ -2906,32 +2917,32 @@
                                     return noteText && noteText.trim() !== "";
                                 });
                                 if (typesForDay.length > 0) {
-                                    const dotsContainer = document.createElement("div");
-                                    dotsContainer.className = "note-dots-container";
-                                    typesForDay.slice().reverse().forEach((typeName, idx) => {
-                                        const typeObj = noteTypes.find(t => t.name === typeName);
-                                        const dot = document.createElement("span");
-                                        dot.className = "note-dot";
-                                        dot.style.backgroundColor = typeObj ? typeObj.color : "#3498db";
-                                        const noteText = userNotes[dateId][typeName] || "";
+                                const dotsContainer = document.createElement("div");
+                                dotsContainer.className = "note-dots-container";
+                                typesForDay.slice().reverse().forEach((typeName, idx) => {
+                                    const typeObj = noteTypes.find(t => t.name === typeName);
+                                    const dot = document.createElement("span");
+                                    dot.className = "note-dot";
+                                    dot.style.backgroundColor = typeObj ? typeObj.color : "#3498db";
+                                    const noteText = userNotes[dateId][typeName] || "";
 
-                                        // Tooltip custom (affichage instantané)
-                                        const tooltip = document.createElement("div");
-                                            tooltip.className = "note-dot-tooltip";
-                                            tooltip.innerHTML = `
-                                            <span class="tooltip-dot" style="background:${typeObj ? typeObj.color : "#3498db"}"></span>
-                                            <strong>${typeName}</strong> : ${noteText.length > 70 ? noteText.substring(0, 70) + '…' : noteText}
-                                            `;
-                                            dot.appendChild(tooltip);
-                                            dot.addEventListener("mouseenter", function() {
-                                                dot.classList.add("show-tooltip");
-                                                // Met la classe spéciale sur la cellule parente
-                                                dayCell.closest("td").classList.add("note-tooltip-open");
-                                            });
-                                            dot.addEventListener("mouseleave", function() {
-                                                dot.classList.remove("show-tooltip");
-                                                dayCell.closest("td").classList.remove("note-tooltip-open");
-                                            });
+                                    // Tooltip custom (affichage instantané)
+                                    const tooltip = document.createElement("div");
+                                    tooltip.className = "note-dot-tooltip";
+                                    tooltip.innerHTML = `
+                                        <span class="tooltip-dot" style="background:${typeObj ? typeObj.color : "#3498db"}"></span>
+                                        ${typeName} : <strong>${noteText.length > 70 ? noteText.substring(0, 70) + '…' : noteText}</strong>
+                                    `;
+                                    dot.appendChild(tooltip);
+                                    dot.addEventListener("mouseenter", function() {
+                                        dot.classList.add("show-tooltip");
+                                        // Met la classe spéciale sur la cellule parente
+                                        dayCell.closest("td").classList.add("note-tooltip-open");
+                                    });
+                                    dot.addEventListener("mouseleave", function() {
+                                        dot.classList.remove("show-tooltip");
+                                        dayCell.closest("td").classList.remove("note-tooltip-open");
+                                    });
 
                                         dotsContainer.appendChild(dot);
                                     });
@@ -2948,12 +2959,12 @@
                                 medIndicator.innerHTML = '<span class="med-icon">💊</span>';
 
                                 const medTypeName = medData.type ? medData.type : "(non renseigné)";
+                                const qty = medData.qty ? medData.qty : 1;
                                 const tooltip = document.createElement("div");
                                 tooltip.className = "note-dot-tooltip";
                                 tooltip.innerHTML = `
                                     <span class="tooltip-pill" style="color:#FF5722; font-size: 15px; margin-right: 2px;">💊</span>
-                                    <strong>${medTypeName}</strong><br>
-                                    Quantité : <strong>${medData.qty ? medData.qty : 1}</strong>
+                                    ${medTypeName} : <strong>x${qty}</strong>
                                 `;
                                 medIndicator.appendChild(tooltip);
 
@@ -3145,47 +3156,62 @@
                                     showPainModal(dateId);
                                 });
 
-                                // Tooltip pour la vue annuelle
+                                const painLevelLabels = [
+                                    "Absente",
+                                    "Légère",
+                                    "Modérée",
+                                    "Forte",
+                                    "Très forte",
+                                    "Extrême"
+                                ];
+
                                 const painLevel = userPainData[dateId];
                                 const painInfo = (painLevel !== undefined && painLevel !== 0);
                                 const medData  = userMedsData[dateId];
                                 const medInfo  = medData && medData.taken;
                                 const noteObjY = userNotes[dateId];
                                 const notesInfo = noteObjY && Object.values(noteObjY).some(t => t && t.trim() !== "");
+
                                 if (painInfo || medInfo || notesInfo) {
-                                    const tooltip = document.createElement("div");
-                                    tooltip.className = "note-dot-tooltip";
-                                    let parts = [];
-                                    if (painInfo) {
-                                        const level = painLevel;
-                                        const dotColor = painColors[level];
-                                        parts.push(`<span class="tooltip-dot" style="background:${dotColor}"></span><strong>Douleur</strong> : <strong>${level}</strong>`);
-                                    }
-                                    if (medInfo) {
-                                        const medType = medData.type ? medData.type : "(non renseigné)";
-                                        const qty = medData.qty ? medData.qty : 1;
-                                        parts.push(`<span class="tooltip-pill" style="color:#FF5722; font-size: 15px; margin-right: 2px;">💊</span><strong>${medType}</strong> x <strong>${qty}</strong>`);
-                                    }
-                                    if (notesInfo) {
-                                        for (const [typeName, text] of Object.entries(noteObjY)) {
-                                            if (text && text.trim() !== "") {
-                                                const typeObj = noteTypes.find(t => t.name === typeName);
-                                                const color = typeObj ? typeObj.color : "#3498db";
-                                                parts.push(`<span class="tooltip-dot" style="background:${color}"></span><strong>${typeName}</strong> : ${text.length > 70 ? text.substring(0,70)+'…' : text}`);
-                                            }
+                                const tooltip = document.createElement("div");
+                                tooltip.className = "note-dot-tooltip";
+                                let parts = [];
+                                if (medInfo) {
+                                    const medType = medData.type ? medData.type : "(non renseigné)";
+                                    const qty = medData.qty ? medData.qty : 1;
+                                    // Nom du médicament normal, quantité en gras (avec x)
+                                    parts.push(`<span class="tooltip-pill" style="color:#FF5722; font-size: 15px; margin-right: 5px;">💊</span>${medType} : <strong>x${qty}</strong>`);
+                                }
+                                if (painInfo) {
+                                    const level = painLevel;
+                                    const levelLabel = painLevelLabels[level] || "(inconnu)";
+                                    const dotColor = painColors[level];
+                                    // Douleur en normal, niveau en gras
+                                    parts.push(`<span class="tooltip-dot" style="background:${dotColor}"></span>Douleur : <strong>${levelLabel}</strong>`);
+                                }
+                                if (notesInfo) {
+                                    for (const [typeName, text] of Object.entries(noteObjY)) {
+                                        if (text && text.trim() !== "") {
+                                            const typeObj = noteTypes.find(t => t.name === typeName);
+                                            const color = typeObj ? typeObj.color : "#3498db";
+                                            // Type de note en normal, texte en gras
+                                            parts.push(`<span class="tooltip-dot" style="background:${color}"></span>${typeName} : <strong>${text.length > 70 ? text.substring(0,70)+'…' : text}</strong>`);
                                         }
                                     }
-                                    tooltip.innerHTML = parts.join('<br>');
-                                    miniDay.appendChild(tooltip);
-                                    miniDay.addEventListener("mouseenter", function() {
-                                        miniDay.classList.add("show-tooltip");
-                                        miniDay.closest("td").classList.add("note-tooltip-open");
-                                    });
-                                    miniDay.addEventListener("mouseleave", function() {
-                                        miniDay.classList.remove("show-tooltip");
-                                        miniDay.closest("td").classList.remove("note-tooltip-open");
-                                    });
                                 }
+                                tooltip.innerHTML = parts.join('<br>');
+                                miniDay.appendChild(tooltip);
+                                miniDay.addEventListener("mouseenter", function() {
+                                    miniDay.classList.add("show-tooltip");
+                                    miniDay.closest("td").classList.add("note-tooltip-open");
+                                });
+                                miniDay.addEventListener("mouseleave", function() {
+                                    miniDay.classList.remove("show-tooltip");
+                                    miniDay.closest("td").classList.remove("note-tooltip-open");
+                                });
+                            }
+
+
                                 
                                 cell.appendChild(miniDay);
                                 date++;
@@ -3618,8 +3644,8 @@
                             const label = document.createElement("strong");
                             const content = document.createElement("span");
 
-                            dot.textContent = "●";
-                            dot.style.color = color;
+                            dot.className = "color-dot note-list-dot";
+                            dot.style.backgroundColor = color;
                             dot.style.marginRight = "5px";
                             label.textContent = typeName + " : ";
                             content.textContent = text;
@@ -4370,6 +4396,7 @@
 
                     const tooltip = document.createElement('div');
                     tooltip.className = 'chart-note-tooltip';
+                    tooltip.style.zIndex = '99999';
                     const dayStr = String(date.getDate()).padStart(2, '0');
                     const monthStr = String(date.getMonth() + 1).padStart(2, '0');
                     const yearStr = date.getFullYear();
