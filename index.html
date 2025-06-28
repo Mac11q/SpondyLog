@@ -1869,6 +1869,18 @@
         let chartStartDate = null;
         let chartEndDate = null;
         let noteDotRadius = 6;
+
+        function adjustTooltipPosition(t) {
+            if (!t) return;
+            const offset = 14; // doit rester constant
+            t.style.left = 'auto';
+            t.style.right = offset + 'px';
+            const rect = t.getBoundingClientRect();
+            if (rect.left < 0 || rect.right > window.innerWidth) {
+                t.style.right = 'auto';
+                t.style.left = offset + 'px';
+            }
+        }
         
         (function loadNoteTypesFromStorage() {
             const typesSaved = localStorage.getItem('spondylogNoteTypes');
@@ -2933,6 +2945,7 @@
                                         dot.classList.add("show-tooltip");
                                         // Met la classe spéciale sur la cellule parente
                                         dayCell.closest("td").classList.add("note-tooltip-open");
+                                        adjustTooltipPosition(tooltip);
                                     });
                                     dot.addEventListener("mouseleave", function() {
                                         dot.classList.remove("show-tooltip");
@@ -2966,6 +2979,7 @@
                                 medIndicator.addEventListener("mouseenter", function() {
                                     medIndicator.classList.add("show-tooltip");
                                     dayCell.closest("td").classList.add("note-tooltip-open");
+                                    adjustTooltipPosition(tooltip);
                                 });
                                 medIndicator.addEventListener("mouseleave", function() {
                                     medIndicator.classList.remove("show-tooltip");
@@ -3199,6 +3213,7 @@
                                 miniDay.addEventListener("mouseenter", function() {
                                     miniDay.classList.add("show-tooltip");
                                     miniDay.closest("td").classList.add("note-tooltip-open");
+                                    adjustTooltipPosition(tooltip);
                                 });
                                 miniDay.addEventListener("mouseleave", function() {
                                     miniDay.classList.remove("show-tooltip");
