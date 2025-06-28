@@ -199,7 +199,7 @@
         width: 11px;
         height: 11px;
         border-radius: 50%;
-        margin-right: 4px;
+        margin-right: 9px;
         vertical-align: middle;
         box-shadow: 0 0 2px #444;
     }
@@ -2936,10 +2936,7 @@
                                     // Tooltip custom (affichage instantané)
                                     const tooltip = document.createElement("div");
                                     tooltip.className = "note-dot-tooltip";
-                                    tooltip.innerHTML = `
-                                        <span class="tooltip-dot" style="background:${typeObj ? typeObj.color : "#3498db"}"></span>
-                                        ${typeName} : <strong>${noteText.length > 70 ? noteText.substring(0, 70) + '…' : noteText}</strong>
-                                    `;
+                                    tooltip.innerHTML = `<span class="tooltip-dot" style="background:${typeObj ? typeObj.color : "#3498db"}"></span>${typeName} : <strong>${noteText.length > 70 ? noteText.substring(0, 70) + '…' : noteText}</strong>`;
                                     dot.appendChild(tooltip);
                                     dot.addEventListener("mouseenter", function() {
                                         dot.classList.add("show-tooltip");
@@ -2970,10 +2967,7 @@
                                 const qty = medData.qty ? medData.qty : 1;
                                 const tooltip = document.createElement("div");
                                 tooltip.className = "note-dot-tooltip";
-                                tooltip.innerHTML = `
-                                    <span class="tooltip-pill" style="color:#FF5722; font-size: 15px; margin-right: 2px;">💊</span>
-                                    ${medTypeName} : <strong>x${qty}</strong>
-                                `;
+                                tooltip.innerHTML = `<span class="tooltip-pill" style="color:#FF5722; font-size: 15px; margin-right: 6px;">💊</span>${medTypeName} : <strong>x${qty}</strong>`;
                                 medIndicator.appendChild(tooltip);
 
                                 medIndicator.addEventListener("mouseenter", function() {
