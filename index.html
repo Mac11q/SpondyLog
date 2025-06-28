@@ -168,9 +168,8 @@
         pointer-events: none;
         opacity: 0;
         transition: opacity 0.13s;
-        width: 232px;
-        max-width: 232px;
-        min-width: 127px;
+        max-width: 400px;
+        min-width: 300px;
         text-align: left;
         line-height: 1.4;
         letter-spacing: 0.01em;
@@ -178,8 +177,8 @@
 
     /* Style spécifique pour la vue annuelle */
     .mini-day .note-dot-tooltip {
-        width: 250px;
-        max-width: 350px;
+        max-width: 400px;
+        min-width: 300px;
         top: 24px;           /* écart vertical accru */
     }
 
@@ -2967,7 +2966,7 @@
                                 const qty = medData.qty ? medData.qty : 1;
                                 const tooltip = document.createElement("div");
                                 tooltip.className = "note-dot-tooltip";
-                                tooltip.innerHTML = `<span class="tooltip-pill" style="color:#FF5722; font-size: 15px; margin-right: 6px;">💊</span>Medicament : <strong>${medTypeName} x${qty}</strong>`;
+                                tooltip.innerHTML = `<span class="tooltip-pill" style="color:#FF5722; font-size: 15px; margin-right: 6px;">💊</span>Anti-inflammatoire : <strong>${medTypeName} x${qty}</strong>`;
                                 medIndicator.appendChild(tooltip);
 
                                 medIndicator.addEventListener("mouseenter", function() {
@@ -3183,7 +3182,7 @@
                                     const medType = medData.type ? medData.type : "(non renseigné)";
                                     const qty = medData.qty ? medData.qty : 1;
                                     // Nom du médicament normal, quantité en gras (avec x)
-                                    parts.push(`<span class="tooltip-pill" style="color:#FF5722; font-size: 15px; margin-right: 5px;">💊</span>Medicament : <strong>${medType} x${qty}</strong>`);
+                                    parts.push(`<span class="tooltip-pill" style="color:#FF5722; font-size: 15px; margin-right: 5px;">💊</span>Anti-inflammatoire : <strong>${medType} x${qty}</strong>`);
                                 }
                                 if (painInfo) {
                                     const level = painLevel;
