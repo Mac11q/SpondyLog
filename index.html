@@ -1401,6 +1401,8 @@
         font-size: 12px;
         white-space: nowrap;
         display: none;
+        width: max-content;
+        max-width: 500px;
         z-index: 20;
         pointer-events: none;
         line-height: 1.2;
@@ -1471,7 +1473,7 @@
 
 
     .chart-note-dot:hover .chart-note-tooltip {
-        display: block;
+        display: inline-block;
     }
 
    /* Reduce legend text size on small screens */
@@ -4327,7 +4329,7 @@
                 lines.push(tooltip.body.map(b => b.lines).flat().join('<br>'));
             }
             tooltipEl.innerHTML = `<div>${lines.join('</div><div>')}</div>`;
-            tooltipEl.style.display = 'block';
+            tooltipEl.style.display = 'inline-block';
 
             const {offsetLeft: positionX, offsetTop: positionY, offsetWidth: chartW, offsetHeight: chartH} = chart.canvas;
             const height = tooltipEl.offsetHeight;
@@ -4402,19 +4404,23 @@
                     const tooltip = document.createElement('div');
                     tooltip.className = 'chart-note-tooltip';
                     tooltip.style.zIndex = '99999';
+                    tooltip.style.maxWidth = '490px';
+                    tooltip.style.whiteSpace = 'normal';
+                    tooltip.style.wordBreak = 'break-word';
                     const dayStr = String(date.getDate()).padStart(2, '0');
                     const monthStr = String(date.getMonth() + 1).padStart(2, '0');
                     const yearStr = date.getFullYear();
                     const dateStr = `${dayStr}/${monthStr}/${yearStr}`;
-                    tooltip.innerHTML = `<div><strong>${dateStr}</strong></div><div><span class='chart-tooltip-dot' style='color:${color}'>●</span> ${type}</div><div>${text}</div>`;
+                    tooltip.innerHTML = `<div><strong>${dateStr}</strong></div><div><span class='chart-tooltip-dot' style='color:${color}'>●</span> ${type}: <strong>${text}</strong></div>`;
                     dot.appendChild(tooltip);
-                    dot.onmouseenter = () => { tooltip.style.display = 'block'; };
+                    dot.onmouseenter = () => { tooltip.style.display = 'inline-block'; };
                     dot.onmouseleave = () => { tooltip.style.display = 'none'; };
 
                     overlay.appendChild(dot);
                     stack += noteDotRadius*2 + 4;
                 }
             });
+
         }
 
         ReactDOM.render(<NoteDotsApp />, document.getElementById('note-feature-root'));
