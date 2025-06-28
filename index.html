@@ -178,8 +178,8 @@
 
     /* Style spécifique pour la vue annuelle */
     .mini-day .note-dot-tooltip {
-        width: 230px;
-        max-width: 285px;
+        width: 250px;
+        max-width: 350px;
         top: 24px;           /* écart vertical accru */
     }
 
@@ -2967,7 +2967,7 @@
                                 const qty = medData.qty ? medData.qty : 1;
                                 const tooltip = document.createElement("div");
                                 tooltip.className = "note-dot-tooltip";
-                                tooltip.innerHTML = `<span class="tooltip-pill" style="color:#FF5722; font-size: 15px; margin-right: 6px;">💊</span>${medTypeName} : <strong>x${qty}</strong>`;
+                                tooltip.innerHTML = `<span class="tooltip-pill" style="color:#FF5722; font-size: 15px; margin-right: 6px;">💊</span>Medicament : <strong>${medTypeName} x${qty}</strong>`;
                                 medIndicator.appendChild(tooltip);
 
                                 medIndicator.addEventListener("mouseenter", function() {
@@ -3183,7 +3183,7 @@
                                     const medType = medData.type ? medData.type : "(non renseigné)";
                                     const qty = medData.qty ? medData.qty : 1;
                                     // Nom du médicament normal, quantité en gras (avec x)
-                                    parts.push(`<span class="tooltip-pill" style="color:#FF5722; font-size: 15px; margin-right: 5px;">💊</span>${medType} : <strong>x${qty}</strong>`);
+                                    parts.push(`<span class="tooltip-pill" style="color:#FF5722; font-size: 15px; margin-right: 5px;">💊</span>Medicament : <strong>${medType} x${qty}</strong>`);
                                 }
                                 if (painInfo) {
                                     const level = painLevel;
