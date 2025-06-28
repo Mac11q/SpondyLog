@@ -150,9 +150,11 @@
         margin-top: -1px;
     }
 
-    /* Tooltip (note ET médicament) */
+    /* Tooltip (note ET médicament) ouvrant vers la gauche */
     .note-dot-tooltip {
         position: absolute;
+        top: 18px;           /* Distance verticale sous le point */
+        right: 14px;         /* Décale le tooltip vers la gauche (8px du point + 6px de marge) */
         left: auto;          /* (assure le calcul depuis la droite) */
         background: #222;
         color: #fff;
@@ -173,19 +175,6 @@
         line-height: 1.4;
         letter-spacing: 0.01em;
     }
-
-    .tooltip-left {
-        right: 14px;
-        left: auto;
-        margin-top: 14px;
-    }
-
-    .tooltip-right {
-        left: 14px;
-        right: auto;
-        margin-top: 14px;
-    }
-
 
     /* Increase tooltip width specifically for the yearly view */
     .mini-day .note-dot-tooltip {
@@ -1880,26 +1869,6 @@
         let chartStartDate = null;
         let chartEndDate = null;
         let noteDotRadius = 6;
-
-        function adjustTooltipPosition(container) {
-            const tooltip = container.querySelector('.note-dot-tooltip');
-            if (!tooltip) return;
-
-            tooltip.classList.remove('tooltip-left', 'tooltip-right');
-            tooltip.classList.add('tooltip-left');
-
-            requestAnimationFrame(() => {
-                const rect = tooltip.getBoundingClientRect();
-                const parentRect = container.getBoundingClientRect();
-                const spaceLeft = parentRect.left;
-                const spaceRight = window.innerWidth - parentRect.right;
-
-                if (spaceLeft < rect.width && spaceRight > spaceLeft) {
-                    tooltip.classList.remove('tooltip-left');
-                    tooltip.classList.add('tooltip-right');
-                }
-            });
-        }
         
         (function loadNoteTypesFromStorage() {
             const typesSaved = localStorage.getItem('spondylogNoteTypes');
@@ -2954,14 +2923,13 @@
 
                                     // Tooltip custom (affichage instantané)
                                     const tooltip = document.createElement("div");
-                                    tooltip.className = "note-dot-tooltip tooltip-left";
+                                    tooltip.className = "note-dot-tooltip";
                                     tooltip.innerHTML = `
                                         <span class="tooltip-dot" style="background:${typeObj ? typeObj.color : "#3498db"}"></span>
                                         ${typeName} : <strong>${noteText.length > 70 ? noteText.substring(0, 70) + '…' : noteText}</strong>
                                     `;
                                     dot.appendChild(tooltip);
                                     dot.addEventListener("mouseenter", function() {
-                                        adjustTooltipPosition(dot);
                                         dot.classList.add("show-tooltip");
                                         // Met la classe spéciale sur la cellule parente
                                         dayCell.closest("td").classList.add("note-tooltip-open");
@@ -2988,7 +2956,7 @@
                                 const medTypeName = medData.type ? medData.type : "(non renseigné)";
                                 const qty = medData.qty ? medData.qty : 1;
                                 const tooltip = document.createElement("div");
-                                tooltip.className = "note-dot-tooltip tooltip-left";
+                                tooltip.className = "note-dot-tooltip";
                                 tooltip.innerHTML = `
                                     <span class="tooltip-pill" style="color:#FF5722; font-size: 15px; margin-right: 2px;">💊</span>
                                     ${medTypeName} : <strong>x${qty}</strong>
@@ -2996,7 +2964,7 @@
                                 medIndicator.appendChild(tooltip);
 
                                 medIndicator.addEventListener("mouseenter", function() {
-                                    adjustTooltipPosition(medIndicator);
+                                    medIndicator.classList.add("show-tooltip");
                                     dayCell.closest("td").classList.add("note-tooltip-open");
                                 });
                                 medIndicator.addEventListener("mouseleave", function() {
@@ -3201,7 +3169,7 @@
 
                                 if (painInfo || medInfo || notesInfo) {
                                 const tooltip = document.createElement("div");
-                                tooltip.className = "note-dot-tooltip tooltip-left";
+                                tooltip.className = "note-dot-tooltip";
                                 let parts = [];
                                 if (medInfo) {
                                     const medType = medData.type ? medData.type : "(non renseigné)";
@@ -3229,7 +3197,6 @@
                                 tooltip.innerHTML = parts.join('<br>');
                                 miniDay.appendChild(tooltip);
                                 miniDay.addEventListener("mouseenter", function() {
-                                    adjustTooltipPosition(miniDay);
                                     miniDay.classList.add("show-tooltip");
                                     miniDay.closest("td").classList.add("note-tooltip-open");
                                 });
