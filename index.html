@@ -176,10 +176,11 @@
         letter-spacing: 0.01em;
     }
 
-    /* Increase tooltip width specifically for the yearly view */
+    /* Style spécifique pour la vue annuelle */
     .mini-day .note-dot-tooltip {
         width: 230px;
         max-width: 285px;
+        top: 24px;           /* écart vertical accru */
     }
 
     .note-dot.show-tooltip .note-dot-tooltip {
@@ -1870,9 +1871,8 @@
         let chartEndDate = null;
         let noteDotRadius = 6;
 
-        function adjustTooltipPosition(t) {
+        function adjustTooltipPosition(t, offset = 14) {
             if (!t) return;
-            const offset = 14; // doit rester constant
             t.style.left = 'auto';
             t.style.right = offset + 'px';
             const rect = t.getBoundingClientRect();
@@ -3213,7 +3213,7 @@
                                 miniDay.addEventListener("mouseenter", function() {
                                     miniDay.classList.add("show-tooltip");
                                     miniDay.closest("td").classList.add("note-tooltip-open");
-                                    adjustTooltipPosition(tooltip);
+                                    adjustTooltipPosition(tooltip, 50);
                                 });
                                 miniDay.addEventListener("mouseleave", function() {
                                     miniDay.classList.remove("show-tooltip");
