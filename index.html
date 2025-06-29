@@ -27,6 +27,7 @@
 
         :root {
             --primary-color: #3498db;
+            --primary-hover-color: #2980b9;
             --secondary-color: #2c3e50;
             --text-color: #333;
             --light-bg: #f9f9f9;
@@ -118,7 +119,7 @@
         }
 
         .nav-btn-style:hover {
-            background: #2980b9;
+            background: var(--primary-hover-color);
         }
 
         .current-month, .current-year {
@@ -1222,7 +1223,7 @@
 
         .save-btn-style:hover,
         #save-type-btn:hover {
-            background: #2980b9;
+            background: var(--primary-hover-color);
             color: white;
         }
 
@@ -1277,7 +1278,7 @@
         }
 
         .pain-modal-actions .validate-pain-modal-style:hover {
-            background: #2980b9;
+            background: var(--primary-hover-color);
         }
 
         /* Responsive : sur petit écran, les boutons passent l’un sous l’autre et sont plus larges */
@@ -1965,6 +1966,81 @@
         let settings = cloneSettings(defaultSettings);
         let painLevelLabels = [];
 
+        // ----- Couleur de survol dynamique -----
+        function hexToHsl(hex) {
+            let r = 0, g = 0, b = 0;
+            if (hex.length === 4) {
+                r = parseInt(hex[1] + hex[1], 16);
+                g = parseInt(hex[2] + hex[2], 16);
+                b = parseInt(hex[3] + hex[3], 16);
+            } else if (hex.length === 7) {
+                r = parseInt(hex[1] + hex[2], 16);
+                g = parseInt(hex[3] + hex[4], 16);
+                b = parseInt(hex[5] + hex[6], 16);
+            }
+            r /= 255; g /= 255; b /= 255;
+            const max = Math.max(r, g, b), min = Math.min(r, g, b);
+            let h, s, l = (max + min) / 2;
+
+            if (max === min) {
+                h = s = 0;
+            } else {
+                const d = max - min;
+                s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+                switch (max) {
+                    case r: h = (g - b) / d + (g < b ? 6 : 0); break;
+                    case g: h = (b - r) / d + 2; break;
+                    case b: h = (r - g) / d + 4; break;
+                }
+                h /= 6;
+            }
+            return { h: Math.round(h * 360), s: Math.round(s * 100), l: Math.round(l * 100) };
+        }
+
+        function hslToHex(h, s, l) {
+            h /= 360; s /= 100; l /= 100;
+            let r, g, b;
+            if (s === 0) {
+                r = g = b = l;
+            } else {
+                const hue2rgb = function(p, q, t) {
+                    if (t < 0) t += 1;
+                    if (t > 1) t -= 1;
+                    if (t < 1/6) return p + (q - p) * 6 * t;
+                    if (t < 1/2) return q;
+                    if (t < 2/3) return p + (q - p) * (2/3 - t) * 6;
+                    return p;
+                };
+                const q = l < 0.5 ? l * (1 + s) : l + s - l * s;
+                const p = 2 * l - q;
+                r = hue2rgb(p, q, h + 1/3);
+                g = hue2rgb(p, q, h);
+                b = hue2rgb(p, q, h - 1/3);
+            }
+            const toHex = x => {
+                const hex = Math.round(x * 255).toString(16);
+                return hex.length === 1 ? '0' + hex : hex;
+            };
+            return '#' + toHex(r) + toHex(g) + toHex(b);
+        }
+
+        const defaultPrimaryHex = '#3498db';
+        const defaultHoverHex = '#2980b9';
+        const defaultPrimaryHSL = hexToHsl(defaultPrimaryHex);
+        const defaultHoverHSL = hexToHsl(defaultHoverHex);
+        const deltaH = defaultHoverHSL.h - defaultPrimaryHSL.h;
+        const deltaS = defaultHoverHSL.s - defaultPrimaryHSL.s;
+        const deltaL = defaultHoverHSL.l - defaultPrimaryHSL.l;
+
+        function getHoverColor(userPrimaryHex) {
+            const hsl = hexToHsl(userPrimaryHex);
+            let h = (hsl.h + deltaH) % 360;
+            if (h < 0) h += 360;
+            let s = Math.max(0, Math.min(100, hsl.s + deltaS));
+            let l = Math.max(0, Math.min(100, hsl.l + deltaL));
+            return hslToHex(h, s, l);
+        }
+
         function adjustTooltipPosition(t, offset = 14) {
             if (!t) return;
             t.style.left = 'auto';
@@ -2009,6 +2085,8 @@
 
         function applySettingsToUI() {
             document.documentElement.style.setProperty('--primary-color', settings.themeColor);
+            const hover = getHoverColor(settings.themeColor);
+            document.documentElement.style.setProperty('--primary-hover-color', hover);
             const metaTheme = document.querySelector('meta[name="theme-color"]');
             if (metaTheme) metaTheme.setAttribute('content', settings.themeColor);
             const subtitle = document.querySelector('header p');
