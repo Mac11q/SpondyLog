@@ -1353,7 +1353,7 @@
         .import-export-dropdown {
             display: none;
             position: absolute;
-            bottom: -250%;
+            bottom: -350%;
             right: 0;
             background: white;
             border: 1px solid #ddd;
@@ -1367,6 +1367,8 @@
             font-size: inherit;
             cursor: pointer;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif!important;
+            text-align: center;
+            width: max-content; 
         }
 
         button {
@@ -1521,11 +1523,11 @@
                     <button id="next-month" class="nav-btn-style">→</button>
                 </div>
                 <div class="import-export-container">
-                    <button class="import-export-btn">📁</button>
+                    <button class="import-export-btn">⚙️</button>
                     <div class="import-export-dropdown">
-                        <div class="import-option" style="padding: 10px; cursor: pointer;">Importer</div>
-                        <div class="export-option" style="padding: 10px; cursor: pointer;">Exporter</div>
-                        <div class="settings-option" style="padding: 10px; cursor: pointer;">Réglage</div>
+                        <div class="import-option" style="padding: 10px; cursor: pointer;">Importer data</div>
+                        <div class="export-option" style="padding: 10px; cursor: pointer;">Exporter data</div>
+                        <div class="settings-option" style="padding: 10px; cursor: pointer;">Paramètres</div>
                     </div>
                 </div>
             </div>
@@ -1556,11 +1558,11 @@
                     <button id="next-year" class="nav-btn-style">→</button>
                 </div>
                 <div class="import-export-container">
-                    <button class="import-export-btn">📁</button>
+                    <button class="import-export-btn">⚙️</button>
                     <div class="import-export-dropdown">
-                        <div class="import-option" style="padding: 10px; cursor: pointer;">Importer</div>
-                        <div class="export-option" style="padding: 10px; cursor: pointer;">Exporter</div>
-                        <div class="settings-option" style="padding: 10px; cursor: pointer;">Réglage</div>
+                        <div class="import-option" style="padding: 10px; cursor: pointer;">Importer data</div>
+                        <div class="export-option" style="padding: 10px; cursor: pointer;">Exporter data</div>
+                        <div class="settings-option" style="padding: 10px; cursor: pointer;">Paramètres</div>
                     </div>
                 </div>
             </div>
@@ -1819,11 +1821,11 @@
             </div>
         </div>
         
-        <!-- Modal de réglage -->
+        <!-- Modal de paramètres -->
         <div id="settings-modal" class="modal">
             <div class="modal-content" style="max-width: 400px;">
                 <div class="modal-header">
-                    <h3>Réglage</h3>
+                    <h3>Paramètres</h3>
                     <button class="close-btn" id="close-settings-modal">&times;</button>
                 </div>
                 <div class="modal-section">
@@ -1858,7 +1860,7 @@
             </div>
         </div>
 
-        <!-- Modal de confirmation pour les réglages -->
+        <!-- Modal de confirmation pour les paramètres -->
         <div id="confirm-settings-modal" class="modal">
             <div class="modal-content" style="max-width: 400px; text-align: center;">
                 <p id="confirm-settings-msg" style="margin-bottom: 20px; font-size: 1.1em;"></p>
@@ -1942,7 +1944,12 @@
                 5: 'Extrême'
             }
         };
-        let settings = {...defaultSettings};
+   
+        function cloneSettings(obj) {
+            return JSON.parse(JSON.stringify(obj));
+        }
+
+        let settings = cloneSettings(defaultSettings);
         let painLevelLabels = [];
 
         function adjustTooltipPosition(t, offset = 14) {
@@ -1972,7 +1979,11 @@
         function loadSettings() {
             const saved = localStorage.getItem('spondylogSettings');
             if (saved) {
-                try { settings = { ...defaultSettings, ...JSON.parse(saved) }; } catch(e) { settings = { ...defaultSettings }; }
+                try {
+                    settings = { ...cloneSettings(defaultSettings), ...JSON.parse(saved) };
+                } catch(e) {
+                    settings = cloneSettings(defaultSettings);
+                }
             } else {
                 localStorage.setItem('spondylogSettings', JSON.stringify(defaultSettings));
             }
@@ -2001,7 +2012,7 @@
         }
 
         function resetSettings() {
-            settings = { ...defaultSettings };
+            settings = cloneSettings(defaultSettings);
             saveSettings();
             applySettingsToUI();
         }
@@ -2766,7 +2777,7 @@
             if (savedPainData)   userPainData = JSON.parse(savedPainData);
             if (savedMedsData)   userMedsData = JSON.parse(savedMedsData);
             if (savedLastType)   userLastNoteType = JSON.parse(savedLastType);
-            if (savedSettings)   settings = { ...defaultSettings, ...JSON.parse(savedSettings) };
+            if (savedSettings)   settings = { ...cloneSettings(defaultSettings), ...JSON.parse(savedSettings) };
 
             // 2) Initialiser les types de notes AVANT conversion des anciennes notes
             if (savedNoteTypes) {
@@ -4027,7 +4038,7 @@
                             }
 
                             if (importedData.settings && typeof importedData.settings === 'object') {
-                                settings = { ...defaultSettings, ...importedData.settings };
+                                settings = { ...cloneSettings(defaultSettings), ...importedData.settings };
                                 saveSettings();
                                 applySettingsToUI();
                             }
@@ -4573,7 +4584,7 @@
             });
 
             document.getElementById('settings-reset').addEventListener('click', () => {
-                document.getElementById('confirm-settings-msg').textContent = 'Êtes-vous sûr de vouloir réinitialiser les réglages ?';
+                document.getElementById('confirm-settings-msg').textContent = 'Êtes-vous sûr de vouloir réinitialiser les paramètres ?';
                 document.getElementById('confirm-settings-modal').dataset.action = 'reset';
                 document.getElementById('confirm-settings-modal').style.display = 'flex';
             });
