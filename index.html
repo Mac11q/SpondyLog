@@ -1010,6 +1010,13 @@
             box-sizing: border-box;
         }
 
+        /* Police uniforme pour tous les champs de la modale Paramètres */
+        #settings-modal input,
+        #settings-modal select,
+        #settings-modal textarea {
+            font-size: 16px;
+        }
+
         /* Slideur pour la sélection du niveau de douleur */
         .pain-slider-rect-section {
             width: 100%;
@@ -1832,17 +1839,21 @@
                     <h4>Titre</h4>
                     <input type="text" id="settings-title" style="width:100%;margin-bottom:8px;" placeholder="Titre" />
                     <label for="settings-color">Couleur&nbsp;:</label>
-                    <input type="color" id="settings-color" value="#3498db" />
+                    <input type="color" id="settings-color" value="#3498db"/>
+                    <div style="margin-bottom:10px;">
+                    </div>
                 </div>
                 <div class="modal-section">
                     <h4>Type d’élément</h4>
-                    <input type="text" id="settings-icon" style="width:100%;margin-bottom:8px;" placeholder="Icône" />
+                    <input type="text" id="settings-icon" style="width:100%;" placeholder="Icône" />
                     <input type="text" id="settings-name" style="width:100%;" placeholder="Nom" />
+                    <div style="margin-bottom:10px;">
+                    </div>
                 </div>
                 <div class="modal-section">
                     <h4>Légende</h4>
-                    <div style="margin-bottom:8px;">
-                        <span>Légende des niveaux de ... </span><input type="text" id="settings-legend-name" value="Douleur" style="width:60%;" />
+                    <div style="margin-bottom:2px;">
+                        <span>Légende des niveaux de ... </span><input type="text" id="settings-legend-name" value="douleur" style="width:60%;" />
                     </div>
                     <div id="settings-legend-inputs">
                         <div class="modal-row"><label>0 : </label><input type="text" id="legend-0" value="Absente" /></div>
@@ -1934,7 +1945,7 @@
             themeColor: '#3498db',
             elementIcon: '💊',
             elementName: 'Médicament',
-            legendName: 'Douleur',
+            legendName: 'douleur',
             legendLevels: {
                 0: 'Absente',
                 1: 'Légère',
@@ -3318,7 +3329,7 @@
                                     const levelLabel = painLevelLabels[level] || "(inconnu)";
                                     const dotColor = painColors[level];
                                     // Douleur en normal, niveau en gras
-                                    parts.push(`<span class="tooltip-dot" style="background:${dotColor}"></span>Douleur : <strong>${levelLabel}</strong>`);
+                                    parts.push(`<span class="tooltip-dot" style="background:${dotColor}"></span>douleur : <strong>${levelLabel}</strong>`);
                                 }
                                 if (notesInfo) {
                                     for (const [typeName, text] of Object.entries(noteObjY)) {
