@@ -4546,25 +4546,41 @@
         }
 
         ReactDOM.render(<NoteDotsApp />, document.getElementById('note-feature-root'));
-        document.addEventListener('DOMContentLoaded', function() {
+  
+        function initSettingsModal() {
+            const settingsModal = document.getElementById('settings-modal');
+            const confirmModal = document.getElementById('confirm-settings-modal');
+
+
             loadSettings();
+
             document.getElementById('close-settings-modal').addEventListener('click', () => {
-                document.getElementById('settings-modal').style.display = 'none';
+                settingsModal.style.display = 'none';
             });
+
+            settingsModal.addEventListener('click', (e) => {
+                if (e.target === settingsModal) settingsModal.style.display = 'none';
+            });
+
+            confirmModal.addEventListener('click', (e) => {
+                if (e.target === confirmModal) confirmModal.style.display = 'none';
+            });
+
             document.getElementById('settings-save').addEventListener('click', () => {
                 document.getElementById('confirm-settings-msg').textContent = 'Êtes-vous sûr de vouloir enregistrer les modifications ?';
-                document.getElementById('confirm-settings-modal').dataset.action = 'save';
-                document.getElementById('confirm-settings-modal').style.display = 'flex';
+                confirmModal.dataset.action = 'save';
+                confirmModal.style.display = 'flex';
             });
+
             document.getElementById('settings-reset').addEventListener('click', () => {
                 document.getElementById('confirm-settings-msg').textContent = 'Êtes-vous sûr de vouloir réinitialiser les réglages ?';
                 document.getElementById('confirm-settings-modal').dataset.action = 'reset';
                 document.getElementById('confirm-settings-modal').style.display = 'flex';
             });
+
             document.getElementById('confirm-settings-yes').addEventListener('click', () => {
-                const modal = document.getElementById('confirm-settings-modal');
-                const action = modal.dataset.action;
-                modal.style.display = 'none';
+                const action = confirmModal.dataset.action;
+                confirmModal.style.display = 'none';
                 if (action === 'save') {
                     settings.title = document.getElementById('settings-title').value;
                     settings.themeColor = document.getElementById('settings-color').value;
@@ -4580,16 +4596,20 @@
                     resetSettings();
                     populateSettingsModal();
                 }
-                document.getElementById('settings-modal').style.display = 'none';
+                settingsModal.style.display = 'none';
             });
-            document.getElementById('confirm-settings-no').addEventListener('click', () => {
-                document.getElementById('confirm-settings-modal').style.display = 'none';
-            });
-        });
-    </script>
 
-</script>
-    
+            document.getElementById('confirm-settings-no').addEventListener('click', () => {
+                confirmModal.style.display = 'none';
+            });
+        }
+
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initSettingsModal);
+        } else {
+            initSettingsModal();
+        }
+    </script>
 
 </body>
 </html>
