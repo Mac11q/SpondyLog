@@ -16,12 +16,12 @@
         header h1 a {
             color: var(--primary-color);
             text-decoration: none;
-             cursor: pointer;
+                cursor: pointer;
             transition: opacity 0.2s;
         }
 
         header h1 a:hover {
-            opacity: 0.8;
+            color: var(--primary-hover-color);
             text-decoration: none;
         }
 
@@ -2473,7 +2473,8 @@
                         const selectedPain = document.querySelector(".pain-option.selected");
                         if (selectedPain) {
                             const v = Number(selectedPain.getAttribute("data-value"));
-                            if (v > 0) {
+                            const medChecked = document.getElementById('med-taken')?.checked;
+                            if (v > 0 || (v === 0 && medChecked)) {
                                 userPainData[selectedDate] = v;
                             } else {
                                 delete userPainData[selectedDate];
@@ -2502,7 +2503,8 @@
                         const selectedPain = document.querySelector(".pain-option.selected");
                         if (selectedPain) {
                             const v = Number(selectedPain.getAttribute("data-value"));
-                            if (v > 0) {
+                            const medChecked = document.getElementById('med-taken')?.checked;
+                            if (v > 0 || (v === 0 && medChecked)) {
                                 userPainData[selectedDate] = v;
                             } else {
                                 delete userPainData[selectedDate];
@@ -2859,7 +2861,10 @@
             function saveUserData() {
             // Nettoyer les données de douleur (conserver uniquement > 0)
             for (const d in userPainData) {
-                if (!(userPainData[d] > 0)) delete userPainData[d];
+                const val = userPainData[d];
+                if (!(val > 0) && !(val === 0 && userMedsData[d])) {
+                    delete userPainData[d];
+                }
             }
             // Stocker les données dans localStorage
             localStorage.setItem('spondylogPainData', JSON.stringify(userPainData));
@@ -2881,11 +2886,16 @@
 
             if (savedPainData) {
                 userPainData = JSON.parse(savedPainData);
-                for (const d in userPainData) {
-                    if (!(userPainData[d] > 0)) delete userPainData[d];
-                }
             }
             if (savedMedsData)   userMedsData = JSON.parse(savedMedsData);
+            if (userPainData) {
+                for (const d in userPainData) {
+                    const val = userPainData[d];
+                    if (!(val > 0) && !(val === 0 && userMedsData && userMedsData[d])) {
+                        delete userPainData[d];
+                    }
+                }
+            }
             if (savedLastType)   userLastNoteType = JSON.parse(savedLastType);
             if (savedSettings)   settings = { ...cloneSettings(defaultSettings), ...JSON.parse(savedSettings) };
 
@@ -3539,7 +3549,8 @@
                     opt.onclick = function() {
                         const v = Number(this.dataset.value);
                         moveSelector(v);
-                        if (v > 0) {
+                        const medChecked = document.getElementById('med-taken')?.checked;
+                        if (v > 0 || (v === 0 && medChecked)) {
                             userPainData[dateId] = v;
                         } else {
                             delete userPainData[dateId];
@@ -3576,7 +3587,8 @@
                     moveSelector(idx);
                     painRectValueSpan.textContent = idx;
                     painRectValue = idx;
-                    if (idx > 0) {
+                    const medChecked = document.getElementById('med-taken')?.checked;
+                    if (idx > 0 || (idx === 0 && medChecked)) {
                         userPainData[dateId] = idx;
                     } else {
                         delete userPainData[dateId];
@@ -3718,7 +3730,8 @@
 
                 // 1️⃣ Mémoriser le niveau de douleur
                 const painValue = parseInt(level, 10);
-                if (painValue > 0) {
+                const medChecked = document.getElementById('med-taken')?.checked;
+                if (painValue > 0 || (painValue === 0 && medChecked)) {
                     userPainData[selectedDate] = painValue;
                 } else {
                     delete userPainData[selectedDate];
