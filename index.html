@@ -428,7 +428,7 @@
 
         /* Effet hover pour le bouton "Non" (comme Enregistrer) */
         .confirm-no {
-            background-color: #3498db;
+            background-color: var(--primary-color);
             color: white;
             border: none;
             padding: 10px 20px;
@@ -437,7 +437,8 @@
             transition: background 0.3s, color 0.2s;
         }
         .confirm-no:hover {
-            background: #2980b9; /* même fond que .validate-pain-modal-style:hover */
+            background: var(--primary-color);
+            filter: brightness(90%);
             color: white;
         }
 
@@ -569,6 +570,7 @@
         .med-checkbox input {
             width: 18px;
             height: 18px;
+            accent-color: var(--primary-color);
         }
 
         .med-icon {
