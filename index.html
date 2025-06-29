@@ -1095,7 +1095,7 @@
             margin-left: -3px;
             height: 40px;
             background: transparent;
-            border: 3px solid #3498db;
+            border: 3px solid var(--primary-color);
             border-radius: 8px;
             box-shadow: 0 1px 6px rgba(52,152,219,0.11);
             display: flex;
@@ -1108,7 +1108,7 @@
         }
 
         .pain-slider-rect-selector span {
-            color: #3498db;
+            color: var(--primary-color);
             font-weight: bold;
             font-size: 1.18em;
             background: rgba(255,255,255,0.85);
@@ -2472,7 +2472,12 @@
                         // Sauvegarder le niveau de douleur :
                         const selectedPain = document.querySelector(".pain-option.selected");
                         if (selectedPain) {
-                            userPainData[selectedDate] = Number(selectedPain.getAttribute("data-value"));
+                            const v = Number(selectedPain.getAttribute("data-value"));
+                            if (v > 0) {
+                                userPainData[selectedDate] = v;
+                            } else {
+                                delete userPainData[selectedDate];
+                            }
                         }
                         saveUserData();
                     }
@@ -2496,7 +2501,12 @@
                         userLastNoteType[selectedDate] = document.getElementById('selected-type-name').textContent;
                         const selectedPain = document.querySelector(".pain-option.selected");
                         if (selectedPain) {
-                            userPainData[selectedDate] = Number(selectedPain.getAttribute("data-value"));
+                            const v = Number(selectedPain.getAttribute("data-value"));
+                            if (v > 0) {
+                                userPainData[selectedDate] = v;
+                            } else {
+                                delete userPainData[selectedDate];
+                            }
                         }
                         saveUserData();
                     }
@@ -2847,6 +2857,10 @@
 
             // Fonctions pour sauvegarder et charger les données utilisateur
             function saveUserData() {
+            // Nettoyer les données de douleur (conserver uniquement > 0)
+            for (const d in userPainData) {
+                if (!(userPainData[d] > 0)) delete userPainData[d];
+            }
             // Stocker les données dans localStorage
             localStorage.setItem('spondylogPainData', JSON.stringify(userPainData));
             localStorage.setItem('spondylogNotes', JSON.stringify(userNotes));
@@ -2865,7 +2879,12 @@
             const savedLastType   = localStorage.getItem('spondylogLastNoteType');
             const savedSettings   = localStorage.getItem('spondylogSettings');
 
-            if (savedPainData)   userPainData = JSON.parse(savedPainData);
+            if (savedPainData) {
+                userPainData = JSON.parse(savedPainData);
+                for (const d in userPainData) {
+                    if (!(userPainData[d] > 0)) delete userPainData[d];
+                }
+            }
             if (savedMedsData)   userMedsData = JSON.parse(savedMedsData);
             if (savedLastType)   userLastNoteType = JSON.parse(savedLastType);
             if (savedSettings)   settings = { ...cloneSettings(defaultSettings), ...JSON.parse(savedSettings) };
@@ -3520,7 +3539,11 @@
                     opt.onclick = function() {
                         const v = Number(this.dataset.value);
                         moveSelector(v);
-                        userPainData[dateId] = v;
+                        if (v > 0) {
+                            userPainData[dateId] = v;
+                        } else {
+                            delete userPainData[dateId];
+                        }
                     };
                 });
 
@@ -3553,7 +3576,11 @@
                     moveSelector(idx);
                     painRectValueSpan.textContent = idx;
                     painRectValue = idx;
-                    userPainData[dateId] = idx;
+                    if (idx > 0) {
+                        userPainData[dateId] = idx;
+                    } else {
+                        delete userPainData[dateId];
+                    }
                 }
                 function moveSelector(val) {
                     const total = rectOptions.length;
@@ -3691,7 +3718,11 @@
 
                 // 1️⃣ Mémoriser le niveau de douleur
                 const painValue = parseInt(level, 10);
-                userPainData[selectedDate] = painValue;
+                if (painValue > 0) {
+                    userPainData[selectedDate] = painValue;
+                } else {
+                    delete userPainData[selectedDate];
+                }
 
                 // 2️⃣ Sauvegarder la note du type de note actuellement sélectionné
                 //    Cette fonction gère correctement userNotes[selectedDate] en tant qu'objet
@@ -4066,9 +4097,13 @@
             function exportData() {
             const medTypesSaved = localStorage.getItem('spondylogMedTypes');
             const settingsSaved = localStorage.getItem('spondylogSettings');
+            const painExport = {};
+            for (const d in userPainData) {
+                if (userPainData[d] > 0) painExport[d] = userPainData[d];
+            }
             const exportObj = {
                 settings: settingsSaved ? JSON.parse(settingsSaved) : settings,
-                painData:  userPainData,
+                painData:  painExport,
                 notes:     userNotes,
                 medsData:  userMedsData,
                 noteTypes: noteTypes,
