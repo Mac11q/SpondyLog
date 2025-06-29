@@ -4112,7 +4112,10 @@
             const settingsSaved = localStorage.getItem('spondylogSettings');
             const painExport = {};
             for (const d in userPainData) {
-                if (userPainData[d] > 0) painExport[d] = userPainData[d];
+                const val = userPainData[d];
+                if (val > 0 || (val === 0 && userMedsData && userMedsData[d])) {
+                    painExport[d] = val;
+                }
             }
             const exportObj = {
                 settings: settingsSaved ? JSON.parse(settingsSaved) : settings,
