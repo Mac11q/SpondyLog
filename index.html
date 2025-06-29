@@ -1849,8 +1849,10 @@
                 <div class="modal-section">
                     <h4>Type d’élément</h4>
                     <input type="text" id="settings-icon" style="width:100%;" placeholder="Icône" />
-                    <input type="text" id="settings-name" style="width:100%;" placeholder="Nom" />
-                    <div style="margin-bottom:10px;">
+                    <div style="margin-top: 2px;">
+                        <input type="text" id="settings-name" style="width:100%;" placeholder="Nom" />
+                    </div>
+                    <div style="margin-bottom:10px; margin-top: 2px;">
                     </div>
                 </div>
                 <div class="modal-section">
@@ -2469,16 +2471,19 @@
                         saveCurrentNote();
                         saveMedDataForDay(selectedDate);
                         userLastNoteType[selectedDate] = document.getElementById('selected-type-name').textContent;
-                        // Sauvegarder le niveau de douleur :
+                          // Sauvegarder le niveau de douleur
+                          let v;
                         const selectedPain = document.querySelector(".pain-option.selected");
                         if (selectedPain) {
-                            const v = Number(selectedPain.getAttribute("data-value"));
-                            const medChecked = document.getElementById('med-taken')?.checked;
-                            if (v > 0 || (v === 0 && medChecked)) {
-                                userPainData[selectedDate] = v;
-                            } else {
-                                delete userPainData[selectedDate];
-                            }
+                            v = Number(selectedPain.getAttribute("data-value"));
+                        } else {
+                            v = Number(painRectValue ?? document.getElementById('pain-slider-rect-value')?.textContent ?? 0);
+                        }
+                        const medChecked = document.getElementById('med-taken')?.checked;
+                        if (v > 0 || (v === 0 && medChecked)) {
+                            userPainData[selectedDate] = v;
+                        } else {
+                            delete userPainData[selectedDate];
                         }
                         saveUserData();
                     }
@@ -2500,15 +2505,18 @@
                         saveCurrentNote();
                         saveMedDataForDay(selectedDate);
                         userLastNoteType[selectedDate] = document.getElementById('selected-type-name').textContent;
+                        let v;
                         const selectedPain = document.querySelector(".pain-option.selected");
                         if (selectedPain) {
-                            const v = Number(selectedPain.getAttribute("data-value"));
-                            const medChecked = document.getElementById('med-taken')?.checked;
-                            if (v > 0 || (v === 0 && medChecked)) {
-                                userPainData[selectedDate] = v;
-                            } else {
-                                delete userPainData[selectedDate];
-                            }
+                            v = Number(selectedPain.getAttribute("data-value"));
+                        } else {
+                            v = Number(painRectValue ?? document.getElementById('pain-slider-rect-value')?.textContent ?? 0);
+                        }
+                        const medChecked = document.getElementById('med-taken')?.checked;
+                        if (v > 0 || (v === 0 && medChecked)) {
+                            userPainData[selectedDate] = v;
+                        } else {
+                            delete userPainData[selectedDate];
                         }
                         saveUserData();
                     }
