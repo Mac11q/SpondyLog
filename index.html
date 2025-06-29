@@ -1525,6 +1525,7 @@
                     <div class="import-export-dropdown">
                         <div class="import-option" style="padding: 10px; cursor: pointer;">Importer</div>
                         <div class="export-option" style="padding: 10px; cursor: pointer;">Exporter</div>
+                        <div class="settings-option" style="padding: 10px; cursor: pointer;">Réglage</div>
                     </div>
                 </div>
             </div>
@@ -1559,6 +1560,7 @@
                     <div class="import-export-dropdown">
                         <div class="import-option" style="padding: 10px; cursor: pointer;">Importer</div>
                         <div class="export-option" style="padding: 10px; cursor: pointer;">Exporter</div>
+                        <div class="settings-option" style="padding: 10px; cursor: pointer;">Réglage</div>
                     </div>
                 </div>
             </div>
@@ -1816,6 +1818,56 @@
             </div>
             </div>
         </div>
+
+        <!-- Modal de réglage -->
+        <div id="settings-modal" class="modal">
+            <div class="modal-content" style="max-width: 400px;">
+                <div class="modal-header">
+                    <h3>Réglage</h3>
+                    <button class="close-btn" id="close-settings-modal">&times;</button>
+                </div>
+                <div class="modal-section">
+                    <h4>Titre</h4>
+                    <input type="text" id="settings-title" style="width:100%;margin-bottom:8px;" placeholder="Titre" />
+                    <label for="settings-color">Couleur&nbsp;:</label>
+                    <input type="color" id="settings-color" value="#3498db" />
+                </div>
+                <div class="modal-section">
+                    <h4>Type d’élément</h4>
+                    <input type="text" id="settings-icon" style="width:100%;margin-bottom:8px;" placeholder="Icône" />
+                    <input type="text" id="settings-name" style="width:100%;" placeholder="Nom" />
+                </div>
+                <div class="modal-section">
+                    <h4>Légende</h4>
+                    <div style="margin-bottom:8px;">
+                        <span>Légende des niveaux de </span><input type="text" id="settings-legend-name" value="Douleur" style="width:60%;" />
+                    </div>
+                    <div id="settings-legend-inputs">
+                        <div class="modal-row"><label>0</label><input type="text" id="legend-0" value="Absente" /></div>
+                        <div class="modal-row"><label>1</label><input type="text" id="legend-1" value="Légère" /></div>
+                        <div class="modal-row"><label>2</label><input type="text" id="legend-2" value="Modérée" /></div>
+                        <div class="modal-row"><label>3</label><input type="text" id="legend-3" value="Forte" /></div>
+                        <div class="modal-row"><label>4</label><input type="text" id="legend-4" value="Très forte" /></div>
+                        <div class="modal-row"><label>5</label><input type="text" id="legend-5" value="Extrême" /></div>
+                    </div>
+                </div>
+                <div class="pain-modal-actions">
+                    <button id="settings-reset" class="erase-option" type="button">Réinitialiser</button>
+                    <button id="settings-save" class="validate-pain-modal-style" type="button">Enregistrer</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Modal de confirmation pour les réglages -->
+        <div id="confirm-settings-modal" class="modal">
+            <div class="modal-content" style="max-width: 400px; text-align: center;">
+                <p id="confirm-settings-msg" style="margin-bottom: 20px; font-size: 1.1em;"></p>
+                <div style="display: flex; justify-content: space-around;">
+                    <button id="confirm-settings-yes" class="confirm-yes">Oui</button>
+                    <button id="confirm-settings-no" class="confirm-no">Non</button>
+                </div>
+            </div>
+        </div>
         
         <!-- Section pour le pense-bête (maintenant en dernier) -->
             <div class="notes-section">
@@ -1875,6 +1927,24 @@
         let chartEndDate = null;
         let noteDotRadius = 6;
 
+        const defaultSettings = {
+            title: 'Suivi quotidien des crises inflammatoires',
+            themeColor: '#3498db',
+            elementIcon: '💊',
+            elementName: 'Médicament',
+            legendName: 'Douleur',
+            legendLevels: {
+                0: 'Absente',
+                1: 'Légère',
+                2: 'Modérée',
+                3: 'Forte',
+                4: 'Très forte',
+                5: 'Extrême'
+            }
+        };
+        let settings = {...defaultSettings};
+        let painLevelLabels = [];
+
         function adjustTooltipPosition(t, offset = 14) {
             if (!t) return;
             t.style.left = 'auto';
@@ -1898,6 +1968,55 @@
                 localStorage.setItem('spondylogNoteTypes', JSON.stringify(noteTypes));
             }
         })();
+
+        function loadSettings() {
+            const saved = localStorage.getItem('spondylogSettings');
+            if (saved) {
+                try { settings = { ...defaultSettings, ...JSON.parse(saved) }; } catch(e) { settings = { ...defaultSettings }; }
+            } else {
+                localStorage.setItem('spondylogSettings', JSON.stringify(defaultSettings));
+            }
+            applySettingsToUI();
+        }
+
+        function saveSettings() {
+            localStorage.setItem('spondylogSettings', JSON.stringify(settings));
+        }
+
+        function applySettingsToUI() {
+            document.documentElement.style.setProperty('--primary-color', settings.themeColor);
+            const metaTheme = document.querySelector('meta[name="theme-color"]');
+            if (metaTheme) metaTheme.setAttribute('content', settings.themeColor);
+            const subtitle = document.querySelector('header p');
+            if (subtitle) subtitle.textContent = settings.title;
+            const medLabel = document.querySelector("label[for='med-taken']");
+            if (medLabel) medLabel.innerHTML = `<span class="med-icon">${settings.elementIcon}</span> ${settings.elementName}`;
+            const legendTitle = document.querySelector('.legend h3');
+            if (legendTitle) legendTitle.textContent = `Légende des niveaux de ${settings.legendName}`;
+            const legendItems = document.querySelectorAll('.legend .color-item span');
+            legendItems.forEach((span, idx) => { span.textContent = `${idx} - ${settings.legendLevels[idx]}`; });
+            const sliderLabels = document.querySelectorAll('.pain-slider-rect-labels span');
+            sliderLabels.forEach((span, idx) => { span.textContent = settings.legendLevels[idx]; });
+            painLevelLabels = [settings.legendLevels[0], settings.legendLevels[1], settings.legendLevels[2], settings.legendLevels[3], settings.legendLevels[4], settings.legendLevels[5]];
+        }
+
+        function resetSettings() {
+            settings = { ...defaultSettings };
+            saveSettings();
+            applySettingsToUI();
+        }
+
+        function populateSettingsModal() {
+            document.getElementById('settings-title').value = settings.title;
+            document.getElementById('settings-color').value = settings.themeColor;
+            document.getElementById('settings-icon').value = settings.elementIcon;
+            document.getElementById('settings-name').value = settings.elementName;
+            document.getElementById('settings-legend-name').value = settings.legendName;
+            for (let i = 0; i <= 5; i++) {
+                const input = document.getElementById('legend-' + i);
+                if (input) input.value = settings.legendLevels[i];
+            }
+        }
         
         function populateNoteTypeFilter() {
             const filterSelect = document.getElementById('note-type-filter');
@@ -2225,6 +2344,7 @@
         
             // Essayer de charger les données depuis localStorage
             loadUserData();
+            loadSettings();
             
             // Affichage du calendrier initial
             renderCalendar(currentMonth, currentYear);
@@ -2380,7 +2500,7 @@
             // Ouvre le modal pour ajouter un type
             function openMedTypeModalForAdd() {
             editingMedTypeName = null;
-            document.getElementById('med-type-modal-title').textContent = "Ajouter un type d’anti-inflammatoire";
+            document.getElementById('med-type-modal-title').textContent = `Ajouter un type de ${settings.elementName}`;
             document.getElementById('med-type-name-input').value = "";
             document.getElementById('delete-med-type-btn').style.display = "none";
             document.getElementById('med-type-modal').style.display = "flex";
@@ -2389,7 +2509,7 @@
             // Ouvre le modal pour éditer un type
             function openMedTypeModalForEdit(typeName) {
             editingMedTypeName = typeName;
-            document.getElementById('med-type-modal-title').textContent = "Modifier le type d’anti-inflammatoire";
+            document.getElementById('med-type-modal-title').textContent = `Modifier le type de ${settings.elementName}`;
             document.getElementById('med-type-name-input').value = typeName;
             document.getElementById('delete-med-type-btn').style.display = "inline-block";
             document.getElementById('med-type-modal').style.display = "flex";
@@ -2641,10 +2761,12 @@
             const savedMedsData   = localStorage.getItem('spondylogMedsData');
             const savedNoteTypes  = localStorage.getItem('spondylogNoteTypes');
             const savedLastType   = localStorage.getItem('spondylogLastNoteType');
+            const savedSettings   = localStorage.getItem('spondylogSettings');
 
             if (savedPainData)   userPainData = JSON.parse(savedPainData);
             if (savedMedsData)   userMedsData = JSON.parse(savedMedsData);
             if (savedLastType)   userLastNoteType = JSON.parse(savedLastType);
+            if (savedSettings)   settings = { ...defaultSettings, ...JSON.parse(savedSettings) };
 
             // 2) Initialiser les types de notes AVANT conversion des anciennes notes
             if (savedNoteTypes) {
@@ -2971,7 +3093,7 @@
                                 const qty = medData.qty ? medData.qty : 1;
                                 const tooltip = document.createElement("div");
                                 tooltip.className = "note-dot-tooltip";
-                                tooltip.innerHTML = `<span class="tooltip-pill" style="color:#FF5722; font-size: 15px; margin-right: 6px;">💊</span>Anti-inflammatoire : <strong>${medTypeName} x${qty}</strong>`;
+                                tooltip.innerHTML = `<span class="tooltip-pill" style="color:#FF5722; font-size: 15px; margin-right: 6px;">${settings.elementIcon}</span>${settings.elementName} : <strong>${medTypeName} x${qty}</strong>`;
                                 medIndicator.appendChild(tooltip);
 
                                 medIndicator.addEventListener("mouseenter", function() {
@@ -3163,14 +3285,6 @@
                                     showPainModal(dateId);
                                 });
 
-                                const painLevelLabels = [
-                                    "Absente",
-                                    "Légère",
-                                    "Modérée",
-                                    "Forte",
-                                    "Très forte",
-                                    "Extrême"
-                                ];
 
                                 const painLevel = userPainData[dateId];
                                 const painInfo = (painLevel !== undefined && painLevel !== 0);
@@ -3187,7 +3301,7 @@
                                     const medType = medData.type ? medData.type : "(non renseigné)";
                                     const qty = medData.qty ? medData.qty : 1;
                                     // Nom du médicament normal, quantité en gras (avec x)
-                                    parts.push(`<span class="tooltip-pill" style="color:#FF5722; font-size: 15px; margin-right: 5px;">💊</span>Anti-inflammatoire : <strong>${medType} x${qty}</strong>`);
+                                    parts.push(`<span class="tooltip-pill" style="color:#FF5722; font-size: 15px; margin-right: 5px;">${settings.elementIcon}</span>${settings.elementName} : <strong>${medType} x${qty}</strong>`);
                                 }
                                 if (painInfo) {
                                     const level = painLevel;
@@ -3809,6 +3923,7 @@
                 const dropdown = container.querySelector('.import-export-dropdown');
                 const importOption = container.querySelector('.import-option');
                 const exportOption = container.querySelector('.export-option');
+                const settingsOption = container.querySelector('.settings-option');
             
                 // Afficher/Masquer le menu déroulant
                     btn.addEventListener('click', () => {
@@ -3837,12 +3952,21 @@
                     document.getElementById('import-file-input').click();
                     dropdown.style.display = 'none';
                 });
+
+                if (settingsOption) {
+                    settingsOption.addEventListener('click', () => {
+                        populateSettingsModal();
+                        document.getElementById('settings-modal').style.display = 'flex';
+                        dropdown.style.display = 'none';
+                    });
+                }
             });
 
             function exportData() {
-            // Ajoute medTypes à l'export (avec sécurité si la variable n'est pas initialisée)
             const medTypesSaved = localStorage.getItem('spondylogMedTypes');
+            const settingsSaved = localStorage.getItem('spondylogSettings');
             const exportObj = {
+                settings: settingsSaved ? JSON.parse(settingsSaved) : settings,
                 painData:  userPainData,
                 notes:     userNotes,
                 medsData:  userMedsData,
@@ -3901,6 +4025,12 @@
                                 if (typeof renderMedTypeDropdown === "function") {
                                     renderMedTypeDropdown(medTypes[0]?.name);
                                 }
+                            }
+
+                            if (importedData.settings && typeof importedData.settings === 'object') {
+                                settings = { ...defaultSettings, ...importedData.settings };
+                                saveSettings();
+                                applySettingsToUI();
                             }
 
                             // 🟢 Importer le dernier type de note sélectionné par jour
@@ -4116,14 +4246,7 @@
                                 const border = borderColors[context.dataIndex];
                                 const square = `<span style='display:inline-block;width:10px;height:10px;background:${color};border:1px solid ${border};margin-right:4px'></span>`;
                                 if (value === null) return `${square}Douleur : Non renseigné`;
-                                const painLevels = {
-                                    0: 'Absente',
-                                    1: 'Légère',
-                                    2: 'Modérée',
-                                    3: 'Forte',
-                                    4: 'Très forte',
-                                    5: 'Extrême'
-                                };
+                                const painLevels = settings.legendLevels;
                                 const valText = painLevels[value] !== undefined ? `<strong>${painLevels[value]}</strong>` : `<strong>${value}</strong>`;
                                 return `${square}Douleur : ${valText}`;
                             },
@@ -4132,7 +4255,7 @@
                                 
                                 // Indiquer si un anti-inflammatoire a été pris
                                 const medTaken = medData[index];
-                                const medText = medTaken ? 'Anti-inflammatoire: Oui' : 'Anti-inflammatoire: Non';
+                                const medText = medTaken ? `${settings.elementName}: Oui` : `${settings.elementName}: Non`;
                                 
                                 // Récupérer la note
                                 const currentDate = new Date(startDate);
@@ -4424,6 +4547,46 @@
         }
 
         ReactDOM.render(<NoteDotsApp />, document.getElementById('note-feature-root'));
+        document.addEventListener('DOMContentLoaded', function() {
+            loadSettings();
+            document.getElementById('close-settings-modal').addEventListener('click', () => {
+                document.getElementById('settings-modal').style.display = 'none';
+            });
+            document.getElementById('settings-save').addEventListener('click', () => {
+                document.getElementById('confirm-settings-msg').textContent = 'Êtes-vous sûr de vouloir enregistrer les modifications ?';
+                document.getElementById('confirm-settings-modal').dataset.action = 'save';
+                document.getElementById('confirm-settings-modal').style.display = 'flex';
+            });
+            document.getElementById('settings-reset').addEventListener('click', () => {
+                document.getElementById('confirm-settings-msg').textContent = 'Êtes-vous sûr de vouloir réinitialiser les réglages ?';
+                document.getElementById('confirm-settings-modal').dataset.action = 'reset';
+                document.getElementById('confirm-settings-modal').style.display = 'flex';
+            });
+            document.getElementById('confirm-settings-yes').addEventListener('click', () => {
+                const modal = document.getElementById('confirm-settings-modal');
+                const action = modal.dataset.action;
+                modal.style.display = 'none';
+                if (action === 'save') {
+                    settings.title = document.getElementById('settings-title').value;
+                    settings.themeColor = document.getElementById('settings-color').value;
+                    settings.elementIcon = document.getElementById('settings-icon').value;
+                    settings.elementName = document.getElementById('settings-name').value;
+                    settings.legendName = document.getElementById('settings-legend-name').value;
+                    for (let i = 0; i <= 5; i++) {
+                        settings.legendLevels[i] = document.getElementById('legend-' + i).value;
+                    }
+                    saveSettings();
+                    applySettingsToUI();
+                } else if (action === 'reset') {
+                    resetSettings();
+                    populateSettingsModal();
+                }
+                document.getElementById('settings-modal').style.display = 'none';
+            });
+            document.getElementById('confirm-settings-no').addEventListener('click', () => {
+                document.getElementById('confirm-settings-modal').style.display = 'none';
+            });
+        });
     </script>
 
 </script>
