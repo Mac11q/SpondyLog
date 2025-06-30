@@ -1641,27 +1641,27 @@
             <h3>Légende des niveaux de douleur</h3>
             <div class="color-scale">
                 <div class="color-item">
-                    <div class="color-box" style="background-color: #FFFFFF; color:#000;">0</div>
+                    <div class="color-box" style="background-color: #FFFFFF; color:#000;"></div>
                     <span>Absente</span>
                 </div>
                 <div class="color-item">
-                    <div class="color-box" style="background-color: #00FF00; color:#000;">1</div>
+                    <div class="color-box" style="background-color: #00FF00; color:#000;"></div>
                     <span>Légère</span>
                 </div>
                 <div class="color-item">
-                    <div class="color-box" style="background-color: #FFFF00; color:#000;">2</div>
+                    <div class="color-box" style="background-color: #FFFF00; color:#000;"></div>
                     <span>Modérée</span>
                 </div>
                 <div class="color-item">
-                    <div class="color-box" style="background-color: #FF8000; color:#000;">3</div>
+                    <div class="color-box" style="background-color: #FF8000; color:#000;"></div>
                     <span>Forte</span>
                 </div>
                 <div class="color-item">
-                    <div class="color-box" style="background-color: #FF4000; color:#000;">4</div>
+                    <div class="color-box" style="background-color: #FF4000; color:#000;"></div>
                     <span>Très forte</span>
                 </div>
                 <div class="color-item">
-                    <div class="color-box" style="background-color: #000000; color:#fff;">5</div>
+                    <div class="color-box" style="background-color: #000000; color:#fff;"></div>
                     <span>Extrême</span>
                 </div>
             </div>
@@ -2160,7 +2160,8 @@
             const legendTitle = document.querySelector('.legend h3');
             if (legendTitle) legendTitle.textContent = `Légende des niveaux de ${settings.legendName}`;
             const legendItems = document.querySelectorAll('.legend .color-item span');
-            legendItems.forEach((span, idx) => { span.textContent = `${idx} - ${settings.legendLevels[idx]}`; });
+            // legendItems.forEach((span, idx) => { span.textContent = settings.legendLevels[idx]; }); (ne pas avoir "1 - " dans la légende)
+            legendItems.forEach((span, idx) => { span.textContent = `${idx} - ${settings.legendLevels[idx]}`; }); 
             const sliderLabels = document.querySelectorAll('.pain-slider-rect-labels span');
             sliderLabels.forEach((span, idx) => { span.textContent = settings.legendLevels[idx]; });
             painLevelLabels = [settings.legendLevels[0], settings.legendLevels[1], settings.legendLevels[2], settings.legendLevels[3], settings.legendLevels[4], settings.legendLevels[5]];
