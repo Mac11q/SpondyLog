@@ -32,6 +32,7 @@
             --text-color: #333;
             --light-bg: #f9f9f9;
             --border-color: #ddd;
+            --legend-name-width: 35%;
         }
 
         * {
@@ -1020,6 +1021,46 @@
             font-size: 16px;
         }
 
+        /* Alignement de la section Légende dans la modale Paramètres */
+        #settings-legend-name {
+            width: 100%;
+        }
+        #settings-legend-inputs {
+            width: calc(100% - var(--legend-name-width));
+        }
+        #settings-legend-inputs .modal-row {
+            display: flex;
+            align-items: center;
+            margin-bottom: 2px;
+        }
+        #settings-legend-inputs .modal-row label {
+            margin-right: 6px;
+            width: 20px;
+        }
+        #settings-legend-inputs .modal-row input[type="text"] {
+            flex: 1;
+        }
+
+
+        #settings-modal .modal-row {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            margin-bottom: 4px;
+        }
+
+        .legend-number-box {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 24px;
+            height: 24px;
+            border: 1px solid #ccc;
+            margin-right: 0px;
+            font-size: 0.9em;
+            border-radius: 4px;
+        }
+
         /* Slideur pour la sélection du niveau de douleur */
         .pain-slider-rect-section {
             width: 100%;
@@ -1839,16 +1880,16 @@
                     <button class="close-btn" id="close-settings-modal">&times;</button>
                 </div>
                 <div class="modal-section">
-                    <h4>Titre</h4>
+                    <h4 style="width:100%; margin-bottom:4px;">Titre</h4>
                     <input type="text" id="settings-title" style="width:100%;margin-bottom:8px;" placeholder="Titre" />
-                    <label for="settings-color">Couleur&nbsp;:</label>
-                    <input type="color" id="settings-color" value="#3498db"/>
-                    <div style="margin-bottom:10px;">
+                    <div style="display: flex; align-items: center; width: 100%; margin-bottom: 15px;">
+                        <label for="settings-color">Couleur&nbsp;:</label>
+                        <input type="color" id="settings-color" value="#3498db" style="margin-left: auto;" />
                     </div>
                 </div>
                 <div class="modal-section">
-                    <h4>Type d’élément</h4>
-                    <div style="display: flex; gap: 2px; margin-bottom: 10px;">
+                    <h4 style="width:100%; margin-bottom:4px;">Type d’élément</h4>
+                    <div style="display: flex; gap: 4px; margin-bottom: 15px;">
                         <input 
                             type="text" 
                             id="settings-icon" 
@@ -1864,24 +1905,24 @@
                     </div>
                 </div>                
                 <div class="modal-section">
-                    <h4>Légende</h4>
-                    <div style="display: flex; align-items: center; gap: 6px; margin-bottom: 2px;">
+                    <h4 style="width:100%; margin-bottom:4px;" >Légende</h4>
+                    <div style="display: grid; grid-template-columns: 1fr var(--legend-name-width); align-items: center; gap: 6px; margin-bottom: 2px;">
                         <span>Légende des niveaux de ...</span>
                         <input 
-                            type="text" 
-                            id="settings-legend-name" 
-                            value="douleur" 
-                            style="width:45%; text-transform: lowercase;" 
+                            type="text"
+                            id="settings-legend-name"
+                            value="douleur"
+                            style="text-transform: lowercase;"
                             autocomplete="off"
                         />
                     </div>
                     <div id="settings-legend-inputs">
-                        <div class="modal-row"><label>0 : </label><input type="text" id="legend-0" value="Absente" /></div>
-                        <div class="modal-row"><label>1 : </label><input type="text" id="legend-1" value="Légère" /></div>
-                        <div class="modal-row"><label>2 : </label><input type="text" id="legend-2" value="Modérée" /></div>
-                        <div class="modal-row"><label>3 : </label><input type="text" id="legend-3" value="Forte" /></div>
-                        <div class="modal-row"><label>4 : </label><input type="text" id="legend-4" value="Très forte" /></div>
-                        <div class="modal-row"><label>5 : </label><input type="text" id="legend-5" value="Extrême" /></div>
+                        <div class="modal-row"><span class="legend-number-box" style="background-color:#FFFFFF;color:#000;">0</span><input type="text" id="legend-0" value="Absente" /></div>
+                        <div class="modal-row"><span class="legend-number-box" style="background-color:#00FF00;color:#000;">1</span><input type="text" id="legend-1" value="Légère" /></div>
+                        <div class="modal-row"><span class="legend-number-box" style="background-color:#FFFF00;color:#000;">2</span><input type="text" id="legend-2" value="Modérée" /></div>
+                        <div class="modal-row"><span class="legend-number-box" style="background-color:#FF8000;color:#000;">3</span><input type="text" id="legend-3" value="Forte" /></div>
+                        <div class="modal-row"><span class="legend-number-box" style="background-color:#FF4000;color:#000;">4</span><input type="text" id="legend-4" value="Très forte" /></div>
+                        <div class="modal-row"><span class="legend-number-box" style="background-color:#000000;color:#fff;">5</span><input type="text" id="legend-5" value="Extrême" /></div>
                     </div>
                 </div>
                 <div class="pain-modal-actions">
