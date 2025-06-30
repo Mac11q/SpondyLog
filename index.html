@@ -1848,17 +1848,32 @@
                 </div>
                 <div class="modal-section">
                     <h4>Type d’élément</h4>
-                    <input type="text" id="settings-icon" style="width:100%;" placeholder="Icône" />
-                    <div style="margin-top: 2px;">
-                        <input type="text" id="settings-name" style="width:100%;" placeholder="Nom" />
+                    <div style="display: flex; gap: 2px; margin-bottom: 10px;">
+                        <input 
+                            type="text" 
+                            id="settings-icon" 
+                            style="width: 10%; text-align: center;" 
+                            placeholder="Icône" 
+                        />
+                        <input 
+                            type="text" 
+                            id="settings-name" 
+                            style="width: 90%;" 
+                            placeholder="Nom" 
+                        />
                     </div>
-                    <div style="margin-bottom:10px; margin-top: 2px;">
-                    </div>
-                </div>
+                </div>                
                 <div class="modal-section">
                     <h4>Légende</h4>
-                    <div style="margin-bottom:2px;">
-                        <span>Légende des niveaux de ... </span><input type="text" id="settings-legend-name" value="douleur" style="width:60%;" />
+                    <div style="display: flex; align-items: center; gap: 6px; margin-bottom: 2px;">
+                        <span>Légende des niveaux de ...</span>
+                        <input 
+                            type="text" 
+                            id="settings-legend-name" 
+                            value="douleur" 
+                            style="width:45%; text-transform: lowercase;" 
+                            autocomplete="off"
+                        />
                     </div>
                     <div id="settings-legend-inputs">
                         <div class="modal-row"><label>0 : </label><input type="text" id="legend-0" value="Absente" /></div>
