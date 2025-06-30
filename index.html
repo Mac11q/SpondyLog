@@ -4726,9 +4726,13 @@
         function initSettingsModal() {
             const settingsModal = document.getElementById('settings-modal');
             const confirmModal = document.getElementById('confirm-settings-modal');
-
+            const legendNameInput = document.getElementById('settings-legend-name');
 
             loadSettings();
+
+            legendNameInput.addEventListener('input', () => {
+                legendNameInput.value = legendNameInput.value.toLowerCase();
+            });
 
             document.getElementById('close-settings-modal').addEventListener('click', () => {
                 settingsModal.style.display = 'none';
