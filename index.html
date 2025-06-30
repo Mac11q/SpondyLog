@@ -252,16 +252,20 @@
         }
 
         .color-box {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
             width: 24px;
             height: 24px;
             border-radius: 4px;
             border: 1px solid #ccc;
             margin-right: 10px;
             box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+            font-size: 0.9em;
         }
 
         /* Styles responsifs supplémentaires */
-        @media (max-width: 480px) {
+        @media (max-width: 767px) {
         .color-scale {
             grid-template-columns: repeat(2, 1fr);
         }
@@ -1637,28 +1641,28 @@
             <h3>Légende des niveaux de douleur</h3>
             <div class="color-scale">
                 <div class="color-item">
-                    <div class="color-box" style="background-color: #FFFFFF;"></div>
-                    <span>0 - Absente</span>
-                </div>        
-                <div class="color-item">
-                    <div class="color-box" style="background-color: #00FF00;"></div>
-                    <span>1 - Légère</span>
+                    <div class="color-box" style="background-color: #FFFFFF; color:#000;">0</div>
+                    <span>Absente</span>
                 </div>
                 <div class="color-item">
-                    <div class="color-box" style="background-color: #FFFF00;"></div>
-                    <span>2 - Modérée</span>
+                    <div class="color-box" style="background-color: #00FF00; color:#000;">1</div>
+                    <span>Légère</span>
                 </div>
                 <div class="color-item">
-                    <div class="color-box" style="background-color: #FF8000;"></div>
-                    <span>3 - Forte</span>
+                    <div class="color-box" style="background-color: #FFFF00; color:#000;">2</div>
+                    <span>Modérée</span>
                 </div>
                 <div class="color-item">
-                    <div class="color-box" style="background-color: #FF4000;"></div>
-                    <span>4 - Très forte</span>
+                    <div class="color-box" style="background-color: #FF8000; color:#000;">3</div>
+                    <span>Forte</span>
                 </div>
                 <div class="color-item">
-                    <div class="color-box" style="background-color: #000000;"></div>
-                    <span>5 - Extrême</span>
+                    <div class="color-box" style="background-color: #FF4000; color:#000;">4</div>
+                    <span>Très forte</span>
+                </div>
+                <div class="color-item">
+                    <div class="color-box" style="background-color: #000000; color:#fff;">5</div>
+                    <span>Extrême</span>
                 </div>
             </div>
         </div>
