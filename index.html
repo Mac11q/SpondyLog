@@ -32,7 +32,7 @@
             --text-color: #333;
             --light-bg: #f9f9f9;
             --border-color: #ddd;
-            --legend-name-width: clamp(20px, 40%, 200px);
+            --legend-name-width: clamp(80px, 35%, 220px);
         }
 
         * {
@@ -1027,8 +1027,9 @@
 
         /* Alignement de la section Légende dans la modale Paramètres */
         #settings-legend-name {
-            width: 100%;
+            width: var(--legend-name-width);
             color: #333;
+            flex-shrink: 0;
         }
         #settings-legend-inputs {
             width: calc(100% - var(--legend-name-width));
@@ -1047,6 +1048,18 @@
             color: #333;
         }
 
+        #settings-legend-row {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            width: 100%;
+            margin-bottom: 10px;
+        }
+        #settings-legend-row span {
+            flex: 1;
+            white-space: nowrap;
+            color: #000;
+        }
 
         #settings-modal .modal-row {
             display: flex;
@@ -1920,9 +1933,9 @@
                 </div>                
                 <div class="modal-section">
                     <h4 style="width:100%; margin-bottom:4px;" >Légende</h4>
-                    <div style="display: grid; grid-template-columns: 1fr var(--legend-name-width); align-items: center; gap: 4px; margin-bottom: 10px;">
-                        <span style="color:#000;">Légende des niveaux de</span>
-                        <input 
+                    <div id="settings-legend-row">
+                        <span>Légende des niveaux de</span>
+                        <input
                             type="text"
                             id="settings-legend-name"
                             value="douleur"
@@ -2224,13 +2237,13 @@
         }
 
         function openTypeModalForEdit(typeName) {
-        editingTypeName = typeName;
-        document.getElementById('note-type-modal-title').textContent = "Modifier le type de note";
-        const obj = noteTypes.find(t => t.name === typeName);
-        document.getElementById('type-name-input').value  = obj ? obj.name  : "";
-        document.getElementById('type-color-input').value = obj ? obj.color : "#3498db";
-        document.getElementById('delete-type-btn').style.display = "inline-block";
-        document.getElementById('note-type-modal').style.display   = "flex";
+            editingTypeName = typeName;
+            document.getElementById('note-type-modal-title').textContent = "Modifier le type de note";
+            const obj = noteTypes.find(t => t.name === typeName);
+            document.getElementById('type-name-input').value  = obj ? obj.name  : "";
+            document.getElementById('type-color-input').value = obj ? obj.color : "#3498db";
+            document.getElementById('delete-type-btn').style.display = "inline-block";
+            document.getElementById('note-type-modal').style.display   = "flex";
         }
 
         // Éléments DOM
