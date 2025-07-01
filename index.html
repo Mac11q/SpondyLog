@@ -32,7 +32,7 @@
             --text-color: #333;
             --light-bg: #f9f9f9;
             --border-color: #ddd;
-            --legend-name-width: 35%;
+            --legend-name-width: clamp(120px, 35%, 200px);
         }
 
         * {
@@ -1064,11 +1064,15 @@
             border: 1px solid #ccc;
             margin-right: 0px;
             font-size: 0.9em;
+            flex-shrink: 0;
             border-radius: 4px;
         }
 
         .legend-number {
             margin: 0 4px 0 2px;
+            width: 28px;
+            text-align: right;
+            flex-shrink: 0;
         }
 
         /* Slideur pour la sélection du niveau de douleur */
@@ -1916,7 +1920,7 @@
                 </div>                
                 <div class="modal-section">
                     <h4 style="width:100%; margin-bottom:4px;" >Légende</h4>
-                    <div style="display: grid; grid-template-columns: 1fr var(--legend-name-width); align-items: center; gap: 6px; margin-bottom: 10px;">
+                    <div style="display: grid; grid-template-columns: 1fr var(--legend-name-width); align-items: center; gap: 4px; margin-bottom: 10px;">
                         <span style="color:#000;">Légende des niveaux de ...</span>
                         <input 
                             type="text"
