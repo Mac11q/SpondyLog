@@ -1054,8 +1054,8 @@
             gap: 4px;
             margin-bottom: 4px;
         }
-
-        .legend-number-box {
+    
+        .legend-color-box {
             display: inline-flex;
             align-items: center;
             justify-content: center;
@@ -1065,6 +1065,10 @@
             margin-right: 0px;
             font-size: 0.9em;
             border-radius: 4px;
+        }
+
+        .legend-number {
+            margin: 0 4px 0 2px;
         }
 
         /* Slideur pour la sélection du niveau de douleur */
@@ -1912,8 +1916,8 @@
                 </div>                
                 <div class="modal-section">
                     <h4 style="width:100%; margin-bottom:4px;" >Légende</h4>
-                    <div style="display: grid; grid-template-columns: 1fr var(--legend-name-width); align-items: center; gap: 6px; margin-bottom: 4px;">
-                        <span style="color:#000;">Légende des niveaux de</span>
+                    <div style="display: grid; grid-template-columns: 1fr var(--legend-name-width); align-items: center; gap: 6px; margin-bottom: 10px;">
+                        <span style="color:#000;">Légende des niveaux de ...</span>
                         <input 
                             type="text"
                             id="settings-legend-name"
@@ -1923,12 +1927,12 @@
                         />
                     </div>
                     <div id="settings-legend-inputs">
-                        <div class="modal-row"><span class="legend-number-box" style="background-color:#FFFFFF;color:#000;">0</span><input type="text" id="legend-0" value="Absente" /></div>
-                        <div class="modal-row"><span class="legend-number-box" style="background-color:#00FF00;color:#000;">1</span><input type="text" id="legend-1" value="Légère" /></div>
-                        <div class="modal-row"><span class="legend-number-box" style="background-color:#FFFF00;color:#000;">2</span><input type="text" id="legend-2" value="Modérée" /></div>
-                        <div class="modal-row"><span class="legend-number-box" style="background-color:#FF8000;color:#000;">3</span><input type="text" id="legend-3" value="Forte" /></div>
-                        <div class="modal-row"><span class="legend-number-box" style="background-color:#FF4000;color:#000;">4</span><input type="text" id="legend-4" value="Très forte" /></div>
-                        <div class="modal-row"><span class="legend-number-box" style="background-color:#000000;color:#fff;">5</span><input type="text" id="legend-5" value="Extrême" /></div>
+                        <div class="modal-row"><span class="legend-color-box" style="background-color:#FFFFFF;"></span><span class="legend-number">0 - </span><input type="text" id="legend-0" value="Absente" /></div>
+                        <div class="modal-row"><span class="legend-color-box" style="background-color:#00FF00;"></span><span class="legend-number">1 - </span><input type="text" id="legend-1" value="Légère" /></div>
+                        <div class="modal-row"><span class="legend-color-box" style="background-color:#FFFF00;"></span><span class="legend-number">2 - </span><input type="text" id="legend-2" value="Modérée" /></div>
+                        <div class="modal-row"><span class="legend-color-box" style="background-color:#FF8000;"></span><span class="legend-number">3 - </span><input type="text" id="legend-3" value="Forte" /></div>
+                        <div class="modal-row"><span class="legend-color-box" style="background-color:#FF4000;"></span><span class="legend-number">4 - </span><input type="text" id="legend-4" value="Très forte" /></div>
+                        <div class="modal-row"><span class="legend-color-box" style="background-color:#000000;"></span><span class="legend-number">5 - </span><input type="text" id="legend-5" value="Extrême" /></div>
                     </div>
                 </div>
                 <div class="pain-modal-actions">
