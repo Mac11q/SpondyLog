@@ -1740,7 +1740,7 @@
                         <span id="max-pain" class="stat-value" style="font-size: 0.95em; color: #dc3545;">--</span>
                     </div>
                     <div class="stat-item" style="padding: 0 2px; background-color: #f5f5f5; border-radius: 4px; text-align: center;">
-                        <span class="stat-label" style="display: block; font-weight: bold; font-size: 0.8em; margin-bottom: 0;">Anti-inflam.</span>
+                        <span id="med-days-label" class="stat-label" style="display: block; font-weight: bold; font-size: 0.8em; margin-bottom: 0;">Anti-inflam.</span>
                         <span id="med-days" class="stat-value" style="font-size: 0.95em; color: #fd7e14;">--</span>
                     </div>
                     <div class="stat-item" style="padding: 0 2px; background-color: #f5f5f5; border-radius: 4px; text-align: center;">
@@ -2182,6 +2182,8 @@
             if (subtitle) subtitle.textContent = settings.title;
             const medLabel = document.querySelector("label[for='med-taken']");
             if (medLabel) medLabel.innerHTML = `<span class="med-icon">${settings.elementIcon}</span> ${settings.elementName}`;
+            const medDaysLabel = document.getElementById('med-days-label');
+            if (medDaysLabel) medDaysLabel.textContent = settings.elementIcon;
             const legendTitle = document.querySelector('.legend h3');
             if (legendTitle) legendTitle.textContent = `Légende des niveaux de ${settings.legendName}`;
             const chartTitle = document.querySelector('#chart-modal .modal-header h3');
@@ -3318,7 +3320,7 @@
                             if (medData && medData.taken) {
                                 const medIndicator = document.createElement("span");
                                 medIndicator.className = "med-indicator";
-                                medIndicator.innerHTML = '<span class="med-icon">💊</span>';
+                                medIndicator.innerHTML = `<span class="med-icon">${settings.elementIcon}</span>`;
 
                                 const medTypeName = medData.type ? medData.type : "(non renseigné)";
                                 const qty = medData.qty ? medData.qty : 1;
@@ -4027,7 +4029,7 @@
                     if (userMedsData[dateId]) {
                         const medIcon = document.createElement("span");
                         medIcon.className = "med-icon";
-                        medIcon.innerHTML = "💊";
+                        medIcon.innerHTML = settings.elementIcon;
                         medIcon.style.marginLeft = "5px";
                         noteDate.appendChild(medIcon);
                     }
@@ -4862,7 +4864,13 @@
                     }
                     saveSettings();
                     applySettingsToUI();
-                } else if (action === 'reset') {
+                    if (currentView === "month") {
+                        renderCalendar(currentMonth, currentYear);
+                    } else {
+                        renderYearView(currentYear);
+                    }
+                    renderNotesList();
+                    } else if (action === 'reset') {
                     resetSettings();
                     populateSettingsModal();
                 }
