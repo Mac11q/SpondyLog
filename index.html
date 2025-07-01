@@ -32,7 +32,7 @@
             --text-color: #333;
             --light-bg: #f9f9f9;
             --border-color: #ddd;
-            --legend-name-width: clamp(80px, 35%, 220px);
+            --legend-name-width: 120px;
         }
 
         * {
@@ -1027,9 +1027,9 @@
 
         /* Alignement de la section Légende dans la modale Paramètres */
         #settings-legend-name {
-            width: var(--legend-name-width);
+            flex: 1;
+            min-width: 80px;
             color: #333;
-            flex-shrink: 0;
         }
         #settings-legend-inputs {
             width: calc(100% - var(--legend-name-width));
@@ -1056,9 +1056,10 @@
             margin-bottom: 10px;
         }
         #settings-legend-row span {
-            flex: 1;
+            flex: 0 0 auto;
             white-space: nowrap;
             color: #000;
+            margin-right: 4px;
         }
 
         #settings-modal .modal-row {
@@ -4194,6 +4195,7 @@
                     settingsOption.addEventListener('click', () => {
                         populateSettingsModal();
                         document.getElementById('settings-modal').style.display = 'flex';
+                        updateLegendLayout();
                         dropdown.style.display = 'none';
                     });
                 }
@@ -4791,6 +4793,17 @@
         }
 
         ReactDOM.render(<NoteDotsApp />, document.getElementById('note-feature-root'));
+
+
+        function updateLegendLayout() {
+            const legendNameInput = document.getElementById('settings-legend-name');
+            if (legendNameInput) {
+                const width = legendNameInput.offsetWidth;
+                document.documentElement.style.setProperty('--legend-name-width', width + 'px');
+            }
+        }
+
+        window.addEventListener('resize', updateLegendLayout);
   
         function initSettingsModal() {
             const settingsModal = document.getElementById('settings-modal');
@@ -4801,6 +4814,7 @@
 
             legendNameInput.addEventListener('input', () => {
                 legendNameInput.value = legendNameInput.value.toLowerCase();
+                updateLegendLayout();
             });
 
             document.getElementById('close-settings-modal').addEventListener('click', () => {
