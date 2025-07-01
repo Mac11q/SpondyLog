@@ -1694,7 +1694,7 @@
         <div id="chart-modal" class="modal">
             <div class="modal-content" style="max-width: 800px; width: 90%;">
                 <div class="modal-header">
-                    <h3>Évolution de la douleur</h3>
+                    <h3>Graphique d'évolution</h3>
                     <button class="close-btn" id="close-chart-modal">&times;</button>
                 </div>
                 <div class="date-range-selector" style="margin-bottom: 10px;">
@@ -2050,6 +2050,9 @@
         }
 
         let settings = cloneSettings(defaultSettings);
+        function capitalizeFirst(str) {
+            return str ? str.charAt(0).toUpperCase() + str.slice(1) : '';
+        }
         let painLevelLabels = [];
 
         // ----- Couleur de survol dynamique -----
@@ -2181,6 +2184,10 @@
             if (medLabel) medLabel.innerHTML = `<span class="med-icon">${settings.elementIcon}</span> ${settings.elementName}`;
             const legendTitle = document.querySelector('.legend h3');
             if (legendTitle) legendTitle.textContent = `Légende des niveaux de ${settings.legendName}`;
+            const chartTitle = document.querySelector('#chart-modal .modal-header h3');
+            if (chartTitle) chartTitle.textContent = `Graphique d'évolution`;
+            const painLabel = document.querySelector('.pain-slider-label');
+            if (painLabel) painLabel.textContent = `Niveau de ${capitalizeFirst(settings.legendName)} ressenti :`;
             const legendItems = document.querySelectorAll('.legend .color-item span');
             // legendItems.forEach((span, idx) => { span.textContent = settings.legendLevels[idx]; }); (ne pas avoir "1 - " dans la légende)
             legendItems.forEach((span, idx) => { span.textContent = `${idx} - ${settings.legendLevels[idx]}`; }); 
@@ -3531,7 +3538,7 @@
                                     const levelLabel = painLevelLabels[level] || "(inconnu)";
                                     const dotColor = painColors[level];
                                     // Douleur en normal, niveau en gras
-                                    parts.push(`<span class="tooltip-dot" style="background:${dotColor}"></span>douleur : <strong>${levelLabel}</strong>`);
+                                    parts.push(`<span class="tooltip-dot" style="background:${dotColor}"></span>${capitalizeFirst(settings.legendName)} : <strong>${levelLabel}</strong>`);
                                 }
                                 if (notesInfo) {
                                     for (const [typeName, text] of Object.entries(noteObjY)) {
@@ -4437,7 +4444,7 @@
             data: {
                 labels: dates,
                 datasets: [{
-                    label: 'Niveau de douleur',
+                    label: `Niveau de ${capitalizeFirst(settings.legendName)}`,
                     data: painData,
                     backgroundColor: barColors,
                     borderColor: borderColors,
@@ -4460,7 +4467,7 @@
                     y: {
                         title: {
                             display: true,
-                            text: 'Niveau de douleur'
+                            text: `Niveau de ${capitalizeFirst(settings.legendName)}`
                         },
                         min: 0,
                         max: 5,
@@ -4491,10 +4498,10 @@
                                 const color = barColors[context.dataIndex];
                                 const border = borderColors[context.dataIndex];
                                 const square = `<span style='display:inline-block;width:10px;height:10px;background:${color};border:1px solid ${border};margin-right:4px'></span>`;
-                                if (value === null) return `${square}Douleur : Non renseigné`;
+                                if (value === null) return `${square}${capitalizeFirst(settings.legendName)} : Non renseigné`;
                                 const painLevels = settings.legendLevels;
                                 const valText = painLevels[value] !== undefined ? `<strong>${painLevels[value]}</strong>` : `<strong>${value}</strong>`;
-                                return `${square}Douleur : ${valText}`;
+                                return `${square}${capitalizeFirst(settings.legendName)} : ${valText}`;
                             },
                             afterLabel: function(context) {
                                 const index = context.dataIndex;
@@ -4573,7 +4580,7 @@
             noMedColor.style.marginRight = '5px';
             
             const noMedText = document.createElement('span');
-            noMedText.textContent = 'Sans anti-inflammatoire';
+            noMedText.textContent = `Sans ${settings.elementName}`;
             
             noMedLegend.appendChild(noMedColor);
             noMedLegend.appendChild(noMedText);
@@ -4593,7 +4600,7 @@
             medColor.style.marginRight = '5px';
             
             const medText = document.createElement('span');
-            medText.textContent ='Avec anti-inflammatoire';
+            medText.textContent =`Avec ${settings.elementName}`;
             
             medLegend.appendChild(medColor);
             medLegend.appendChild(medText);
