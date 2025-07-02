@@ -626,6 +626,16 @@
             gap: 5px;
         }
 
+           .med-info {
+            display: inline-flex;
+            align-items: center;
+        }
+
+        .med-info {
+            display: inline-flex;
+            align-items: center;
+        }
+
         .pain-level-display {
             position: relative;
             display: inline-flex;
@@ -4003,6 +4013,8 @@
                     if (painContainer) {
                         noteDate.appendChild(document.createTextNode(" - "));
                         noteDate.appendChild(painContainer);
+                        const levelLabel = painLevelLabels[painValue] || "";
+                        noteDate.appendChild(document.createTextNode(` - ${levelLabel}`));
                     }
                     noteEntry.appendChild(noteDate);
 
@@ -4040,11 +4052,18 @@
                     noteEntry.appendChild(noteText);
 
                     if (userMedsData[dateId]) {
+                        const medData = userMedsData[dateId];
+                        const medSpan = document.createElement("span");
+                        medSpan.className = "med-info";
                         const medIcon = document.createElement("span");
                         medIcon.className = "med-icon";
                         medIcon.innerHTML = settings.elementIcon;
-                        medIcon.style.marginLeft = "5px";
-                        noteDate.appendChild(medIcon);
+                        medSpan.appendChild(medIcon);
+                        const qty = medData.qty ? medData.qty : 1;
+                        medSpan.appendChild(document.createTextNode(` x${qty}`));
+                        medSpan.style.marginLeft = "5px";
+                        noteDate.appendChild(document.createTextNode(" "));
+                        noteDate.appendChild(medSpan);
                     }
 
                     const editLink = document.createElement("a");
