@@ -3960,32 +3960,20 @@
                     noteDate.className = "note-date";
 
                     const painValue = userPainData[dateId] !== undefined ? userPainData[dateId] : 0;
-                    let painContainer = null;
-                    if (painValue > 0) {
-                        painContainer = document.createElement("span");
-                        painContainer.className = "pain-level-display";
-
-                        const painBox = document.createElement("span");
-                        painBox.className = "color-box note-pain-level";
-                        painBox.style.backgroundColor = painColors[painValue];
-                        if (painValue === 5) {
-                            painBox.style.borderColor = "white";
-                        }
-
-                        const painNumber = document.createElement("span");
-                        painNumber.className = "pain-level-number";
-                        painNumber.textContent = painValue;
-
-                        painContainer.appendChild(painBox);
-                        painContainer.appendChild(painNumber);
-                    }
                     noteDate.textContent = formattedDate;
-                    if (painContainer) {
+                    const hasPain  = painValue > 0;
+                    const hasMeds  = !!userMedsData[dateId];
+                    if (hasPain || hasMeds) {
                         noteDate.appendChild(document.createTextNode(" - "));
-                        noteDate.appendChild(painContainer);
-                        const levelLabel = painLevelLabels[painValue] || "";
-                        noteDate.appendChild(document.createTextNode(` - ${levelLabel}`));
                     }
+
+                    if (hasPain) {
+                        const painTextSpan = document.createElement("span");
+                        const levelLabel   = painLevelLabels[painValue] || "";
+                        painTextSpan.textContent = `${capitalizeFirst(settings.legendName)} : ${levelLabel}`;
+                        noteDate.appendChild(painTextSpan);
+                    }
+
                     noteEntry.appendChild(noteDate);
 
                     const noteText = document.createElement("div");
@@ -4021,8 +4009,11 @@
 
                     noteEntry.appendChild(noteText);
 
-                    if (userMedsData[dateId]) {
+                    if (hasMeds) {
                         const medData = userMedsData[dateId];
+                        if (hasPain) {
+                            noteDate.appendChild(document.createTextNode(" - "));
+                        }
                         const medSpan = document.createElement("span");
                         medSpan.className = "med-info";
                         const medIcon = document.createElement("span");
@@ -4031,7 +4022,6 @@
                         medSpan.appendChild(medIcon);
                         const qty = medData.qty ? medData.qty : 1;
                         medSpan.appendChild(document.createTextNode(' x' + qty));
-                        noteDate.appendChild(document.createTextNode(" "));
                         noteDate.appendChild(medSpan);
                     }
 
