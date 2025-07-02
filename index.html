@@ -2183,7 +2183,7 @@
             const medLabel = document.querySelector("label[for='med-taken']");
             if (medLabel) medLabel.innerHTML = `<span class="med-icon">${settings.elementIcon}</span> ${settings.elementName}`;
             const medDaysLabel = document.getElementById('med-days-label');
-            if (medDaysLabel) medDaysLabel.textContent = settings.elementIcon;
+            if (medDaysLabel) medDaysLabel.innerHTML = `Quantité <span class="med-icon">${settings.elementIcon}</span>`;
             const legendTitle = document.querySelector('.legend h3');
             if (legendTitle) legendTitle.textContent = `Légende des niveaux de ${settings.legendName}`;
             const chartTitle = document.querySelector('#chart-modal .modal-header h3');
