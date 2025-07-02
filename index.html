@@ -1026,6 +1026,10 @@
         }
 
         /* Alignement de la section Légende dans la modale Paramètres */
+        #settings-legend-pre {
+            width: 40px;
+            color: #333;
+        }
         #settings-legend-name {
             flex: 1;
             min-width: 80px;
@@ -1745,7 +1749,7 @@
                     </div>
                     <div class="stat-item" style="padding: 0 2px; background-color: #f5f5f5; border-radius: 4px; text-align: center;">
                         <span id="med-days-label" class="stat-label" style="display: block; font-weight: bold; font-size: 0.8em; margin-bottom: 0;"> Quantité</span>
-                        <span id="med-days" class="stat-value" style="font-size: 0.95em; color: #333;">--</span>
+                        <span id="med-days" class="stat-value" style="font-size: 0.95em; color: #333;">-Quantité-</span>
                     </div>
                 </div>
             </div>
@@ -1935,7 +1939,14 @@
                 <div class="modal-section">
                     <h4 style="width:100%; margin-bottom:4px;" >Légende</h4>
                     <div id="settings-legend-row">
-                        <span>Légende des niveaux de</span>
+                        <span>Légende des niveaux</span>
+                        <input
+                            type="text"
+                            id="settings-legend-pre"
+                            value="de"
+                            style="width: 30px; text-transform: lowercase;"
+                            autocomplete="off"
+                        />
                         <input
                             type="text"
                             id="settings-legend-name"
@@ -2034,6 +2045,7 @@
             themeColor: '#3498db',
             elementIcon: '💊',
             elementName: 'Médicament',
+            legendPre: 'de',
             legendName: 'douleur',
             legendLevels: {
                 0: 'Absente',
@@ -2185,11 +2197,11 @@
             const medDaysLabel = document.getElementById('med-days-label');
             if (medDaysLabel) medDaysLabel.innerHTML = `Quantité <span class="med-icon">${settings.elementIcon}</span>`;
             const legendTitle = document.querySelector('.legend h3');
-            if (legendTitle) legendTitle.textContent = `Légende des niveaux de ${settings.legendName}`;
+            if (legendTitle) legendTitle.textContent = `Légende des niveaux ${settings.legendPre.toLowerCase()} ${settings.legendName.toLowerCase()}`;
             const chartTitle = document.querySelector('#chart-modal .modal-header h3');
             if (chartTitle) chartTitle.textContent = `Graphique d'évolution`;
             const painLabel = document.querySelector('.pain-slider-label');
-            if (painLabel) painLabel.textContent = `Niveau de ${capitalizeFirst(settings.legendName)} ressenti :`;
+            if (painLabel) painLabel.textContent = `Niveau ${settings.legendPre.toLowerCase()} ${settings.legendName.toLowerCase()} ressenti :`;
             const legendItems = document.querySelectorAll('.legend .color-item span');
             // legendItems.forEach((span, idx) => { span.textContent = settings.legendLevels[idx]; }); (ne pas avoir "1 - " dans la légende)
             legendItems.forEach((span, idx) => { span.textContent = `${idx} - ${settings.legendLevels[idx]}`; }); 
@@ -2209,6 +2221,7 @@
             document.getElementById('settings-color').value = settings.themeColor;
             document.getElementById('settings-icon').value = settings.elementIcon;
             document.getElementById('settings-name').value = settings.elementName;
+            document.getElementById('settings-legend-pre').value = settings.legendPre;
             document.getElementById('settings-legend-name').value = settings.legendName;
             for (let i = 0; i <= 5; i++) {
                 const input = document.getElementById('legend-' + i);
@@ -4446,7 +4459,7 @@
             data: {
                 labels: dates,
                 datasets: [{
-                    label: `Niveau de ${capitalizeFirst(settings.legendName)}`,
+                    label: `Niveau ${(settings.legendPre.toLowerCase)} ${(settings.legendName.toLowerCase)}`,
                     data: painData,
                     backgroundColor: barColors,
                     borderColor: borderColors,
@@ -4469,7 +4482,7 @@
                     y: {
                         title: {
                             display: true,
-                            text: `Niveau de ${capitalizeFirst(settings.legendName)}`
+                            text: `Niveau ${settings.legendPre.toLowerCase()} ${settings.legendName.toLowerCase()}`
                         },
                         min: 0,
                         max: 5,
@@ -4806,8 +4819,9 @@
 
         function updateLegendLayout() {
             const legendNameInput = document.getElementById('settings-legend-name');
-            if (legendNameInput) {
-                const width = legendNameInput.offsetWidth;
+            const legendPreInput  = document.getElementById('settings-legend-pre');
+            if (legendNameInput && legendPreInput) {
+                const width = legendNameInput.offsetWidth + legendPreInput.offsetWidth + 8;
                 document.documentElement.style.setProperty('--legend-name-width', width + 'px');
             }
         }
@@ -4858,6 +4872,7 @@
                     settings.themeColor = document.getElementById('settings-color').value;
                     settings.elementIcon = document.getElementById('settings-icon').value;
                     settings.elementName = document.getElementById('settings-name').value;
+                    settings.legendPre  = document.getElementById('settings-legend-pre').value;
                     settings.legendName = document.getElementById('settings-legend-name').value;
                     for (let i = 0; i <= 5; i++) {
                         settings.legendLevels[i] = document.getElementById('legend-' + i).value;
