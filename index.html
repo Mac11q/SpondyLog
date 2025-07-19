@@ -651,6 +651,17 @@
             border-radius: 4px;
         }
 
+        .note-pain-square {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 16px;
+            height: 16px;
+            border-radius: 3px;
+            border: 1px solid var(--primary-color);
+            font-size: 0.75em;
+        }
+
         .note-text {
             margin-top: 5px;
             white-space: pre-wrap;
@@ -3968,10 +3979,12 @@
                     }
 
                     if (hasPain) {
-                        const painTextSpan = document.createElement("span");
-                        const levelLabel   = painLevelLabels[painValue] || "";
-                        painTextSpan.textContent = `${capitalizeFirst(settings.legendName)} : ${levelLabel}`;
-                        noteDate.appendChild(painTextSpan);
+                        const painSquare = document.createElement("span");
+                        painSquare.className = "note-pain-square";
+                        painSquare.textContent = painValue;
+                        painSquare.style.backgroundColor = painColors[painValue];
+                        painSquare.style.color = painValue === 5 ? "#fff" : "#000";
+                        noteDate.appendChild(painSquare);
                     }
 
                     noteEntry.appendChild(noteDate);
@@ -4010,7 +4023,6 @@
                     noteEntry.appendChild(noteText);
 
                     if (hasMeds) {
-                        const medData = userMedsData[dateId];
                         if (hasPain) {
                             noteDate.appendChild(document.createTextNode(" - "));
                         }
@@ -4020,8 +4032,6 @@
                         medIcon.className = "med-icon";
                         medIcon.innerHTML = settings.elementIcon;
                         medSpan.appendChild(medIcon);
-                        const qty = medData.qty ? medData.qty : 1;
-                        medSpan.appendChild(document.createTextNode(' x' + qty));
                         noteDate.appendChild(medSpan);
                     }
 
