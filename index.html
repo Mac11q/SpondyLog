@@ -1112,6 +1112,18 @@
             margin-right: 4px;
         }
 
+        /* Positionnement du toggle dans la modale Paramètres */
+            #settings-symptom-toggle {
+            display: flex;
+            align-items: center;          /* Centre verticalement */
+            width: 110px; /* ou 60px, adapte selon lisibilité */
+            height: 20px;
+            border-radius: 5px;
+            margin: 0;
+            overflow: hidden;
+            font-size: 8px;
+        }
+
         #settings-modal .modal-row {
             display: flex;
             align-items: center;
@@ -2037,6 +2049,13 @@
                 </div>                
                 <div class="modal-section">
                     <h4 style="width:100%; margin-bottom:4px;" >Légende</h4>
+                    <div class="toggle-switch" id="settings-symptom-toggle">
+                        <input type="radio" id="settings-pain-toggle" name="settings-symptom" checked>
+                        <label for="settings-pain-toggle" id="settings-pain-toggle-btn">Douleur</label>
+                        <input type="radio" id="settings-stiffness-toggle" name="settings-symptom">
+                        <label for="settings-stiffness-toggle" id="settings-stiffness-toggle-btn">Raideur</label>
+                        <span class="toggle-slider"></span>
+                    </div>
                     <div id="settings-legend-row">
                         <span>Légende des niveaux</span>
                         <input
@@ -4952,6 +4971,10 @@
             const settingsModal = document.getElementById('settings-modal');
             const confirmModal = document.getElementById('confirm-settings-modal');
             const legendNameInput = document.getElementById('settings-legend-name');
+            const settingsPainToggleBtn = document.getElementById('settings-pain-toggle-btn');
+            const settingsStiffnessToggleBtn = document.getElementById('settings-stiffness-toggle-btn');
+            const settingsPainToggleInput = document.getElementById('settings-pain-toggle');
+            const settingsStiffnessToggleInput = document.getElementById('settings-stiffness-toggle');
 
             loadSettings();
 
@@ -4971,6 +4994,18 @@
             confirmModal.addEventListener('click', (e) => {
                 if (e.target === confirmModal) confirmModal.style.display = 'none';
             });
+
+            if (settingsPainToggleBtn) {
+                settingsPainToggleBtn.addEventListener('click', () => {
+                    settingsPainToggleInput.checked = true;
+                });
+            }
+
+            if (settingsStiffnessToggleBtn) {
+                settingsStiffnessToggleBtn.addEventListener('click', () => {
+                    settingsStiffnessToggleInput.checked = true;
+                });
+            }
 
             document.getElementById('settings-save').addEventListener('click', () => {
                 document.getElementById('confirm-settings-msg').textContent = 'Êtes-vous sûr de vouloir enregistrer les modifications ?';
