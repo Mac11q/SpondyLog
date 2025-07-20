@@ -1179,6 +1179,41 @@
             margin-bottom: 5px;
         }
 
+        .pain-toggle-container {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+            margin-bottom: 5px;
+            font-size: 8px;
+        }
+
+        .pain-toggle-container .pain-slider-label {
+            margin-bottom: 0;
+        }
+
+        .pain-modal-toggle {
+            display: flex;
+            align-items: center;          /* Centre verticalement */
+            width: 110px; /* ou 60px, adapte selon lisibilité */
+            height: 20px;
+            border-radius: 5px;
+            margin: 0;
+            overflow: hidden;
+        }
+
+        @media (max-width: 480px) {
+            .pain-modal-toggle {
+                display: flex;
+                align-items: center;          /* Centre verticalement */
+                width: 80px; /* ou 60px, adapte selon lisibilité */
+                height: 20px;
+                border-radius: 5px;
+                margin: 0;
+                overflow: hidden;
+            }
+        }
+
         .pain-slider-rect-bar {
             position: relative;
             display: flex;
@@ -1909,7 +1944,16 @@
             
                 <!-- 3. Section pour le niveau de douleur (efn dernier) -->
                 <div class="pain-slider-rect-section">
-                    <label class="pain-slider-label">Niveau de douleur ressenti :</label>
+                    <div class="pain-toggle-container">
+                        <label class="pain-slider-label">Niveau de douleur ressenti :</label>
+                        <div class="toggle-switch pain-modal-toggle" id="modal-symptom-toggle">
+                            <input type="radio" id="modal-pain-toggle" name="modal-symptom" checked>
+                            <label for="modal-pain-toggle" id="modal-pain-toggle-btn">Douleur</label>
+                            <input type="radio" id="modal-stiffness-toggle" name="modal-symptom">
+                            <label for="modal-stiffness-toggle" id="modal-stiffness-toggle-btn">Raideur</label>
+                            <span class="toggle-slider"></span>
+                        </div>
+                    </div>
                     <div class="pain-slider-rect-bar" id="pain-slider-rect-bar">
                         <div class="pain-slider-rect-option" data-value="0" style="background: #FFFFFF;"></div>
                         <div class="pain-slider-rect-option" data-value="1" style="background: #00FF00;"></div>
@@ -2350,6 +2394,10 @@
         const stiffnessToggleBtn = document.getElementById("stiffness-toggle-btn");
         const painToggleInput = document.getElementById("pain-toggle");
         const stiffnessToggleInput = document.getElementById("stiffness-toggle");
+        const modalPainToggleBtn = document.getElementById("modal-pain-toggle-btn");
+        const modalStiffnessToggleBtn = document.getElementById("modal-stiffness-toggle-btn");
+        const modalPainToggleInput = document.getElementById("modal-pain-toggle");
+        const modalStiffnessToggleInput = document.getElementById("modal-stiffness-toggle");
 
         let selectedDate = null;     // Variable temporaire pour stocker la date sélectionnée
 
@@ -2738,6 +2786,18 @@
             stiffnessToggleBtn.addEventListener("click", function() {
                 stiffnessToggleInput.checked = true;
             });
+
+            if (modalPainToggleBtn) {
+                modalPainToggleBtn.addEventListener("click", function() {
+                    modalPainToggleInput.checked = true;
+                });
+            }
+
+            if (modalStiffnessToggleBtn) {
+                modalStiffnessToggleBtn.addEventListener("click", function() {
+                    modalStiffnessToggleInput.checked = true;
+                });
+            }
 
             // Initialiser la référence à la case à cocher des anti-inflammatoires
             medCheckbox = document.getElementById('med-taken');
