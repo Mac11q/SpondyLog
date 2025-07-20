@@ -267,8 +267,20 @@
         /* Styles responsifs supplémentaires */
         @media (max-width: 767px) {
         .color-scale {
-            grid-template-columns: repeat(2, 1fr);
+            grid-template-columns: 1fr 1fr;
+            grid-template-rows: repeat(3, auto);
+            grid-template-areas:
+                "a d"
+                "b e"
+                "c f";
         }
+        .color-scale .color-item:nth-child(1) { grid-area: a; }
+        .color-scale .color-item:nth-child(2) { grid-area: b; }
+        .color-scale .color-item:nth-child(3) { grid-area: c; }
+        .color-scale .color-item:nth-child(4) { grid-area: d; }
+        .color-scale .color-item:nth-child(5) { grid-area: e; }
+        .color-scale .color-item:nth-child(6) { grid-area: f; }
+
     
         .color-item {
             padding: 4px;
