@@ -116,10 +116,14 @@
             flex: 1;
             padding: 10px 0;
             text-align: center;
-            color: white;
+            color: black;
             cursor: pointer;
             user-select: none;
             z-index: 2;
+        }
+
+        .toggle-switch input:checked + label {
+            color: white;
         }
 
         .toggle-switch .toggle-slider {
