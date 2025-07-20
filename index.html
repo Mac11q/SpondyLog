@@ -96,6 +96,46 @@
             background: var(--primary-color);
         }
 
+        .toggle-switch {
+            position: relative;
+            display: inline-flex;
+            justify-content: space-between;
+            width: 220px;
+            border-radius: 5px;
+            background: var(--secondary-color);
+            overflow: hidden;
+            margin: 0 auto 20px auto;
+        }
+
+        .toggle-switch input {
+            display: none;
+        }
+
+        .toggle-switch label {
+            flex: 1;
+            padding: 10px 0;
+            text-align: center;
+            color: white;
+            cursor: pointer;
+            user-select: none;
+            z-index: 2;
+        }
+
+        .toggle-switch .toggle-slider {
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            width: 50%;
+            background: var(--primary-color);
+            border-radius: 5px;
+            transition: transform 0.3s;
+            z-index: 1;
+        }
+
+        #stiffness-toggle:checked ~ .toggle-slider {
+            transform: translateX(100%);
+        }
+
         .calendar-header {
             display: flex;
             justify-content: space-between;
@@ -1665,9 +1705,12 @@
 
     
         <!-- Sélecteur Douleur/Raideur -->
-        <div class="view-toggle" id="symptom-toggle">
-            <button id="pain-toggle-btn" class="view-btn active">Douleur</button>
-            <button id="stiffness-toggle-btn" class="view-btn">Raideur</button>
+        <div class="toggle-switch" id="symptom-toggle">
+            <input type="radio" id="pain-toggle" name="symptom" checked>
+            <label for="pain-toggle" id="pain-toggle-btn">Douleur</label>
+            <input type="radio" id="stiffness-toggle" name="symptom">
+            <label for="stiffness-toggle" id="stiffness-toggle-btn">Raideur</label>
+            <span class="toggle-slider"></span>
         </div>
 
         <!-- Boutons d'affichage des notes et du graphique -->
@@ -2308,6 +2351,8 @@
         const notesList = document.getElementById("notes-list")
         const painToggleBtn = document.getElementById("pain-toggle-btn");
         const stiffnessToggleBtn = document.getElementById("stiffness-toggle-btn");
+        const painToggleInput = document.getElementById("pain-toggle");
+        const stiffnessToggleInput = document.getElementById("stiffness-toggle");
 
         let selectedDate = null;     // Variable temporaire pour stocker la date sélectionnée
 
@@ -2690,13 +2735,11 @@
             });
 
             painToggleBtn.addEventListener("click", function() {
-                painToggleBtn.classList.add("active");
-                stiffnessToggleBtn.classList.remove("active");
+                painToggleInput.checked = true;
             });
 
             stiffnessToggleBtn.addEventListener("click", function() {
-                stiffnessToggleBtn.classList.add("active");
-                painToggleBtn.classList.remove("active");
+                stiffnessToggleInput.checked = true;
             });
 
             // Initialiser la référence à la case à cocher des anti-inflammatoires
