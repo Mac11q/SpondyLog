@@ -103,7 +103,7 @@
             justify-content: space-between;
             width: 100%;
             border-radius: 5px;
-            background: var(--secondary-color);
+            background: #e0e0e0;
             overflow: hidden;
             margin: 20px auto 10px auto;
         }
@@ -1838,7 +1838,13 @@
                         </div>
                         <button id="apply-custom-dates" class="view-btn" style="margin-top: 5px; padding: 4px 12px; font-size: 0.9em; display: block; margin-left: auto; margin-right: auto;">Appliquer</button>
                     </div>
-                    <div id="note-feature-root" style="margin-top: 10px; margin-bottom: -10px;"> 
+                    <div class="range-option" style="display: flex; align-items: center; gap: 10px; margin-top: 10px;">
+                        <label for="data-select">Données :</label>
+                        <select id="data-select" style="padding: 4px 8px;">
+                            <option value="all" selected>Toutes les données</option>
+                        </select>
+                    </div>
+                    <div id="note-feature-root" style="margin-top: 10px; margin-bottom: -10px;">
                     </div>
                 </div>
                 <div class="chart-container" style="position: relative; height: 350px; margin-bottom: 0px;">
