@@ -1105,6 +1105,14 @@
             width: 100%;
             margin-bottom: 10px;
         }
+        #settings-legend-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            width: 100%;
+            margin-bottom: 4px;
+        }
+
         #settings-legend-row span {
             flex: 0 0 auto;
             white-space: nowrap;
@@ -2048,13 +2056,15 @@
                     </div>
                 </div>                
                 <div class="modal-section">
-                    <h4 style="width:100%; margin-bottom:4px;" >Légende</h4>
-                    <div class="toggle-switch" id="settings-symptom-toggle">
-                        <input type="radio" id="settings-pain-toggle" name="settings-symptom" checked>
-                        <label for="settings-pain-toggle" id="settings-pain-toggle-btn">Douleur</label>
-                        <input type="radio" id="settings-stiffness-toggle" name="settings-symptom">
-                        <label for="settings-stiffness-toggle" id="settings-stiffness-toggle-btn">Raideur</label>
-                        <span class="toggle-slider"></span>
+                       <div id="settings-legend-header">
+                        <h4 style="margin: 0;">Légende</h4>
+                        <div class="toggle-switch" id="settings-symptom-toggle">
+                            <input type="radio" id="settings-pain-toggle" name="settings-symptom" checked>
+                            <label for="settings-pain-toggle" id="settings-pain-toggle-btn">Douleur</label>
+                            <input type="radio" id="settings-stiffness-toggle" name="settings-symptom">
+                            <label for="settings-stiffness-toggle" id="settings-stiffness-toggle-btn">Raideur</label>
+                            <span class="toggle-slider"></span>
+                        </div>
                     </div>
                     <div id="settings-legend-row">
                         <span>Légende des niveaux</span>
