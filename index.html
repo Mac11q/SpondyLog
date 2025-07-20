@@ -608,8 +608,9 @@
             margin-top: 20px;
             text-align: center;
             display: flex;
-            flex-direction: column; /* Affiche les éléments en colonne */
-            gap: 10px; /* Espace entre les boutons */
+            flex-direction: row;
+            justify-content: center;
+            gap: 10px;
             align-items: center; /* Centre les boutons horizontalement */
         }
 
@@ -1663,11 +1664,17 @@
         </div>
 
     
-        <!-- Bouton pour voir toutes les notes -->
-            <div class="view-all-notes">
-                <button id="show-notes-btn" class="view-btn">Voir toutes les notes</button>
-                <button id="show-chart-btn" class="view-btn">Voir graphique</button>
-            </div>
+        <!-- Sélecteur Douleur/Raideur -->
+        <div class="view-toggle" id="symptom-toggle">
+            <button id="pain-toggle-btn" class="view-btn active">Douleur</button>
+            <button id="stiffness-toggle-btn" class="view-btn">Raideur</button>
+        </div>
+
+        <!-- Boutons d'affichage des notes et du graphique -->
+        <div class="view-all-notes">
+            <button id="show-notes-btn" class="view-btn">Notes</button>
+            <button id="show-chart-btn" class="view-btn">Graphique</button>
+        </div>
         </div>
 
           <div class="legend">
@@ -2299,6 +2306,8 @@
         const notesListModal = document.getElementById("notes-list-modal");
         const closeNotesListBtn = document.getElementById("close-notes-list");
         const notesList = document.getElementById("notes-list")
+        const painToggleBtn = document.getElementById("pain-toggle-btn");
+        const stiffnessToggleBtn = document.getElementById("stiffness-toggle-btn");
 
         let selectedDate = null;     // Variable temporaire pour stocker la date sélectionnée
 
@@ -2678,6 +2687,16 @@
                 if (event.target === notesListModal) {
                     notesListModal.style.display = "none";
                 }
+            });
+
+            painToggleBtn.addEventListener("click", function() {
+                painToggleBtn.classList.add("active");
+                stiffnessToggleBtn.classList.remove("active");
+            });
+
+            stiffnessToggleBtn.addEventListener("click", function() {
+                stiffnessToggleBtn.classList.add("active");
+                painToggleBtn.classList.remove("active");
             });
 
             // Initialiser la référence à la case à cocher des anti-inflammatoires
