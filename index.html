@@ -2248,6 +2248,7 @@
             return str ? str.charAt(0).toUpperCase() + str.slice(1) : '';
         }
         let painLevelLabels = [];
+        let currentModalLegend = settings.activeLegend;
 
         // ----- Couleur de survol dynamique -----
         function hexToHsl(hex) {
@@ -2407,6 +2408,14 @@
             const sliderLabels = document.querySelectorAll('.pain-slider-rect-labels span');
             sliderLabels.forEach((span, idx) => { span.textContent = settings.legendLevels[idx]; });
             painLevelLabels = [settings.legendLevels[0], settings.legendLevels[1], settings.legendLevels[2], settings.legendLevels[3], settings.legendLevels[4], settings.legendLevels[5]];
+        }
+
+        function applyLegendToPainModal(variant) {
+            const data = settings.legendVariants[variant];
+            const painLabel = document.querySelector('.pain-slider-label');
+            if (painLabel) painLabel.textContent = `${capitalizeFirst(data.name)} ressenti :`;
+            const sliderLabels = document.querySelectorAll('.pain-slider-rect-labels span');
+            sliderLabels.forEach((span, idx) => { span.textContent = data.levels[idx]; });
         }
 
         function resetSettings() {
@@ -2915,16 +2924,16 @@
             if (modalPainToggleBtn) {
                 modalPainToggleBtn.addEventListener("click", function() {
                     modalPainToggleInput.checked = true;
-                    setActiveLegend('pain');
-                    applySettingsToUI();
+                    currentModalLegend = 'pain';
+                    applyLegendToPainModal('pain');
                 });
             }
 
             if (modalStiffnessToggleBtn) {
                 modalStiffnessToggleBtn.addEventListener("click", function() {
                     modalStiffnessToggleInput.checked = true;
-                    setActiveLegend('stiffness');
-                    applySettingsToUI();
+                    currentModalLegend = 'stiffness';
+                    applyLegendToPainModal('stiffness');
                 });
             }
 
@@ -3888,6 +3897,10 @@
 
             function showPainModal(dateId) {
                 selectedDate = dateId;
+                currentModalLegend = settings.activeLegend;
+                if (modalPainToggleInput) modalPainToggleInput.checked = (currentModalLegend === 'pain');
+                if (modalStiffnessToggleInput) modalStiffnessToggleInput.checked = (currentModalLegend === 'stiffness');
+                applyLegendToPainModal(currentModalLegend);
 
                 // Si on vient de la vue année, on mémorise où revenir
                 if (currentView === "year") {
