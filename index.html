@@ -1232,7 +1232,7 @@
             .pain-modal-toggle {
                 display: flex;
                 align-items: center;          /* Centre verticalement */
-                width: 70px; /* ou 60px, adapte selon lisibilité */
+                width: 110px; /* ou 60px, adapte selon lisibilité */
                 height: 20px;
                 border-radius: 5px;
                 margin: 0;
@@ -1977,7 +1977,7 @@
                 <!-- 3. Section pour le niveau de douleur (efn dernier) -->
                 <div class="pain-slider-rect-section">
                     <div class="pain-toggle-container">
-                        <label class="pain-slider-label">Niveau de douleur ressenti :</label>
+                        <label class="pain-slider-label">Douleur ressenti :</label>
                         <div class="toggle-switch pain-modal-toggle" id="modal-symptom-toggle">
                             <input type="radio" id="modal-pain-toggle" name="modal-symptom" checked>
                             <label for="modal-pain-toggle" id="modal-pain-toggle-btn">Douleur</label>
@@ -2340,7 +2340,7 @@
             const chartTitle = document.querySelector('#chart-modal .modal-header h3');
             if (chartTitle) chartTitle.textContent = `Graphique d'évolution`;
             const painLabel = document.querySelector('.pain-slider-label');
-            if (painLabel) painLabel.textContent = `Niveau ${settings.legendPre.toLowerCase()} ${settings.legendName.toLowerCase()} ressenti :`;
+            if (painLabel) painLabel.textContent = `${capitalizeFirst(settings.legendName)} ressenti :`;
             const legendItems = document.querySelectorAll('.legend .color-item span');
             // legendItems.forEach((span, idx) => { span.textContent = settings.legendLevels[idx]; }); (ne pas avoir "1 - " dans la légende)
             legendItems.forEach((span, idx) => { span.textContent = `${idx} - ${settings.legendLevels[idx]}`; }); 
