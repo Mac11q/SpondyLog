@@ -2170,6 +2170,7 @@
         
         // Stockage des données utilisateur (en mémoire uniquement)
         let userPainData = {};
+        let userStiffnessData = {}; // Nouvelle structure pour la raideur
         let userNotes = {}; // Nouvelle variable pour stocker les notes
         let noteTypes = [];  // Liste des types de notes personnalisées (objets { name, color })
         let userMedsData = {}; // Variable pour stocker les jours avec prise d'anti-inflammatoires
@@ -2808,11 +2809,10 @@
                         } else {
                             v = Number(painRectValue ?? document.getElementById('pain-slider-rect-value')?.textContent ?? 0);
                         }
-                        const medChecked = document.getElementById('med-taken')?.checked;
-                        if (v > 0 || (v === 0 && medChecked)) {
-                            userPainData[selectedDate] = v;
+                        if (currentModalLegend === 'pain') {
+                            if (v > 0) userPainData[selectedDate] = v; else delete userPainData[selectedDate];
                         } else {
-                            delete userPainData[selectedDate];
+                            if (v > 0) userStiffnessData[selectedDate] = v; else delete userStiffnessData[selectedDate];
                         }
                         saveUserData();
                     }
@@ -2841,11 +2841,10 @@
                         } else {
                             v = Number(painRectValue ?? document.getElementById('pain-slider-rect-value')?.textContent ?? 0);
                         }
-                        const medChecked = document.getElementById('med-taken')?.checked;
-                        if (v > 0 || (v === 0 && medChecked)) {
-                            userPainData[selectedDate] = v;
+                        if (currentModalLegend === 'pain') {
+                            if (v > 0) userPainData[selectedDate] = v; else delete userPainData[selectedDate];
                         } else {
-                            delete userPainData[selectedDate];
+                            if (v > 0) userStiffnessData[selectedDate] = v; else delete userStiffnessData[selectedDate];
                         }
                         saveUserData();
                     }
@@ -2924,16 +2923,26 @@
             if (modalPainToggleBtn) {
                 modalPainToggleBtn.addEventListener("click", function() {
                     modalPainToggleInput.checked = true;
-                    currentModalLegend = 'pain';
-                    applyLegendToPainModal('pain');
+                    switchModalVariant('pain');
                 });
             }
 
             if (modalStiffnessToggleBtn) {
                 modalStiffnessToggleBtn.addEventListener("click", function() {
                     modalStiffnessToggleInput.checked = true;
-                    currentModalLegend = 'stiffness';
-                    applyLegendToPainModal('stiffness');
+                    switchModalVariant('stiffness');
+                });
+            }
+
+            if (modalPainToggleInput) {
+                modalPainToggleInput.addEventListener('change', () => {
+                    if (modalPainToggleInput.checked) switchModalVariant('pain');
+                });
+            }
+
+            if (modalStiffnessToggleInput) {
+                modalStiffnessToggleInput.addEventListener('change', () => {
+                    if (modalStiffnessToggleInput.checked) switchModalVariant('stiffness');
                 });
             }
 
@@ -3238,15 +3247,16 @@
 
             // Fonctions pour sauvegarder et charger les données utilisateur
             function saveUserData() {
-            // Nettoyer les données de douleur (conserver uniquement > 0)
+            // Nettoyer les données de douleur et de raideur (conserver uniquement > 0)
             for (const d in userPainData) {
-                const val = userPainData[d];
-                if (!(val > 0) && !(val === 0 && userMedsData[d])) {
-                    delete userPainData[d];
-                }
+                if (!(userPainData[d] > 0)) delete userPainData[d];
+            }
+            for (const d in userStiffnessData) {
+                if (!(userStiffnessData[d] > 0)) delete userStiffnessData[d];
             }
             // Stocker les données dans localStorage
             localStorage.setItem('spondylogPainData', JSON.stringify(userPainData));
+            localStorage.setItem('spondylogStiffnessData', JSON.stringify(userStiffnessData));
             localStorage.setItem('spondylogNotes', JSON.stringify(userNotes));
             localStorage.setItem('spondylogMedsData', JSON.stringify(userMedsData));
             localStorage.setItem('spondylogNoteTypes', JSON.stringify(noteTypes));
@@ -3257,6 +3267,7 @@
             function loadUserData() {
             // 1) Charger les données existantes
             const savedPainData   = localStorage.getItem('spondylogPainData');
+            const savedStiffnessData = localStorage.getItem('spondylogStiffnessData');
             const savedNotes      = localStorage.getItem('spondylogNotes');
             const savedMedsData   = localStorage.getItem('spondylogMedsData');
             const savedNoteTypes  = localStorage.getItem('spondylogNoteTypes');
@@ -3266,13 +3277,19 @@
             if (savedPainData) {
                 userPainData = JSON.parse(savedPainData);
             }
+            if (savedStiffnessData) {
+                userStiffnessData = JSON.parse(savedStiffnessData);
+            }
             if (savedMedsData)   userMedsData = JSON.parse(savedMedsData);
             if (userPainData) {
                 for (const d in userPainData) {
                     const val = userPainData[d];
-                    if (!(val > 0) && !(val === 0 && userMedsData && userMedsData[d])) {
-                        delete userPainData[d];
-                    }
+                    if (!(val > 0)) delete userPainData[d];
+                }
+            }
+            if (userStiffnessData) {
+                for (const d in userStiffnessData) {
+                    if (!(userStiffnessData[d] > 0)) delete userStiffnessData[d];
                 }
             }
             if (savedLastType)   userLastNoteType = JSON.parse(savedLastType);
@@ -3370,6 +3387,7 @@
             function erasePainValue() {
                 if (selectedDate) {
                     delete userPainData[selectedDate];
+                    delete userStiffnessData[selectedDate];
                     delete userNotes[selectedDate];    // supprime toutes les notes de ce jour
                     delete userMedsData[selectedDate];
                     delete userLastNoteType[selectedDate];
@@ -3922,8 +3940,13 @@
                 const rectBar = document.getElementById('pain-slider-rect-bar');
                 const rectOptions = rectBar.querySelectorAll('.pain-slider-rect-option');
 
-                // Charge la valeur de douleur pour ce jour (0 si rien)
-                let sliderVal = (userPainData[dateId] != null) ? userPainData[dateId] : 0;
+                // Charge la valeur selon la variante courante (0 si rien)
+                let sliderVal = 0;
+                if (currentModalLegend === 'pain') {
+                    sliderVal = (userPainData[dateId] != null) ? userPainData[dateId] : 0;
+                } else {
+                    sliderVal = (userStiffnessData[dateId] != null) ? userStiffnessData[dateId] : 0;
+                }
                 moveSelector(sliderVal);
                 painRectValueSpan.textContent = sliderVal;
                 painRectValue = sliderVal;
@@ -3932,11 +3955,10 @@
                     opt.onclick = function() {
                         const v = Number(this.dataset.value);
                         moveSelector(v);
-                        const medChecked = document.getElementById('med-taken')?.checked;
-                        if (v > 0 || (v === 0 && medChecked)) {
-                            userPainData[dateId] = v;
+                        if (currentModalLegend === 'pain') {
+                            if (v > 0) userPainData[dateId] = v; else delete userPainData[dateId];
                         } else {
-                            delete userPainData[dateId];
+                            if (v > 0) userStiffnessData[dateId] = v; else delete userStiffnessData[dateId];
                         }
                     };
                 });
@@ -3970,11 +3992,10 @@
                     moveSelector(idx);
                     painRectValueSpan.textContent = idx;
                     painRectValue = idx;
-                    const medChecked = document.getElementById('med-taken')?.checked;
-                    if (idx > 0 || (idx === 0 && medChecked)) {
-                        userPainData[dateId] = idx;
+                    if (currentModalLegend === 'pain') {
+                        if (idx > 0) userPainData[dateId] = idx; else delete userPainData[dateId];
                     } else {
-                        delete userPainData[dateId];
+                        if (idx > 0) userStiffnessData[dateId] = idx; else delete userStiffnessData[dateId];
                     }
                 }
                 function moveSelector(val) {
@@ -4073,11 +4094,36 @@
 
                 // --- affiche la modale ---
                 painModal.style.display = "flex";
-
-                
             }
 
+            function switchModalVariant(newVariant) {
+                const valueSpan = document.getElementById('pain-slider-rect-value');
+                const selector = document.getElementById('pain-slider-rect-selector');
+                const rectOptions = document.querySelectorAll('#pain-slider-rect-bar .pain-slider-rect-option');
+                const total = rectOptions.length;
+                const currentVal = parseInt(valueSpan.textContent, 10) || 0;
 
+                if (selectedDate) {
+                    if (currentModalLegend === 'pain') {
+                        if (currentVal > 0) userPainData[selectedDate] = currentVal; else delete userPainData[selectedDate];
+                    } else {
+                        if (currentVal > 0) userStiffnessData[selectedDate] = currentVal; else delete userStiffnessData[selectedDate];
+                    }
+                }
+
+                currentModalLegend = newVariant;
+                applyLegendToPainModal(newVariant);
+                if (modalPainToggleInput) modalPainToggleInput.checked = (newVariant === 'pain');
+                if (modalStiffnessToggleInput) modalStiffnessToggleInput.checked = (newVariant === 'stiffness');
+
+                let newVal = 0;
+                if (selectedDate) {
+                    newVal = newVariant === 'pain' ? (userPainData[selectedDate] || 0) : (userStiffnessData[selectedDate] || 0);
+                }
+                selector.style.left = `calc(${newVal} * (100% / ${total}))`;
+                valueSpan.textContent = newVal;
+                painRectValue = newVal;
+            }
 
 
             function closeModal(refresh = false) {
@@ -4113,11 +4159,10 @@
 
                 // 1️⃣ Mémoriser le niveau de douleur
                 const painValue = parseInt(level, 10);
-                const medChecked = document.getElementById('med-taken')?.checked;
-                if (painValue > 0 || (painValue === 0 && medChecked)) {
-                    userPainData[selectedDate] = painValue;
+                if (currentModalLegend === 'pain') {
+                    if (painValue > 0) userPainData[selectedDate] = painValue; else delete userPainData[selectedDate];
                 } else {
-                    delete userPainData[selectedDate];
+                    if (painValue > 0) userStiffnessData[selectedDate] = painValue; else delete userStiffnessData[selectedDate];
                 }
 
                 // 2️⃣ Sauvegarder la note du type de note actuellement sélectionné
@@ -4144,6 +4189,7 @@
                 if (selectedDate) {
                     // Supprimer la valeur
                     delete userPainData[selectedDate];
+                    delete userStiffnessData[selectedDate];
                     
                     // Supprimer la note
                     delete userNotes[selectedDate];
@@ -4490,13 +4536,17 @@
             const painExport = {};
             for (const d in userPainData) {
                 const val = userPainData[d];
-                if (val > 0 || (val === 0 && userMedsData && userMedsData[d])) {
-                    painExport[d] = val;
-                }
+                if (val > 0) painExport[d] = val;
+            }
+            const stiffnessExport = {};
+            for (const d in userStiffnessData) {
+                const val = userStiffnessData[d];
+                if (val > 0) stiffnessExport[d] = val;
             }
             const exportObj = {
                 settings: settingsSaved ? JSON.parse(settingsSaved) : settings,
                 painData:  painExport,
+                stiffnessData: stiffnessExport,
                 notes:     userNotes,
                 medsData:  userMedsData,
                 noteTypes: noteTypes,
@@ -4533,10 +4583,11 @@
                     try {
                         const importedData = JSON.parse(e.target.result);
 
-                        // Vérification que les 3 champs existent
+                        // Vérification minimale des champs requis
                         if (importedData.painData && importedData.notes && importedData.medsData) {
                             // Mise à jour des données
                             userPainData = importedData.painData;
+                            userStiffnessData = importedData.stiffnessData || {};
                             userNotes    = importedData.notes;
                             userMedsData = importedData.medsData;
 
