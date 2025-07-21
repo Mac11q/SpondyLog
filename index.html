@@ -2178,26 +2178,69 @@
         let chartStartDate = null;
         let chartEndDate = null;
         let noteDotRadius = 6;
+        let currentSettingsVariant = 'pain';
+
+        const defaultLegendLevels = {
+            0: 'Absente',
+            1: 'Légère',
+            2: 'Modérée',
+            3: 'Forte',
+            4: 'Très forte',
+            5: 'Extrême'
+        };
 
         const defaultSettings = {
             title: 'Suivi quotidien des crises inflammatoires',
             themeColor: '#3498db',
             elementIcon: '💊',
             elementName: 'Médicament',
+            legendVariants: {
+                pain: {
+                    pre: 'de',
+                    name: 'douleur',
+                    levels: { ...defaultLegendLevels }
+                },
+                stiffness: {
+                    pre: 'de',
+                    name: 'raideur',
+                    levels: { ...defaultLegendLevels }
+                }
+            },
+            activeLegend: 'pain',
             legendPre: 'de',
             legendName: 'douleur',
-            legendLevels: {
-                0: 'Absente',
-                1: 'Légère',
-                2: 'Modérée',
-                3: 'Forte',
-                4: 'Très forte',
-                5: 'Extrême'
-            }
+            legendLevels: { ...defaultLegendLevels }
         };
    
         function cloneSettings(obj) {
             return JSON.parse(JSON.stringify(obj));
+        }
+
+        function setActiveLegend(variant) {
+            settings.activeLegend = variant;
+            const data = settings.legendVariants[variant];
+            if (data) {
+                settings.legendPre = data.pre;
+                settings.legendName = data.name;
+                settings.legendLevels = cloneSettings(data.levels);
+            }
+        }
+
+        function switchSettingsVariant(newVariant) {
+            const data = settings.legendVariants[currentSettingsVariant];
+            data.pre = document.getElementById('settings-legend-pre').value;
+            data.name = document.getElementById('settings-legend-name').value;
+            for (let i = 0; i <= 5; i++) {
+                data.levels[i] = document.getElementById('legend-' + i).value;
+            }
+            currentSettingsVariant = newVariant;
+            const newData = settings.legendVariants[newVariant];
+            document.getElementById('settings-legend-pre').value = newData.pre;
+            document.getElementById('settings-legend-name').value = newData.name;
+            for (let i = 0; i <= 5; i++) {
+                const input = document.getElementById('legend-' + i);
+                if (input) input.value = newData.levels[i];
+            }
         }
 
         let settings = cloneSettings(defaultSettings);
@@ -2310,12 +2353,29 @@
             if (saved) {
                 try {
                     settings = { ...cloneSettings(defaultSettings), ...JSON.parse(saved) };
+                    if (!settings.legendVariants) {
+                        settings.legendVariants = {
+                            pain: {
+                                pre: settings.legendPre || 'de',
+                                name: settings.legendName || 'douleur',
+                                levels: settings.legendLevels || cloneSettings(defaultLegendLevels)
+                            },
+                            stiffness: {
+                                pre: 'de',
+                                name: 'raideur',
+                                levels: cloneSettings(defaultLegendLevels)
+                            }
+                        };
+                        settings.activeLegend = 'pain';
+                    }
+                    if (!settings.activeLegend) settings.activeLegend = 'pain';
                 } catch(e) {
                     settings = cloneSettings(defaultSettings);
                 }
             } else {
                 localStorage.setItem('spondylogSettings', JSON.stringify(defaultSettings));
             }
+            setActiveLegend(settings.activeLegend);
             applySettingsToUI();
         }
 
@@ -2351,6 +2411,7 @@
 
         function resetSettings() {
             settings = cloneSettings(defaultSettings);
+            setActiveLegend('pain');
             saveSettings();
             applySettingsToUI();
         }
@@ -2360,11 +2421,16 @@
             document.getElementById('settings-color').value = settings.themeColor;
             document.getElementById('settings-icon').value = settings.elementIcon;
             document.getElementById('settings-name').value = settings.elementName;
-            document.getElementById('settings-legend-pre').value = settings.legendPre;
-            document.getElementById('settings-legend-name').value = settings.legendName;
+            const painChecked = settings.activeLegend === 'pain';
+            document.getElementById('settings-pain-toggle').checked = painChecked;
+            document.getElementById('settings-stiffness-toggle').checked = !painChecked;
+            currentSettingsVariant = settings.activeLegend;
+            const data = settings.legendVariants[currentSettingsVariant];
+            document.getElementById('settings-legend-pre').value = data.pre;
+            document.getElementById('settings-legend-name').value = data.name;
             for (let i = 0; i <= 5; i++) {
                 const input = document.getElementById('legend-' + i);
-                if (input) input.value = settings.legendLevels[i];
+                if (input) input.value = data.levels[i];
             }
         }
         
@@ -2822,21 +2888,43 @@
 
             painToggleBtn.addEventListener("click", function() {
                 painToggleInput.checked = true;
+                setActiveLegend('pain');
+                applySettingsToUI();
+            });
+
+            painToggleInput.addEventListener("change", function() {
+                if (painToggleInput.checked) {
+                    setActiveLegend('pain');
+                    applySettingsToUI();
+                }
             });
 
             stiffnessToggleBtn.addEventListener("click", function() {
                 stiffnessToggleInput.checked = true;
+                setActiveLegend('stiffness');
+                applySettingsToUI();
+            });
+
+            stiffnessToggleInput.addEventListener("change", function() {
+                if (stiffnessToggleInput.checked) {
+                    setActiveLegend('stiffness');
+                    applySettingsToUI();
+                }
             });
 
             if (modalPainToggleBtn) {
                 modalPainToggleBtn.addEventListener("click", function() {
                     modalPainToggleInput.checked = true;
+                    setActiveLegend('pain');
+                    applySettingsToUI();
                 });
             }
 
             if (modalStiffnessToggleBtn) {
                 modalStiffnessToggleBtn.addEventListener("click", function() {
                     modalStiffnessToggleInput.checked = true;
+                    setActiveLegend('stiffness');
+                    applySettingsToUI();
                 });
             }
 
@@ -4457,6 +4545,14 @@
 
                             if (importedData.settings && typeof importedData.settings === 'object') {
                                 settings = { ...cloneSettings(defaultSettings), ...importedData.settings };
+                                if (!settings.activeLegend) settings.activeLegend = 'pain';
+                                if (!settings.legendVariants) {
+                                    settings.legendVariants = {
+                                        pain: { pre: settings.legendPre || 'de', name: settings.legendName || 'douleur', levels: settings.legendLevels || cloneSettings(defaultLegendLevels) },
+                                        stiffness: { pre: 'de', name: 'raideur', levels: cloneSettings(defaultLegendLevels) }
+                                    };
+                                }
+                                setActiveLegend(settings.activeLegend);
                                 saveSettings();
                                 applySettingsToUI();
                             }
@@ -5019,12 +5115,26 @@
             if (settingsPainToggleBtn) {
                 settingsPainToggleBtn.addEventListener('click', () => {
                     settingsPainToggleInput.checked = true;
+                    switchSettingsVariant('pain');
+                });
+            }
+
+            if (settingsPainToggleInput) {
+                settingsPainToggleInput.addEventListener('change', () => {
+                    if (settingsPainToggleInput.checked) switchSettingsVariant('pain');
                 });
             }
 
             if (settingsStiffnessToggleBtn) {
                 settingsStiffnessToggleBtn.addEventListener('click', () => {
                     settingsStiffnessToggleInput.checked = true;
+                    switchSettingsVariant('stiffness');
+                });
+            }
+
+            if (settingsStiffnessToggleInput) {
+                settingsStiffnessToggleInput.addEventListener('change', () => {
+                    if (settingsStiffnessToggleInput.checked) switchSettingsVariant('stiffness');
                 });
             }
 
@@ -5044,15 +5154,18 @@
                 const action = confirmModal.dataset.action;
                 confirmModal.style.display = 'none';
                 if (action === 'save') {
+                    // sauvegarder la variante actuellement affichée
+                    switchSettingsVariant(currentSettingsVariant);    
+
                     settings.title = document.getElementById('settings-title').value;
                     settings.themeColor = document.getElementById('settings-color').value;
                     settings.elementIcon = document.getElementById('settings-icon').value;
                     settings.elementName = document.getElementById('settings-name').value;
-                    settings.legendPre  = document.getElementById('settings-legend-pre').value;
-                    settings.legendName = document.getElementById('settings-legend-name').value;
-                    for (let i = 0; i <= 5; i++) {
-                        settings.legendLevels[i] = document.getElementById('legend-' + i).value;
-                    }
+                    
+                    const activeVar = settingsPainToggleInput.checked ? 'pain' : 'stiffness';
+                    setActiveLegend(activeVar);
+
+
                     saveSettings();
                     applySettingsToUI();
                     if (currentView === "month") {
@@ -5063,6 +5176,7 @@
                     renderNotesList();
                     } else if (action === 'reset') {
                     resetSettings();
+                    currentSettingsVariant = settings.activeLegend;
                     populateSettingsModal();
                 }
                 settingsModal.style.display = 'none';
