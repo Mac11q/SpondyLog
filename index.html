@@ -591,7 +591,7 @@
             width: 100%;
             min-height: 80px;
             padding: 8px;
-            font-size: 16px;     /* empêche iOS de zoomer */
+            font-size: 10px;     /* empêche iOS de zoomer */
             line-height: 1.4;    /* au besoin, pour garder une belle lisibilité */
             border: 1px solid var(--border-color);
             border-radius: 5px;
@@ -1680,7 +1680,7 @@
     /* Legend title responsiveness */
     @media (max-width: 600px) {
         .legend h3 {
-            font-size: 15px;
+            font-size: 17px;
         }
     }
 
@@ -2249,14 +2249,37 @@
                 const input = document.getElementById('legend-' + i);
                 if (input) input.value = newData.levels[i];
             }
+            document.getElementById('settings-pain-toggle-btn').textContent = capitalizeWords(settings.legendVariants.pain.name);
+            document.getElementById('settings-stiffness-toggle-btn').textContent = capitalizeWords(settings.legendVariants.stiffness.name);
+            updateLegendLayout();
         }
 
-        let settings = cloneSettings(defaultSettings);
-        function capitalizeFirst(str) {
-            return str ? str.charAt(0).toUpperCase() + str.slice(1) : '';
-        }
-        let painLevelLabels = [];
-        let currentModalLegend = settings.activeLegend;
+       let settings = cloneSettings(defaultSettings);
+       function capitalizeFirst(str) {
+           return str ? str.charAt(0).toUpperCase() + str.slice(1) : '';
+       }
+       function capitalizeWords(str) {
+           return str ? str.split(' ').map(s => capitalizeFirst(s)).join(' ') : '';
+       }
+
+       function updateToggleLabels() {
+           const painLabel   = capitalizeWords(settings.legendVariants.pain.name);
+           const stiffLabel  = capitalizeWords(settings.legendVariants.stiffness.name);
+           const painEls = [
+               document.getElementById('pain-toggle-btn'),
+               document.getElementById('modal-pain-toggle-btn'),
+               document.getElementById('settings-pain-toggle-btn')
+           ];
+           painEls.forEach(el => { if (el) el.textContent = painLabel; });
+           const stiffEls = [
+               document.getElementById('stiffness-toggle-btn'),
+               document.getElementById('modal-stiffness-toggle-btn'),
+               document.getElementById('settings-stiffness-toggle-btn')
+           ];
+           stiffEls.forEach(el => { if (el) el.textContent = stiffLabel; });
+       }
+       let painLevelLabels = [];
+       let currentModalLegend = settings.activeLegend;
 
         // ----- Couleur de survol dynamique -----
         function hexToHsl(hex) {
@@ -2415,16 +2438,18 @@
             legendItems.forEach((span, idx) => { span.textContent = `${idx} - ${settings.legendLevels[idx]}`; }); 
             const sliderLabels = document.querySelectorAll('.pain-slider-rect-labels span');
             sliderLabels.forEach((span, idx) => { span.textContent = settings.legendLevels[idx]; });
-            painLevelLabels = [settings.legendLevels[0], settings.legendLevels[1], settings.legendLevels[2], settings.legendLevels[3], settings.legendLevels[4], settings.legendLevels[5]];
-        }
+           painLevelLabels = [settings.legendLevels[0], settings.legendLevels[1], settings.legendLevels[2], settings.legendLevels[3], settings.legendLevels[4], settings.legendLevels[5]];
+           updateToggleLabels();
+       }
 
-        function applyLegendToPainModal(variant) {
-            const data = settings.legendVariants[variant];
-            const painLabel = document.querySelector('.pain-slider-label');
-            if (painLabel) painLabel.textContent = `${capitalizeFirst(data.name)} ressenti :`;
-            const sliderLabels = document.querySelectorAll('.pain-slider-rect-labels span');
-            sliderLabels.forEach((span, idx) => { span.textContent = data.levels[idx]; });
-        }
+       function applyLegendToPainModal(variant) {
+           const data = settings.legendVariants[variant];
+           updateToggleLabels();
+           const painLabel = document.querySelector('.pain-slider-label');
+           if (painLabel) painLabel.textContent = `${capitalizeFirst(data.name)} ressenti :`;
+           const sliderLabels = document.querySelectorAll('.pain-slider-rect-labels span');
+           sliderLabels.forEach((span, idx) => { span.textContent = data.levels[idx]; });
+       }
 
         function resetSettings() {
             settings = cloneSettings(defaultSettings);
@@ -2438,6 +2463,8 @@
             document.getElementById('settings-color').value = settings.themeColor;
             document.getElementById('settings-icon').value = settings.elementIcon;
             document.getElementById('settings-name').value = settings.elementName;
+            document.getElementById('settings-pain-toggle-btn').textContent = capitalizeWords(settings.legendVariants.pain.name);
+            document.getElementById('settings-stiffness-toggle-btn').textContent = capitalizeWords(settings.legendVariants.stiffness.name);
             const painChecked = settings.activeLegend === 'pain';
             document.getElementById('settings-pain-toggle').checked = painChecked;
             document.getElementById('settings-stiffness-toggle').checked = !painChecked;
@@ -5167,9 +5194,15 @@
             loadSettings();
 
             legendNameInput.addEventListener('input', () => {
-                legendNameInput.value = legendNameInput.value.toLowerCase();
-                updateLegendLayout();
-            });
+               legendNameInput.value = legendNameInput.value.toLowerCase();
+               updateLegendLayout();
+               const label = capitalizeWords(legendNameInput.value);
+               if (currentSettingsVariant === 'pain') {
+                   document.getElementById('settings-pain-toggle-btn').textContent = label;
+               } else {
+                   document.getElementById('settings-stiffness-toggle-btn').textContent = label;
+               }
+           });
 
             document.getElementById('close-settings-modal').addEventListener('click', () => {
                 settingsModal.style.display = 'none';
