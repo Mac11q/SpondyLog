@@ -591,7 +591,7 @@
             width: 100%;
             min-height: 80px;
             padding: 8px;
-            font-size: 10px;     /* empêche iOS de zoomer */
+            font-size: 16px;     /* empêche iOS de zoomer */
             line-height: 1.4;    /* au besoin, pour garder une belle lisibilité */
             border: 1px solid var(--border-color);
             border-radius: 5px;
@@ -2932,12 +2932,22 @@
                 painToggleInput.checked = true;
                 setActiveLegend('pain');
                 applySettingsToUI();
+                if (currentView === "month") {
+                    renderCalendar(currentMonth, currentYear);
+                } else {
+                    renderYearView(currentYear);
+                }
             });
 
             painToggleInput.addEventListener("change", function() {
                 if (painToggleInput.checked) {
                     setActiveLegend('pain');
                     applySettingsToUI();
+                    if (currentView === "month") {
+                        renderCalendar(currentMonth, currentYear);
+                    } else {
+                        renderYearView(currentYear);
+                    }
                 }
             });
 
@@ -2945,12 +2955,22 @@
                 stiffnessToggleInput.checked = true;
                 setActiveLegend('stiffness');
                 applySettingsToUI();
+                if (currentView === "month") {
+                    renderCalendar(currentMonth, currentYear);
+                } else {
+                    renderYearView(currentYear);
+                }
             });
 
             stiffnessToggleInput.addEventListener("change", function() {
                 if (stiffnessToggleInput.checked) {
                     setActiveLegend('stiffness');
                     applySettingsToUI();
+                    if (currentView === "month") {
+                        renderCalendar(currentMonth, currentYear);
+                    } else {
+                        renderYearView(currentYear);
+                    }
                 }
             });
 
@@ -3502,6 +3522,7 @@
 
             // Fonctions de rendu et de navigation du calendrier mensuel
             function renderCalendar(month, year) {
+                const symptomData = settings.activeLegend === 'pain' ? userPainData : userStiffnessData;
                 // Mise à jour de l'affichage du mois et de l'année
                 const monthNames = ["Janvier", "Février", "Mars", "Avril", "Mai", "Juin", 
                                     "Juillet", "Août", "Septembre", "Octobre", "Novembre", "Décembre"];
@@ -3584,11 +3605,11 @@
                                 dayCell.insertBefore(redSquare, dayCell.firstChild);
                             }
                             
-                            if (userPainData[dateId] !== undefined) {
+                            if (symptomData[dateId] !== undefined) {
                                 // Valeur définie par l'utilisateur
-                                dayCell.style.backgroundColor = painColors[userPainData[dateId]];
+                                dayCell.style.backgroundColor = painColors[symptomData[dateId]];
                                 // Si c'est le niveau 5 (noir), mettre le texte en blanc
-                                if (userPainData[dateId] === 5) {
+                                if (symptomData[dateId] === 5) {
                                     dayNumber.style.color = "white";
                                 }
                             } else if (targetDate < today) {
@@ -3696,6 +3717,7 @@
 
             // Rendu de la vue annuelle
             function renderYearView(year) {
+                const symptomData = settings.activeLegend === 'pain' ? userPainData : userStiffnessData;
                 // Mise à jour de l'affichage de l'année
                 currentYearDisplay.textContent = year;
                 
@@ -3804,11 +3826,11 @@
                                 const todayForComparison = new Date();
                                 todayForComparison.setHours(0, 0, 0, 0);
                                 
-                                if (userPainData[dateId] !== undefined) {
+                                if (symptomData[dateId] !== undefined) {
                                     // Valeur définie par l'utilisateur
-                                    miniDay.style.backgroundColor = painColors[userPainData[dateId]];
+                                    miniDay.style.backgroundColor = painColors[symptomData[dateId]];
                                     // Si c'est le niveau 5 (noir), mettre le texte en blanc
-                                    if (userPainData[dateId] === 5) {
+                                    if (symptomData[dateId] === 5) {
                                         miniDay.style.color = "white";
                                     }
                                 } else if (targetDate < todayForComparison) {
@@ -3847,7 +3869,7 @@
                                     showPainModal(dateId);
                                 });
 
-                                const painLevel = userPainData[dateId];
+                                const painLevel = symptomData[dateId];
                                 const painInfo = (painLevel !== undefined && painLevel !== 0);
                                 const medData  = userMedsData[dateId];
                                 const medInfo  = medData && medData.taken;
@@ -4653,6 +4675,11 @@
                                 setActiveLegend(settings.activeLegend);
                                 saveSettings();
                                 applySettingsToUI();
+                                if (currentView === "month") {
+                                    renderCalendar(currentMonth, currentYear);
+                                } else {
+                                    renderYearView(currentYear);
+                                }
                             }
 
                             // 🟢 Importer le dernier type de note sélectionné par jour
