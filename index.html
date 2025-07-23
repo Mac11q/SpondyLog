@@ -2464,7 +2464,24 @@
             legendItems.forEach((span, idx) => { span.textContent = `${idx} - ${settings.legendLevels[idx]}`; }); 
             const sliderLabels = document.querySelectorAll('.pain-slider-rect-labels span');
             sliderLabels.forEach((span, idx) => { span.textContent = settings.legendLevels[idx]; });
-           painLevelLabels = [settings.legendLevels[0], settings.legendLevels[1], settings.legendLevels[2], settings.legendLevels[3], settings.legendLevels[4], settings.legendLevels[5]];
+            painLevelLabels = [settings.legendLevels[0], settings.legendLevels[1], settings.legendLevels[2], settings.legendLevels[3], settings.legendLevels[4], settings.legendLevels[5]];
+
+            const mainPainToggle       = document.getElementById('pain-toggle');
+            const mainStiffnessToggle  = document.getElementById('stiffness-toggle');
+            const modalPainToggle      = document.getElementById('modal-pain-toggle');
+            const modalStiffnessToggle = document.getElementById('modal-stiffness-toggle');
+            const settingsPainToggle   = document.getElementById('settings-pain-toggle');
+            const settingsStiffnessToggle = document.getElementById('settings-stiffness-toggle');
+
+            const painChecked = settings.activeLegend === 'pain';
+
+            if (mainPainToggle) mainPainToggle.checked = painChecked;
+            if (mainStiffnessToggle) mainStiffnessToggle.checked = !painChecked;
+            if (modalPainToggle) modalPainToggle.checked = painChecked;
+            if (modalStiffnessToggle) modalStiffnessToggle.checked = !painChecked;
+            if (settingsPainToggle) settingsPainToggle.checked = painChecked;
+            if (settingsStiffnessToggle) settingsStiffnessToggle.checked = !painChecked;
+        
            updateToggleLabels();
        }
 
