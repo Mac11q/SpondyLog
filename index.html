@@ -4846,8 +4846,11 @@
                     if (painValue >= 3) severeDays++;
                 }
 
-                 // Récupérer la valeur de raideur
-                let stiffValue = null;
+                // Récupérer la valeur de raideur
+                // Récupérer la valeur de raideur. Si aucune valeur n'est
+                // enregistrée pour ce jour, utiliser 0 afin de conserver une
+                // courbe continue.
+                let stiffValue = 0;
                 if (userStiffnessData[dateId] !== undefined) {
                     stiffValue = userStiffnessData[dateId];
                 }
@@ -4924,7 +4927,12 @@
                         backgroundColor: 'rgba(153, 102, 255, 0.3)',
                         tension: 0.2,
                         borderWidth: 2,
-                        pointRadius: 3,
+                        // Masquer le marqueur si la valeur est à 0 pour ne pas
+                        // attirer l'attention sur ces points tout en gardant la
+                        // continuité de la courbe.
+                        pointRadius: ctx => (ctx.raw > 0 ? 3 : 0),
+                        pointHoverRadius: ctx => (ctx.raw > 0 ? 5 : 0),
+                        spanGaps: true,
                         order: 0,
                         hidden: hideStiff
                     }
