@@ -2201,6 +2201,7 @@
         let chartStartDate = null;
         let chartEndDate = null;
         let noteDotRadius = 6;
+        let stiffPointRadius = 2;
         let chartDataChoice = 'all';
         let currentSettingsVariant = 'pain';
 
@@ -2380,6 +2381,15 @@
             let s = Math.max(0, Math.min(100, hsl.s + deltaS));
             let l = Math.max(0, Math.min(100, hsl.l + deltaL));
             return hslToHex(h, s, l);
+        }
+
+        function adjustAlpha(rgba, delta) {
+            const m = rgba.match(/rgba\((\d+),\s*(\d+),\s*(\d+),\s*([\d\.]+)\)/);
+            if (!m) return rgba;
+            const r = m[1], g = m[2], b = m[3];
+            let a = parseFloat(m[4]);
+            a = Math.max(0, Math.min(1, a + delta));
+            return `rgba(${r}, ${g}, ${b}, ${a})`;
         }
 
         function adjustTooltipPosition(t, offset = 14) {
@@ -4894,6 +4904,8 @@
             // Si anti-inflammatoire pris ce jour-là, bordure bleue, sinon bordure rouge
             return medData[index] ? 'rgb(54, 162, 235)' : 'rgb(255, 99, 132)';
         });
+
+        const hoverBarColors = barColors.map(c => adjustAlpha(c, 0.2));
         
         // Détruire le graphique existant s'il y en a un
         if (painChart) {
@@ -4917,6 +4929,8 @@
                         backgroundColor: adjBarColors,
                         borderColor: adjBorderColors,
                         borderWidth: hidePain ? 0 : 1,
+                        hoverBackgroundColor: hoverBarColors,
+                        hoverBorderWidth: hidePain ? 0 : 2,
                         order: 1
                     },
                     {
@@ -4930,8 +4944,8 @@
                         // Masquer le marqueur si la valeur est à 0 pour ne pas
                         // attirer l'attention sur ces points tout en gardant la
                         // continuité de la courbe.
-                        pointRadius: ctx => (ctx.raw > 0 ? 3 : 0),
-                        pointHoverRadius: ctx => (ctx.raw > 0 ? 5 : 0),
+                        pointRadius: ctx => (ctx.raw > 0 ? stiffPointRadius : 0),
+                        pointHoverRadius: ctx => (ctx.raw > 0 ? stiffPointRadius + 2 : 0),
                         spanGaps: true,
                         order: 0,
                         hidden: hideStiff
@@ -5017,9 +5031,10 @@
                     }
                 },
                 animation: {
-                        duration: 0.1,
+                    duration: 0.1,
                     onComplete: () => {
                         updateNoteDotRadius();
+                        updateStiffPointRadius();
                         window.dispatchEvent(new CustomEvent('chartRendered'));
                     }
                 }
@@ -5247,6 +5262,19 @@
             } else {
                 noteDotRadius = 6;
             }
+        }
+
+        function updateStiffPointRadius() {
+            if (!painChart) return;
+            const barPoints = painChart.getDatasetMeta(0).data;
+            if (barPoints.length) {
+                const bp = barPoints[0];
+                const barWidth = bp.width || (bp.x2 ? bp.x2 - bp.x1 : 10);
+                stiffPointRadius = Math.max(1, Math.min(3, barWidth * 0.2));
+            } else {
+                stiffPointRadius = 2;
+            }
+            painChart.update();
         }
 
         function drawNoteDots(selectedTypes) {
