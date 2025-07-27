@@ -1509,6 +1509,21 @@
             border: 1px solid var(--border-color);
         }
 
+        @media (min-width: 768px) {
+            #chart-range-selector {
+                display: flex;
+                align-items: center;
+                gap: 20px;
+                flex-wrap: wrap;
+            }
+            #chart-range-selector .range-option {
+                margin-top: 0 !important;
+            }
+            #chart-range-selector #custom-date-range {
+                width: 100%;
+            }
+        }
+
         .chart-stats {
             background: #f5f5f5;
             padding: 15px;
@@ -1836,7 +1851,7 @@
                     <h3>Graphique d'évolution</h3>
                     <button class="close-btn" id="close-chart-modal">&times;</button>
                 </div>
-                <div class="date-range-selector" style="margin-bottom: 10px;">
+                <div id="chart-range-selector" class="date-range-selector" style="margin-bottom: 10px;">
                     <div class="range-option" style="display: flex; align-items: center; gap: 10px;">
                         <label for="date-range">Période :</label>
                         <select id="date-range" style="padding: 4px 8px;">
@@ -2200,6 +2215,9 @@
         let editingTypeName = null;
         let chartStartDate = null;
         let chartEndDate = null;
+        let chartPainData = [];
+        let chartStiffnessData = [];
+        let chartMedData = [];
         let noteDotRadius = 6;
         let stiffPointRadius = 2;
         let chartDataChoice = 'all';
@@ -4883,6 +4901,10 @@
                 // Passer au jour suivant
                 currentDate.setDate(currentDate.getDate() + 1);
             }
+
+        chartPainData = painData.slice();
+        chartStiffnessData = stiffnessData.slice();
+        chartMedData = medData.slice();   
         
         // Calculer la moyenne de douleur
         const avgPain = painCount > 0 ? (totalPain / painCount).toFixed(1) : "--";
@@ -5072,74 +5094,80 @@
             legendContainer.style.marginTop = '10px';
             legendContainer.style.marginBottom = '5px';
             
-            // Légende pour les barres rouges (sans anti-inflammatoires)
-            const noMedLegend = document.createElement('div');
-            noMedLegend.style.display = 'flex';
-            noMedLegend.style.alignItems = 'center';
-            noMedLegend.style.marginRight = '20px';
-            
-            const noMedColor = document.createElement('div');
-            noMedColor.style.width = '15px';
-            noMedColor.style.height = '15px';
-            noMedColor.style.backgroundColor = 'rgba(255, 99, 132, 0.5)';
-            noMedColor.style.borderColor = 'rgba(255, 99, 132, 1)';
-            noMedColor.style.borderWidth = '1px';
-            noMedColor.style.borderStyle = 'solid';
-            noMedColor.style.marginRight = '5px';
-            
-            const noMedText = document.createElement('span');
-            noMedText.textContent = `Sans ${settings.elementName}`;
-            
-            noMedLegend.appendChild(noMedColor);
-            noMedLegend.appendChild(noMedText);
-            
-            // Légende pour les barres bleues (avec anti-inflammatoires)
-            const medLegend = document.createElement('div');
-            medLegend.style.display = 'flex';
-            medLegend.style.alignItems = 'center';
-            
-            const medColor = document.createElement('div');
-            medColor.style.width = '15px';
-            medColor.style.height = '15px';
-            medColor.style.backgroundColor = 'rgba(54, 162, 235, 0.5)';
-            medColor.style.borderColor = 'rgba(54, 162, 235, 1)';
-            medColor.style.borderWidth = '1px';
-            medColor.style.borderStyle = 'solid';
-            medColor.style.marginRight = '5px';
-            
-            const medText = document.createElement('span');
-            medText.textContent =`Avec ${settings.elementName}`;
-            
-            medLegend.appendChild(medColor);
-            medLegend.appendChild(medText);
+            const showPain   = chartDataChoice !== 'stiffness';
+            const showStiff  = chartDataChoice !== 'pain' && chartStiffnessData.some(v => v > 0);
+            const showNoMed  = showPain && chartPainData.some((v, i) => !chartMedData[i] && v !== null);
+            const showMed    = showPain && chartPainData.some((v, i) => chartMedData[i] && v !== null);
 
-            // Légende pour la courbe de raideur
-            const stiffLegend = document.createElement('div');
-            stiffLegend.style.display = 'flex';
-            stiffLegend.style.alignItems = 'center';
-            stiffLegend.style.marginLeft = '20px';
+            if (showNoMed) {
+                const noMedLegend = document.createElement('div');
+                noMedLegend.style.display = 'flex';
+                noMedLegend.style.alignItems = 'center';
+                noMedLegend.style.marginRight = '20px';
 
-            const stiffLine = document.createElement('div');
-            stiffLine.style.width = '20px';
-            stiffLine.style.height = '3px';
-            stiffLine.style.backgroundColor = 'rgba(153, 102, 255, 1)';
-            stiffLine.style.marginRight = '5px';
+                const noMedColor = document.createElement('div');
+                noMedColor.style.width = '15px';
+                noMedColor.style.height = '15px';
+                noMedColor.style.backgroundColor = 'rgba(255, 99, 132, 0.5)';
+                noMedColor.style.borderColor = 'rgba(255, 99, 132, 1)';
+                noMedColor.style.borderWidth = '1px';
+                noMedColor.style.borderStyle = 'solid';
+                noMedColor.style.marginRight = '5px';
 
-            const stiffText = document.createElement('span');
-            stiffText.textContent = capitalizeWords(settings.legendVariants.stiffness.name);
+                const noMedText = document.createElement('span');
+                noMedText.textContent = `Sans ${settings.elementName}`;
 
-            stiffLegend.appendChild(stiffLine);
-            stiffLegend.appendChild(stiffText);
-            
-            // Ajouter les éléments de légende au conteneur
-            legendContainer.appendChild(noMedLegend);
-            legendContainer.appendChild(medLegend);
-            legendContainer.appendChild(stiffLegend);
-            
-            // Insérer la légende avant le graphique
-            const chartContainer = document.getElementById('pain-chart').parentNode;
-            chartContainer.insertBefore(legendContainer, document.getElementById('pain-chart'));
-            
+                noMedLegend.appendChild(noMedColor);
+                noMedLegend.appendChild(noMedText);
+                legendContainer.appendChild(noMedLegend);
+            }
+
+            if (showMed) {
+                const medLegend = document.createElement('div');
+                medLegend.style.display = 'flex';
+                medLegend.style.alignItems = 'center';
+
+                const medColor = document.createElement('div');
+                medColor.style.width = '15px';
+                medColor.style.height = '15px';
+                medColor.style.backgroundColor = 'rgba(54, 162, 235, 0.5)';
+                medColor.style.borderColor = 'rgba(54, 162, 235, 1)';
+                medColor.style.borderWidth = '1px';
+                medColor.style.borderStyle = 'solid';
+                medColor.style.marginRight = '5px';
+
+                const medText = document.createElement('span');
+                medText.textContent = `Avec ${settings.elementName}`;
+
+                medLegend.appendChild(medColor);
+                medLegend.appendChild(medText);
+                legendContainer.appendChild(medLegend);
+            }
+
+            if (showStiff) {
+                const stiffLegend = document.createElement('div');
+                stiffLegend.style.display = 'flex';
+                stiffLegend.style.alignItems = 'center';
+                stiffLegend.style.marginLeft = '20px';
+
+                const stiffLine = document.createElement('div');
+                stiffLine.style.width = '20px';
+                stiffLine.style.height = '3px';
+                stiffLine.style.backgroundColor = 'rgba(153, 102, 255, 1)';
+                stiffLine.style.marginRight = '5px';
+
+                const stiffText = document.createElement('span');
+                stiffText.textContent = capitalizeWords(settings.legendVariants.stiffness.name);
+
+                stiffLegend.appendChild(stiffLine);
+                stiffLegend.appendChild(stiffText);
+                legendContainer.appendChild(stiffLegend);
+            }
+
+            if (legendContainer.childElementCount) {
+                const chartContainer = document.getElementById('pain-chart').parentNode;
+                chartContainer.insertBefore(legendContainer, document.getElementById('pain-chart'));
+            }
         }
 
         // Fonction pour sauvegarder le pense-bête dans le localStorage
