@@ -1624,7 +1624,7 @@
         width: max-content;
         max-width: 500px;
         z-index: 20;
-        pointer-events: none;
+        pointer-events: auto;
         line-height: 1.2;
     }
 
@@ -5413,7 +5413,19 @@
                     tooltip.innerHTML = `<div><strong>${dateStr}</strong></div><div><span class='chart-tooltip-dot' style='color:${color}'>●</span> ${type}: <strong>${text}</strong></div>`;
                     dot.appendChild(tooltip);
                     dot.onmouseenter = () => { tooltip.style.display = 'inline-block'; };
-                    dot.onmouseleave = () => { tooltip.style.display = 'none'; };
+                    dot.onmouseleave = () => {
+                        setTimeout(() => {
+                            if (!dot.matches(':hover') && !tooltip.matches(':hover')) {
+                                tooltip.style.display = 'none';
+                            }
+                        }, 0);
+                    };
+                    tooltip.addEventListener('mouseenter', () => {
+                        tooltip.style.display = 'inline-block';
+                    });
+                    tooltip.addEventListener('mouseleave', () => {
+                        tooltip.style.display = 'none';
+                    });
 
                     overlay.appendChild(dot);
                     stack += noteDotRadius*2 + 4;
