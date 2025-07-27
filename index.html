@@ -4967,7 +4967,8 @@
                         borderWidth: hidePain ? 0 : 1,
                         hoverBackgroundColor: hoverBarColors,
                         hoverBorderWidth: hidePain ? 0 : 2,
-                        order: 1
+                        order: 1,
+                        hidden: hidePain
                     },
                     {
                         type: 'line',
@@ -5256,7 +5257,7 @@
                 chart.canvas.parentNode.appendChild(tooltipEl);
             }
 
-            if (tooltip.opacity === 0) {
+            if (chartDataChoice === 'stiffness' || tooltip.opacity === 0) {
                 tooltipEl.style.display = 'none';
                 return;
             }
@@ -5327,11 +5328,15 @@
 
             updateNoteDotRadius();
 
+            const hidePain = chartDataChoice === 'stiffness';
             const barPoints = painChart.getDatasetMeta(0).data;
-            const days = barPoints.length;
 
+            const days = painChart.data.labels.length;
+            const xScale = painChart.scales.x;
+            const baseY = painChart.scales.y.getPixelForValue(0);
 
-            barPoints.forEach((bar, idx) => {
+            for (let idx = 0; idx < days; idx++) {
+                const bar = barPoints[idx] || {};
                 const date = new Date(chartStartDate);
                 date.setDate(chartStartDate.getDate() + idx);
                 const dateId = `${date.getFullYear()}-${date.getMonth()+1}-${date.getDate()}`;
@@ -5348,10 +5353,12 @@
                     const dot = document.createElement('div');
                     dot.className = 'chart-note-dot';
                     dot.style.backgroundColor = color;
-                    dot.style.width = `${noteDotRadius*2}px`;
-                    dot.style.height = `${noteDotRadius*2}px`;
-                    dot.style.left = `${bar.x}px`;
-                    dot.style.top = `${bar.y - noteDotRadius - -30 - stack}px`;
+                    dot.style.width = `${noteDotRadius*4}px`;
+                    dot.style.height = `${noteDotRadius*4}px`;
+                    const x = bar.x !== undefined ? bar.x : xScale.getPixelForValue(idx);
+                    const y = hidePain ? baseY : (bar.y !== undefined ? bar.y : baseY);
+                    dot.style.left = `${x}px`;
+                    dot.style.top = `${y - noteDotRadius - -30 - stack}px`;
                     dot.style.transform = 'translate(-50%, -100%)';
 
                     const tooltip = document.createElement('div');
@@ -5372,7 +5379,7 @@
                     overlay.appendChild(dot);
                     stack += noteDotRadius*2 + 4;
                 }
-            });
+            }
 
         }
 
