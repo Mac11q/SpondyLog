@@ -5237,7 +5237,7 @@
             }
 
             return (
-                <div className="range-option" style={{display:'flex',alignItems:'center',gap:'10px',marginBottom:'10px', marginTop:'10px'}}>
+                <div className="range-option" style={{display:'flex',alignItems:'center',gap:'10px',marginBottom:'10px', marginTop: '10px'}}>
                     <label htmlFor="note-type-select">Type de note :</label>
                     <select id="note-type-select" value={choice} onChange={handleChange} style={{padding:'4px 8px'}}>
                         <option value="all">Tous les types</option>
@@ -5298,26 +5298,30 @@
 
         function updateNoteDotRadius() {
             if (!painChart) return;
-            const barPoints = painChart.getDatasetMeta(0).data;
-            if (barPoints.length) {
+            let barWidth = 10;
+            const meta = painChart.getDatasetMeta(0);
+            const barPoints = meta && meta.data ? meta.data : [];
+            if (barPoints.length && (barPoints[0].width || barPoints[0].x2)) {
                 const bp = barPoints[0];
-                const barWidth = bp.width || (bp.x2 ? bp.x2 - bp.x1 : 10);
-                noteDotRadius = Math.max(1, Math.min(10, barWidth * 0.35));
-            } else {
-                noteDotRadius = 6;
+                barWidth = bp.width || (bp.x2 ? bp.x2 - bp.x1 : 10);
+            } else if (painChart.chartArea && painChart.data.labels.length) {
+                barWidth = painChart.chartArea.width / painChart.data.labels.length;
             }
+            noteDotRadius = Math.max(1, Math.min(10, barWidth * 0.35));
         }
 
         function updateStiffPointRadius() {
             if (!painChart) return;
-            const barPoints = painChart.getDatasetMeta(0).data;
-            if (barPoints.length) {
+            let barWidth = 10;
+            const meta = painChart.getDatasetMeta(0);
+            const barPoints = meta && meta.data ? meta.data : [];
+            if (barPoints.length && (barPoints[0].width || barPoints[0].x2)) {
                 const bp = barPoints[0];
-                const barWidth = bp.width || (bp.x2 ? bp.x2 - bp.x1 : 10);
-                stiffPointRadius = Math.max(1, Math.min(3, barWidth * 0.2));
-            } else {
-                stiffPointRadius = 2;
+                barWidth = bp.width || (bp.x2 ? bp.x2 - bp.x1 : 10);
+            } else if (painChart.chartArea && painChart.data.labels.length) {
+                barWidth = painChart.chartArea.width / painChart.data.labels.length;
             }
+            stiffPointRadius = Math.max(1, Math.min(3, barWidth * 0.2));
             painChart.update();
         }
 
