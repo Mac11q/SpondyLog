@@ -2231,10 +2231,7 @@
                     levels: { ...defaultLegendLevels }
                 }
             },
-            activeLegend: 'pain',
-            legendPre: 'de',
-            legendName: 'douleur',
-            legendLevels: { ...defaultLegendLevels }
+            activeLegend: 'pain'
         };
    
         function cloneSettings(obj) {
@@ -2243,13 +2240,12 @@
 
         function setActiveLegend(variant) {
             settings.activeLegend = variant;
-            const data = settings.legendVariants[variant];
-            if (data) {
-                settings.legendPre = data.pre;
-                settings.legendName = data.name;
-                settings.legendLevels = cloneSettings(data.levels);
-            }
         }
+
+        function getCurrentLegend() {
+           return settings.legendVariants[settings.activeLegend];
+        }
+
 
         function switchSettingsVariant(newVariant) {
             const data = settings.legendVariants[currentSettingsVariant];
@@ -2423,18 +2419,9 @@
                     settings = { ...cloneSettings(defaultSettings), ...JSON.parse(saved) };
                     if (!settings.legendVariants) {
                         settings.legendVariants = {
-                            pain: {
-                                pre: settings.legendPre || 'de',
-                                name: settings.legendName || 'douleur',
-                                levels: settings.legendLevels || cloneSettings(defaultLegendLevels)
-                            },
-                            stiffness: {
-                                pre: 'de',
-                                name: 'raideur',
-                                levels: cloneSettings(defaultLegendLevels)
-                            }
+                            pain: { pre: 'de', name: 'douleur', levels: cloneSettings(defaultLegendLevels) },
+                            stiffness: { pre: 'de', name: 'raideur', levels: cloneSettings(defaultLegendLevels) }
                         };
-                        settings.activeLegend = 'pain';
                     }
                     if (!settings.activeLegend) settings.activeLegend = 'pain';
                 } catch(e) {
@@ -2470,18 +2457,19 @@
             if (medLabel) medLabel.innerHTML = `<span class="med-icon">${settings.elementIcon}</span> ${settings.elementName}`;
             const medDaysLabel = document.getElementById('med-days-label');
             if (medDaysLabel) medDaysLabel.innerHTML = `Quantité <span class="med-icon">${settings.elementIcon}</span>`;
+            const legendData = getCurrentLegend();
             const legendTitle = document.querySelector('.legend h3');
-            if (legendTitle) legendTitle.textContent = `Légende des niveaux ${settings.legendPre.toLowerCase()} ${settings.legendName.toLowerCase()}`;
+            if (legendTitle) legendTitle.textContent = `Légende des niveaux ${legendData.pre.toLowerCase()} ${legendData.name.toLowerCase()}`;
             const chartTitle = document.querySelector('#chart-modal .modal-header h3');
             if (chartTitle) chartTitle.textContent = `Graphique d'évolution`;
             const painLabel = document.querySelector('.pain-slider-label');
-            if (painLabel) painLabel.textContent = `${capitalizeFirst(settings.legendName)} ressenti :`;
+            if (painLabel) painLabel.textContent = `${capitalizeFirst(legendData.name)} ressenti :`;
             const legendItems = document.querySelectorAll('.legend .color-item span');
             // legendItems.forEach((span, idx) => { span.textContent = settings.legendLevels[idx]; }); (ne pas avoir "1 - " dans la légende)
-            legendItems.forEach((span, idx) => { span.textContent = `${idx} - ${settings.legendLevels[idx]}`; }); 
+            legendItems.forEach((span, idx) => { span.textContent = `${idx} - ${legendData.levels[idx]}`; });
             const sliderLabels = document.querySelectorAll('.pain-slider-rect-labels span');
-            sliderLabels.forEach((span, idx) => { span.textContent = settings.legendLevels[idx]; });
-            painLevelLabels = [settings.legendLevels[0], settings.legendLevels[1], settings.legendLevels[2], settings.legendLevels[3], settings.legendLevels[4], settings.legendLevels[5]];
+            sliderLabels.forEach((span, idx) => { span.textContent = legendData.levels[idx]; });
+            painLevelLabels = [legendData.levels[0], legendData.levels[1], legendData.levels[2], legendData.levels[3], legendData.levels[4], legendData.levels[5]];
 
             const mainPainToggle       = document.getElementById('pain-toggle');
             const mainStiffnessToggle  = document.getElementById('stiffness-toggle');
@@ -3949,8 +3937,9 @@
                                     const level = painLevel;
                                     const levelLabel = painLevelLabels[level] || "(inconnu)";
                                     const dotColor = painColors[level];
+                                    const legendData = getCurrentLegend();
                                     // Douleur en normal, niveau en gras
-                                    parts.push(`<span class="tooltip-dot" style="background:${dotColor}"></span>${capitalizeFirst(settings.legendName)} : <strong>${levelLabel}</strong>`);
+                                    parts.push(`<span class="tooltip-dot" style="background:${dotColor}"></span>${capitalizeFirst(legendData.name)} : <strong>${levelLabel}</strong>`);
                                 }
                                 if (notesInfo) {
                                     for (const [typeName, text] of Object.entries(noteObjY)) {
@@ -4671,8 +4660,18 @@
                 const val = userStiffnessData[d];
                 if (val > 0) stiffnessExport[d] = val;
             }
+
+            function cleanSettingsForExport(obj) {
+                const copy = JSON.parse(JSON.stringify(obj));
+                delete copy.activeLegend;
+                delete copy.legendPre;
+                delete copy.legendName;
+                delete copy.legendLevels;
+                return copy;
+            }
+
             const exportObj = {
-                settings: settingsSaved ? JSON.parse(settingsSaved) : settings,
+                settings: settingsSaved ? cleanSettingsForExport(JSON.parse(settingsSaved)) : cleanSettingsForExport(settings),
                 painData:  painExport,
                 stiffnessData: stiffnessExport,
                 notes:     userNotes,
@@ -4740,7 +4739,7 @@
                                 if (!settings.activeLegend) settings.activeLegend = 'pain';
                                 if (!settings.legendVariants) {
                                     settings.legendVariants = {
-                                        pain: { pre: settings.legendPre || 'de', name: settings.legendName || 'douleur', levels: settings.legendLevels || cloneSettings(defaultLegendLevels) },
+                                        pain: { pre: 'de', name: 'douleur', levels: cloneSettings(defaultLegendLevels) },
                                         stiffness: { pre: 'de', name: 'raideur', levels: cloneSettings(defaultLegendLevels) }
                                     };
                                 }
@@ -4974,7 +4973,7 @@
                     y: {
                         title: {
                             display: true,
-                            text: `Niveau ${settings.legendPre.toLowerCase()} ${settings.legendName.toLowerCase()}`
+                            text: `Niveau ${getCurrentLegend().pre.toLowerCase()} ${getCurrentLegend().name.toLowerCase()}`
                         },
                         min: 0,
                         max: 5,
@@ -5005,10 +5004,11 @@
                                 const color = barColors[context.dataIndex];
                                 const border = borderColors[context.dataIndex];
                                 const square = `<span style='display:inline-block;width:10px;height:10px;background:${color};border:1px solid ${border};margin-right:4px'></span>`;
-                                if (value === null) return `${square}${capitalizeFirst(settings.legendName)} : Non renseigné`;
-                                const painLevels = settings.legendLevels;
+                                const legendData = getCurrentLegend();
+                                if (value === null) return `${square}${capitalizeFirst(legendData.name)} : Non renseigné`;
+                                const painLevels = legendData.levels;
                                 const valText = painLevels[value] !== undefined ? `<strong>${painLevels[value]}</strong>` : `<strong>${value}</strong>`;
-                                return `${square}${capitalizeFirst(settings.legendName)} : ${valText}`;
+                                return `${square}${capitalizeFirst(legendData.name)} : ${valText}`;
                             },
                             afterLabel: function(context) {
                                 const index = context.dataIndex;
