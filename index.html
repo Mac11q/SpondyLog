@@ -1894,11 +1894,11 @@
                 </div>
                 <div class="chart-stats" style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 5px; padding: 0;">
                     <div class="stat-item" style="padding: 0 2px; background-color: #f5f5f5; border-radius: 4px; text-align: center;">
-                        <span class="stat-label" style="display: block; font-weight: bold; font-size: 0.8em; margin-bottom: 0;">Niveau max</span>
-                        <span id="max-pain" class="stat-value" style="font-size: 0.95em; color: #333;">--</span>
+                        <span id="avg-stiffness-label" class="stat-label" style="display: block; font-weight: bold; font-size: 0.8em; margin-bottom: 0;">Raideur moyenne</span>
+                        <span id="avg-stiffness" class="stat-value" style="font-size: 0.95em; color: #333;">--</span>
                     </div>
                     <div class="stat-item" style="padding: 0 2px; background-color: #f5f5f5; border-radius: 4px; text-align: center;">
-                        <span class="stat-label" style="display: block; font-weight: bold; font-size: 0.8em; margin-bottom: 0;">Douleur moyenne</span>
+                        <span id="avg-pain-label" class="stat-label" style="display: block; font-weight: bold; font-size: 0.8em; margin-bottom: 0;">Douleur moyenne</span>
                         <span id="avg-pain" class="stat-value" style="font-size: 0.95em; color: #333;">--</span>
                     </div>
                     <div class="stat-item" style="padding: 0 2px; background-color: #f5f5f5; border-radius: 4px; text-align: center;">
@@ -1906,8 +1906,8 @@
                         <span id="severe-days" class="stat-value" style="font-size: 0.95em; color: #333;">--</span>
                     </div>
                     <div class="stat-item" style="padding: 0 2px; background-color: #f5f5f5; border-radius: 4px; text-align: center;">
-                        <span id="med-days-label" class="stat-label" style="display: block; font-weight: bold; font-size: 0.8em; margin-bottom: 0;"> Quantité</span>
-                        <span id="med-days" class="stat-value" style="font-size: 0.95em; color: #333;">-Quantité-</span>
+                        <span id="med-days-label" class="stat-label" style="display: block; font-weight: bold; font-size: 0.8em; margin-bottom: 0;"> Jours avec</span>
+                        <span id="med-days" class="stat-value" style="font-size: 0.95em; color: #333;">-Jours avec-</span>
                     </div>
                 </div>
             </div>
@@ -2474,7 +2474,7 @@
             const medLabel = document.querySelector("label[for='med-taken']");
             if (medLabel) medLabel.innerHTML = `<span class="med-icon">${settings.elementIcon}</span> ${settings.elementName}`;
             const medDaysLabel = document.getElementById('med-days-label');
-            if (medDaysLabel) medDaysLabel.innerHTML = `Quantité <span class="med-icon">${settings.elementIcon}</span>`;
+            if (medDaysLabel) medDaysLabel.innerHTML = `Jours avec <span class="med-icon">${settings.elementIcon}</span>`;
             const legendData = getCurrentLegend();
             const legendTitle = document.querySelector('.legend h3');
             if (legendTitle) legendTitle.textContent = `Légende des niveaux ${legendData.pre.toLowerCase()} ${legendData.name.toLowerCase()}`;
@@ -2488,6 +2488,11 @@
             const sliderLabels = document.querySelectorAll('.pain-slider-rect-labels span');
             sliderLabels.forEach((span, idx) => { span.textContent = legendData.levels[idx]; });
             painLevelLabels = [legendData.levels[0], legendData.levels[1], legendData.levels[2], legendData.levels[3], legendData.levels[4], legendData.levels[5]];
+
+            const avgPainLabel = document.getElementById('avg-pain-label');
+            if (avgPainLabel) avgPainLabel.textContent = `${capitalizeFirst(settings.legendVariants.pain.name)} moyenne`;
+            const avgStiffLabel = document.getElementById('avg-stiffness-label');
+            if (avgStiffLabel) avgStiffLabel.textContent = `${capitalizeFirst(settings.legendVariants.stiffness.name)} moyenne`;
 
             const mainPainToggle       = document.getElementById('pain-toggle');
             const mainStiffnessToggle  = document.getElementById('stiffness-toggle');
@@ -4855,7 +4860,8 @@
             // Variables pour les statistiques
             let totalPain = 0;
             let painCount = 0;
-            let maxPain = -1;
+            let totalStiff = 0;
+            let stiffCount = 0;
             let medDays = 0;
             let severeDays = 0; // Jours avec douleur >= 3
         
@@ -4875,7 +4881,6 @@
                     painValue = userPainData[dateId];
                     totalPain += painValue;
                     painCount++;
-                    if (painValue > maxPain) maxPain = painValue;
                     if (painValue >= 3) severeDays++;
                 }
 
@@ -4886,6 +4891,8 @@
                 let stiffValue = 0;
                 if (userStiffnessData[dateId] !== undefined) {
                     stiffValue = userStiffnessData[dateId];
+                    totalStiff += stiffValue;
+                    stiffCount++;
                 }
                 
                 // Récupérer la prise d'anti-inflammatoires
@@ -4902,50 +4909,52 @@
                 currentDate.setDate(currentDate.getDate() + 1);
             }
 
-        chartPainData = painData.slice();
-        chartStiffnessData = stiffnessData.slice();
-        chartMedData = medData.slice();   
-        
-        // Calculer la moyenne de douleur
-        const avgPain = painCount > 0 ? (totalPain / painCount).toFixed(1) : "--";
-        
-        // Mettre à jour les statistiques
-        document.getElementById("avg-pain").textContent = avgPain;
-        document.getElementById("max-pain").textContent = maxPain >= 0 ? maxPain : "--";
-        document.getElementById("med-days").textContent = medDays;
-        document.getElementById("severe-days").textContent = severeDays;
-        
-        // Créer des couleurs personnalisées en fonction de la prise d'anti-inflammatoires
-        const barColors = painData.map((pain, index) => {
-            // Si la valeur de douleur est null, on renvoie une couleur grisée
-            if (pain === null) return 'rgba(200, 200, 200, 0.3)';
+            chartPainData = painData.slice();
+            chartStiffnessData = stiffnessData.slice();
+            chartMedData = medData.slice();   
             
-            // Si anti-inflammatoire pris ce jour-là, afficher en bleu, sinon en rouge
-            return medData[index] ? 'rgba(54, 162, 235, 0.5)' : 'rgba(255, 99, 132, 0.5)';
-        });
-        
-        const borderColors = painData.map((pain, index) => {
-            // Si la valeur de douleur est null, bordure grisée
-            if (pain === null) return 'rgba(200, 200, 200, 0.5)';
+            // Calculer la moyenne de douleur et de raideur
+            const avgPain = painCount > 0 ? (totalPain / painCount).toFixed(1) : "--";
+            const avgStiff = stiffCount > 0 ? (totalStiff / stiffCount).toFixed(1) : "--";
             
-            // Si anti-inflammatoire pris ce jour-là, bordure bleue, sinon bordure rouge
-            return medData[index] ? 'rgb(54, 162, 235)' : 'rgb(255, 99, 132)';
-        });
+            // Mettre à jour les statistiques
+            document.getElementById("avg-pain").textContent = avgPain;
+            const stiffEl = document.getElementById("avg-stiffness");
+            if (stiffEl) stiffEl.textContent = avgStiff;
+            document.getElementById("med-days").textContent = medDays;
+            document.getElementById("severe-days").textContent = severeDays;
+            
+            // Créer des couleurs personnalisées en fonction de la prise d'anti-inflammatoires
+            const barColors = painData.map((pain, index) => {
+                // Si la valeur de douleur est null, on renvoie une couleur grisée
+                if (pain === null) return 'rgba(200, 200, 200, 0.3)';
+                
+                // Si anti-inflammatoire pris ce jour-là, afficher en bleu, sinon en rouge
+                return medData[index] ? 'rgba(54, 162, 235, 0.5)' : 'rgba(255, 99, 132, 0.5)';
+            });
+            
+            const borderColors = painData.map((pain, index) => {
+                // Si la valeur de douleur est null, bordure grisée
+                if (pain === null) return 'rgba(200, 200, 200, 0.5)';
+                
+                // Si anti-inflammatoire pris ce jour-là, bordure bleue, sinon bordure rouge
+                return medData[index] ? 'rgb(54, 162, 235)' : 'rgb(255, 99, 132)';
+            });
 
-        const hoverBarColors = barColors.map(c => adjustAlpha(c, 0.2));
-        
-        // Détruire le graphique existant s'il y en a un
-        if (painChart) {
-            painChart.destroy();
-        }
+            const hoverBarColors = barColors.map(c => adjustAlpha(c, 0.2));
+            
+            // Détruire le graphique existant s'il y en a un
+            if (painChart) {
+                painChart.destroy();
+            }
 
-        // Créer le graphique
-        const ctx = document.getElementById('pain-chart').getContext('2d');
-        const hidePain = chartDataChoice === 'stiffness';
-        const hideStiff = chartDataChoice === 'pain';
-        const adjBarColors = hidePain ? barColors.map(()=>'rgba(0,0,0,0)') : barColors;
-        const adjBorderColors = hidePain ? borderColors.map(()=>'rgba(0,0,0,0)') : borderColors;
-        painChart = new Chart(ctx, {
+            // Créer le graphique
+            const ctx = document.getElementById('pain-chart').getContext('2d');
+            const hidePain = chartDataChoice === 'stiffness';
+            const hideStiff = chartDataChoice === 'pain';
+            const adjBarColors = hidePain ? barColors.map(()=>'rgba(0,0,0,0)') : barColors;
+            const adjBorderColors = hidePain ? borderColors.map(()=>'rgba(0,0,0,0)') : borderColors;
+            painChart = new Chart(ctx, {
             type: 'bar',
             data: {
                 labels: dates,
