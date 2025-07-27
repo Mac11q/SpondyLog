@@ -2441,14 +2441,21 @@
                     settings = cloneSettings(defaultSettings);
                 }
             } else {
-                localStorage.setItem('spondylogSettings', JSON.stringify(defaultSettings));
+                settings = cloneSettings(defaultSettings);
             }
-            setActiveLegend(settings.activeLegend);
+            setActiveLegend('pain');
             applySettingsToUI();
         }
 
         function saveSettings() {
-            localStorage.setItem('spondylogSettings', JSON.stringify(settings));
+            const toSave = {
+                title: settings.title,
+                themeColor: settings.themeColor,
+                elementIcon: settings.elementIcon,
+                elementName: settings.elementName,
+                legendVariants: settings.legendVariants
+            };
+            localStorage.setItem('spondylogSettings', JSON.stringify(toSave));
         }
 
         function applySettingsToUI() {
@@ -2507,7 +2514,7 @@
         function resetSettings() {
             settings = cloneSettings(defaultSettings);
             setActiveLegend('pain');
-            saveSettings();
+            localStorage.removeItem('spondylogSettings');
             applySettingsToUI();
         }
 
@@ -2518,10 +2525,9 @@
             document.getElementById('settings-name').value = settings.elementName;
             document.getElementById('settings-pain-toggle-btn').textContent = capitalizeWords(settings.legendVariants.pain.name);
             document.getElementById('settings-stiffness-toggle-btn').textContent = capitalizeWords(settings.legendVariants.stiffness.name);
-            const painChecked = settings.activeLegend === 'pain';
-            document.getElementById('settings-pain-toggle').checked = painChecked;
-            document.getElementById('settings-stiffness-toggle').checked = !painChecked;
-            currentSettingsVariant = settings.activeLegend;
+            document.getElementById('settings-pain-toggle').checked = true;
+            document.getElementById('settings-stiffness-toggle').checked = false;
+            currentSettingsVariant = 'pain';
             const data = settings.legendVariants[currentSettingsVariant];
             document.getElementById('settings-legend-pre').value = data.pre;
             document.getElementById('settings-legend-name').value = data.name;
@@ -5431,9 +5437,7 @@
                     settings.elementIcon = document.getElementById('settings-icon').value;
                     settings.elementName = document.getElementById('settings-name').value;
                     
-                    const activeVar = settingsPainToggleInput.checked ? 'pain' : 'stiffness';
-                    setActiveLegend(activeVar);
-
+                    setActiveLegend('pain');
 
                     saveSettings();
                     applySettingsToUI();
@@ -5445,7 +5449,7 @@
                     renderNotesList();
                     } else if (action === 'reset') {
                     resetSettings();
-                    currentSettingsVariant = settings.activeLegend;
+                    currentSettingsVariant = 'pain';
                     populateSettingsModal();
                 }
                 settingsModal.style.display = 'none';
