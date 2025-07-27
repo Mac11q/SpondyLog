@@ -214,7 +214,7 @@
         white-space: normal;
         word-break: break-word;
         z-index: 10;
-        pointer-events: none;
+        pointer-events: auto;
         opacity: 0;
         transition: opacity 0.13s;
         display: inline-block;
@@ -3719,11 +3719,22 @@
                                     dot.appendChild(tooltip);
                                     dot.addEventListener("mouseenter", function() {
                                         dot.classList.add("show-tooltip");
-                                        // Met la classe spéciale sur la cellule parente
                                         dayCell.closest("td").classList.add("note-tooltip-open");
                                         adjustTooltipPosition(tooltip);
                                     });
                                     dot.addEventListener("mouseleave", function() {
+                                        setTimeout(() => {
+                                            if (!dot.matches(':hover') && !tooltip.matches(':hover')) {
+                                                dot.classList.remove("show-tooltip");
+                                                dayCell.closest("td").classList.remove("note-tooltip-open");
+                                            }
+                                        }, 0);
+                                    });
+                                    tooltip.addEventListener("mouseenter", function() {
+                                        dot.classList.add("show-tooltip");
+                                        dayCell.closest("td").classList.add("note-tooltip-open");
+                                    });
+                                    tooltip.addEventListener("mouseleave", function() {
                                         dot.classList.remove("show-tooltip");
                                         dayCell.closest("td").classList.remove("note-tooltip-open");
                                     });
@@ -3755,6 +3766,18 @@
                                     adjustTooltipPosition(tooltip);
                                 });
                                 medIndicator.addEventListener("mouseleave", function() {
+                                    setTimeout(() => {
+                                        if (!medIndicator.matches(':hover') && !tooltip.matches(':hover')) {
+                                            medIndicator.classList.remove("show-tooltip");
+                                            dayCell.closest("td").classList.remove("note-tooltip-open");
+                                        }
+                                    }, 0);
+                                });
+                                tooltip.addEventListener("mouseenter", function() {
+                                    medIndicator.classList.add("show-tooltip");
+                                    dayCell.closest("td").classList.add("note-tooltip-open");
+                                });
+                                tooltip.addEventListener("mouseleave", function() {
                                     medIndicator.classList.remove("show-tooltip");
                                     dayCell.closest("td").classList.remove("note-tooltip-open");
                                 });
@@ -3982,6 +4005,18 @@
                                     adjustTooltipPosition(tooltip, 50);
                                 });
                                 miniDay.addEventListener("mouseleave", function() {
+                                    setTimeout(() => {
+                                        if (!miniDay.matches(':hover') && !tooltip.matches(':hover')) {
+                                            miniDay.classList.remove("show-tooltip");
+                                            miniDay.closest("td").classList.remove("note-tooltip-open");
+                                        }
+                                    }, 0);
+                                });
+                                tooltip.addEventListener("mouseenter", function() {
+                                    miniDay.classList.add("show-tooltip");
+                                    miniDay.closest("td").classList.add("note-tooltip-open");
+                                });
+                                tooltip.addEventListener("mouseleave", function() {
                                     miniDay.classList.remove("show-tooltip");
                                     miniDay.closest("td").classList.remove("note-tooltip-open");
                                 });
@@ -5032,14 +5067,21 @@
                             },
                             label: function(context) {
                                 let value = context.parsed.y;
-                                if (Math.abs(value - 0.05) < 0.001) value = 0;
-                                const color = barColors[context.dataIndex];
-                                const border = borderColors[context.dataIndex];
+                                let color, border, legendData;
+                                if (context.datasetIndex === 0) {
+                                    if (Math.abs(value - 0.05) < 0.001) value = 0;
+                                    color = barColors[context.dataIndex];
+                                    border = borderColors[context.dataIndex];
+                                    legendData = settings.legendVariants.pain;
+                                } else {
+                                    color = 'rgba(153, 102, 255, 0.3)';
+                                    border = 'rgba(153, 102, 255, 1)';
+                                    legendData = settings.legendVariants.stiffness;
+                                }
                                 const square = `<span style='display:inline-block;width:10px;height:10px;background:${color};border:1px solid ${border};margin-right:4px'></span>`;
-                                const legendData = getCurrentLegend();
                                 if (value === null) return `${square}${capitalizeFirst(legendData.name)} : Non renseigné`;
-                                const painLevels = legendData.levels;
-                                const valText = painLevels[value] !== undefined ? `<strong>${painLevels[value]}</strong>` : `<strong>${value}</strong>`;
+                                const levels = legendData.levels;
+                                const valText = levels[value] !== undefined ? `<strong>${levels[value]}</strong>` : `<strong>${value}</strong>`;
                                 return `${square}${capitalizeFirst(legendData.name)} : ${valText}`;
                             },
                             afterLabel: function(context) {
