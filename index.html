@@ -5305,7 +5305,8 @@
                 const bp = barPoints[0];
                 barWidth = bp.width || (bp.x2 ? bp.x2 - bp.x1 : 10);
             } else if (painChart.chartArea && painChart.data.labels.length) {
-                barWidth = painChart.chartArea.width / painChart.data.labels.length;
+                const tickWidth = painChart.chartArea.width / painChart.data.labels.length;
+                barWidth = tickWidth * 0.72; // valeur par défaut de Chart.js (cat. 0.8 * bar 0.9)
             }
             noteDotRadius = Math.max(1, Math.min(10, barWidth * 0.35));
         }
