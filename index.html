@@ -2903,8 +2903,8 @@
                 validatePainModalBtn.addEventListener("click", function() {
                     if (selectedDate) {
                         saveCurrentNote();
+                        updateLastNoteTypeForDate(selectedDate);
                         saveMedDataForDay(selectedDate);
-                        userLastNoteType[selectedDate] = document.getElementById('selected-type-name').textContent;
                           // Sauvegarder le niveau de douleur
                           let v;
                         const selectedPain = document.querySelector(".pain-option.selected");
@@ -2936,8 +2936,8 @@
                     // Enregistrer toutes les données comme pour "OK"
                     if (selectedDate) {
                         saveCurrentNote();
+                        updateLastNoteTypeForDate(selectedDate);
                         saveMedDataForDay(selectedDate);
-                        userLastNoteType[selectedDate] = document.getElementById('selected-type-name').textContent;
                         let v;
                         const selectedPain = document.querySelector(".pain-option.selected");
                         if (selectedPain) {
@@ -3490,6 +3490,24 @@
                         }
                     }
                 }
+            }
+
+            function updateLastNoteTypeForDate(dateId) {
+                const currentTypeName = document.getElementById('selected-type-name').textContent;
+                const notes = userNotes[dateId] || {};
+                const hasCurrent = notes[currentTypeName] && notes[currentTypeName].trim() !== '';
+                if (hasCurrent) {
+                    userLastNoteType[dateId] = currentTypeName;
+                    return;
+                }
+                for (const t of noteTypes) {
+                    const txt = notes[t.name];
+                    if (txt && txt.trim() !== '') {
+                        userLastNoteType[dateId] = t.name;
+                        return;
+                    }
+                }
+                delete userLastNoteType[dateId];
             }
 
             function saveMedDataForDay(dateId) {
@@ -4330,8 +4348,8 @@
                 // 2️⃣ Sauvegarder la note du type de note actuellement sélectionné
                 //    Cette fonction gère correctement userNotes[selectedDate] en tant qu'objet
                 saveCurrentNote();
-                // Mémorise le dernier type utilisé pour ce jour
-                userLastNoteType[selectedDate] = document.getElementById('selected-type-name').textContent;
+                // Met à jour le dernier type utilisé pour ce jour en fonction des notes restantes
+                updateLastNoteTypeForDate(selectedDate);
 
                 // 3️⃣ Sauvegarder l’état des anti-inflammatoires
                 if (document.getElementById('med-taken').checked) {
