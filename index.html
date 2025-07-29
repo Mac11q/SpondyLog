@@ -1930,8 +1930,8 @@
                         <span id="severe-days" class="stat-value" style="font-size: 0.95em; color: #333;">--</span>
                     </div>
                     <div class="stat-item" style="padding: 0 2px; background-color: #f5f5f5; border-radius: 4px; text-align: center;">
-                        <span id="med-days-label" class="stat-label" style="display: block; font-weight: bold; font-size: 0.8em; margin-bottom: 0;"> Jours avec</span>
-                        <span id="med-days" class="stat-value" style="font-size: 0.95em; color: #333;">-Jours avec-</span>
+                        <span id="med-days-label" class="stat-label" style="display: block; font-weight: bold; font-size: 0.8em; margin-bottom: 0;"> Jours</span>
+                        <span id="med-days" class="stat-value" style="font-size: 0.95em; color: #333;">-Jours-</span>
                     </div>
                 </div>
             </div>
@@ -2498,7 +2498,7 @@
             const medLabel = document.querySelector("label[for='med-taken']");
             if (medLabel) medLabel.innerHTML = `<span class="med-icon">${settings.elementIcon}</span> ${settings.elementName}`;
             const medDaysLabel = document.getElementById('med-days-label');
-            if (medDaysLabel) medDaysLabel.innerHTML = `Jours avec <span class="med-icon">${settings.elementIcon}</span>`;
+            if (medDaysLabel) medDaysLabel.innerHTML = `Jours <span class="med-icon">${settings.elementIcon}</span>`;
             const legendData = getCurrentLegend();
             const legendTitle = document.querySelector('.legend h3');
             if (legendTitle) legendTitle.textContent = `Légende des niveaux ${legendData.pre.toLowerCase()} ${legendData.name.toLowerCase()}`;
@@ -5328,10 +5328,27 @@
             }, [choice]);
 
             React.useEffect(() => {
-                function redraw() { drawNoteDots(selected); }
+                function redraw() {
+                    if (painChart) {
+                        painChart.resize();
+                        updateStiffPointRadius();
+                    }
+                    drawNoteDots(selected);
+                }
                 redraw();
                 window.addEventListener('resize', redraw);
-                return () => window.removeEventListener('resize', redraw);
+                window.addEventListener('orientationchange', redraw);
+                let ro;
+                const container = document.querySelector('.chart-container');
+                if (window.ResizeObserver && container) {
+                    ro = new ResizeObserver(redraw);
+                    ro.observe(container);
+                }
+                return () => {
+                    window.removeEventListener('resize', redraw);
+                    window.removeEventListener('orientationchange', redraw);
+                    if (ro) ro.disconnect();
+                };
             }, [selected]);
 
             function handleChange(e) {
