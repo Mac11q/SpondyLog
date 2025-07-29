@@ -1736,6 +1736,12 @@
         }
     }
 
+    /* Reserve constant height for the chart legend in the modal */
+    #chart-legend-placeholder {
+        height: 35px;
+        pointer-events: none;
+    }
+
     </style>
 
 <script>
@@ -1913,7 +1919,8 @@
                     </div>
                 </div>
                 <div class="chart-container" style="position: relative; height: 350px; margin-bottom: 0px;">
-                    <canvas id="pain-chart"></canvas> 
+                    <div id="chart-legend-placeholder"></div>
+                    <canvas id="pain-chart"></canvas>
                     <div id="note-dots-overlay" style="position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:10;"></div>
                 </div>
                 <div class="chart-stats" style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 5px; padding: 0;">
@@ -5199,8 +5206,10 @@
 
         // Fonction pour ajouter une légende personnalisée
         function updateChartLegend() {
+            const placeholder = document.getElementById('chart-legend-placeholder');
+            if (!placeholder) return;
             // Vérifier si un élément de légende existe déjà et le supprimer
-            const existingLegend = document.getElementById('custom-chart-legend');
+            const existingLegend = placeholder.querySelector('#custom-chart-legend');
             if (existingLegend) {
                 existingLegend.remove();
             }
@@ -5284,8 +5293,7 @@
             }
 
             if (legendContainer.childElementCount) {
-                const chartContainer = document.getElementById('pain-chart').parentNode;
-                chartContainer.insertBefore(legendContainer, document.getElementById('pain-chart'));
+                placeholder.appendChild(legendContainer);
             }
         }
 
@@ -5440,7 +5448,7 @@
             } else if (painChart.chartArea && painChart.data.labels.length) {
                 barWidth = painChart.chartArea.width / painChart.data.labels.length;
             }
-            stiffPointRadius = Math.max(2, Math.min(10, barWidth * 0.2));
+            stiffPointRadius = Math.max(1.5, Math.min(10, barWidth * 0.2));
         }
 
         function drawNoteDots(selectedTypes) {
@@ -5480,7 +5488,7 @@
                     const x = bar.x !== undefined ? bar.x : xScale.getPixelForValue(idx);
                     const y = hidePain ? baseY : (bar.y !== undefined ? bar.y : baseY);
                     dot.style.left = `${x}px`;
-                    dot.style.top = `${y - noteDotRadius - -30 - stack}px`;
+                    dot.style.top = `${y - noteDotRadius - -33 - stack}px`;
                     dot.style.transform = 'translate(-50%, -100%)';
 
                     const tooltip = document.createElement('div');
