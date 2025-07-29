@@ -214,7 +214,7 @@
         white-space: normal;
         word-break: break-word;
         z-index: 10;
-        pointer-events: auto;
+        pointer-events: none;
         opacity: 0;
         transition: opacity 0.13s;
         display: inline-block;
@@ -235,13 +235,16 @@
 
     .note-dot.show-tooltip .note-dot-tooltip {
         opacity: 1;
+        pointer-events: auto;
     }
     .med-indicator.show-tooltip .note-dot-tooltip {
         opacity: 1;
+        pointer-events: auto;
     }
 
     .mini-day.show-tooltip .note-dot-tooltip {
         opacity: 1;
+        pointer-events: auto;
     }
 
     .tooltip-dot {
@@ -729,6 +732,27 @@
             border-radius: 3px;
             border: 1px solid var(--primary-color);
             font-size: 0.75em;
+        }
+
+        .note-symptom-toggle{
+            display:inline-flex;
+            align-items:stretch;
+            border:1px solid var(--primary-color);
+            border-radius:5px;
+            overflow:hidden;
+            font-size:0.75em;
+        }
+        
+        .note-symptom-toggle .symptom-half{
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            width:16px;height:16px;
+        }
+
+        .note-symptom-toggle .separator{
+            width:1px;
+            background-color:var(--primary-color);
         }
 
         .note-text {
@@ -4469,21 +4493,36 @@
                     const noteDate = document.createElement("div");
                     noteDate.className = "note-date";
 
-                    const painValue = userPainData[dateId] !== undefined ? userPainData[dateId] : 0;
+                    const painDefined = userPainData[dateId] !== undefined;
+                    const stiffnessDefined = userStiffnessData[dateId] !== undefined;
+                    const painValue = painDefined ? userPainData[dateId] : 0;
+                    const stiffnessValue = stiffnessDefined ? userStiffnessData[dateId] : 0;
+                    const hasSymptoms = painDefined || stiffnessDefined;
                     noteDate.textContent = formattedDate;
-                    const hasPain  = painValue > 0;
                     const hasMeds  = !!userMedsData[dateId];
-                    if (hasPain || hasMeds) {
+                    if (hasSymptoms || hasMeds) {
                         noteDate.appendChild(document.createTextNode(" - "));
                     }
 
-                    if (hasPain) {
-                        const painSquare = document.createElement("span");
-                        painSquare.className = "note-pain-square";
-                        painSquare.textContent = painValue;
-                        painSquare.style.backgroundColor = painColors[painValue];
-                        painSquare.style.color = painValue === 5 ? "#fff" : "#000";
-                        noteDate.appendChild(painSquare);
+                    if (hasSymptoms) {
+                        const symptomToggle = document.createElement("span");
+                        symptomToggle.className = "note-symptom-toggle";
+                        const painSpan = document.createElement("span");
+                        painSpan.className = "symptom-half";
+                        painSpan.textContent = painValue;
+                        painSpan.style.backgroundColor = painColors[painValue];
+                        painSpan.style.color = painValue === 5 ? "#fff" : "#000";
+                        const sep = document.createElement("span");
+                        sep.className = "separator";
+                        const stiffSpan = document.createElement("span");
+                        stiffSpan.className = "symptom-half";
+                        stiffSpan.textContent = stiffnessValue;
+                        stiffSpan.style.backgroundColor = painColors[stiffnessValue];
+                        stiffSpan.style.color = "#000";
+                        symptomToggle.appendChild(painSpan);
+                        symptomToggle.appendChild(sep);
+                        symptomToggle.appendChild(stiffSpan);
+                        noteDate.appendChild(symptomToggle);
                     }
 
                     noteEntry.appendChild(noteDate);
@@ -4522,7 +4561,7 @@
                     noteEntry.appendChild(noteText);
 
                     if (hasMeds) {
-                        if (hasPain) {
+                        if (hasSymptoms) {
                             noteDate.appendChild(document.createTextNode(" - "));
                         }
                         const medSpan = document.createElement("span");
