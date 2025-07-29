@@ -4665,6 +4665,12 @@
 
                 // e) Ouvrir la modal
                 chartModal.style.display = "flex";
+                // Ajuster la taille des points de raideur une fois le graphique visible
+                if (painChart) {
+                    painChart.resize();
+                    updateStiffPointRadius();
+                    painChart.update();
+                }
             });
 
 
@@ -5434,7 +5440,7 @@
             } else if (painChart.chartArea && painChart.data.labels.length) {
                 barWidth = painChart.chartArea.width / painChart.data.labels.length;
             }
-            stiffPointRadius = Math.max(1, Math.min(10, barWidth * 0.2));
+            stiffPointRadius = Math.max(2, Math.min(10, barWidth * 0.2));
         }
 
         function drawNoteDots(selectedTypes) {
