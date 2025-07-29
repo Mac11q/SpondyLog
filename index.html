@@ -5173,6 +5173,7 @@
 
         // Caler la taille des pastilles et points puis dessiner les notes
         updateNoteDotRadius();
+        painChart.update();
         updateStiffPointRadius();
         painChart.update();
         const storedChoice = localStorage.getItem('spondylogChartNoteChoice') || '';
@@ -5433,7 +5434,7 @@
             } else if (painChart.chartArea && painChart.data.labels.length) {
                 barWidth = painChart.chartArea.width / painChart.data.labels.length;
             }
-            stiffPointRadius = Math.max(1, Math.min(3, barWidth * 0.2));
+            stiffPointRadius = Math.max(1, Math.min(10, barWidth * 0.2));
         }
 
         function drawNoteDots(selectedTypes) {
