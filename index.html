@@ -4525,7 +4525,7 @@
                         stiffSpan.className = "symptom-half";
                         stiffSpan.textContent = stiffnessValue;
                         stiffSpan.style.backgroundColor = painColors[stiffnessValue];
-                        stiffSpan.style.color = "#000";
+                        stiffSpan.style.color = stiffnessValue === 5 ? "#fff" : "#000";
                         symptomToggle.appendChild(painSpan);
                         symptomToggle.appendChild(sep);
                         symptomToggle.appendChild(stiffSpan);
