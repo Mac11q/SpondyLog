@@ -1536,15 +1536,54 @@
         @media (min-width: 768px) {
             #chart-range-selector {
                 display: flex;
+                flex-direction: column;
+                gap: 10px;
+            }
+            #chart-range-selector .top-filters {
+                display: flex;
                 align-items: center;
                 gap: 20px;
                 flex-wrap: wrap;
             }
-            #chart-range-selector .range-option {
-                margin-top: 0 !important;
+            #chart-range-selector #custom-date-range {
+                display: flex;
+                align-items: center;
+                gap: 10px;
+            }
+            #data-select-container {
+                display: flex;
+                align-items: center;
+                gap: 10px;
+            }
+            #apply-custom-dates {
+                margin-top: 0;
+                margin-left: 10px;
+            }
+        }
+
+        @media (max-width: 767px) {
+            #chart-range-selector {
+                display: flex;
+                flex-direction: column;
+                gap: 10px;
+            }
+            #chart-range-selector .top-filters {
+                display: flex;
+                flex-direction: column;
+                gap: 10px;
+                align-items: flex-start;
             }
             #chart-range-selector #custom-date-range {
-                width: 100%;
+                display: flex;
+                flex-direction: column;
+                gap: 5px;
+            }
+            #apply-custom-dates {
+                align-self: flex-start;
+                margin-left: 0;
+            }
+            #data-select-container {
+                margin-top: 10px;
             }
         }
 
@@ -1882,32 +1921,34 @@
                     <button class="close-btn" id="close-chart-modal">&times;</button>
                 </div>
                 <div id="chart-range-selector" class="date-range-selector" style="margin-bottom: 10px;">
-                    <div class="range-option" style="display: flex; align-items: center; gap: 10px;">
-                        <label for="date-range">Période :</label>
-                        <select id="date-range" style="padding: 4px 8px;">
-                            <option value="7">7 derniers jours</option>
-                            <option value="14">14 derniers jours</option>
-                            <option value="30" selected>30 derniers jours</option>
-                            <option value="90">3 derniers mois</option>
-                            <option value="180">6 derniers mois</option>
-                            <option value="365">Année complète</option>
-                            <option value="custom">Personnalisé</option>
-                        </select>
-                    </div>
-                    <div id="custom-date-range" style="display: none; margin-top: 5px;">
-                        <div style="display: flex; gap: 10px;">
-                            <div>
-                                <label for="start-date">Du :</label>
-                                <input type="date" id="start-date">
-                            </div>
-                            <div>
-                                <label for="end-date">Au :</label>
-                                <input type="date" id="end-date">
-                            </div>
+                    <div class="top-filters">
+                        <div class="range-option">
+                            <label for="date-range">Période :</label>
+                            <select id="date-range" style="padding: 4px 8px;">
+                                <option value="7">7 derniers jours</option>
+                                <option value="14">14 derniers jours</option>
+                                <option value="30" selected>30 derniers jours</option>
+                                <option value="90">3 derniers mois</option>
+                                <option value="180">6 derniers mois</option>
+                                <option value="365">Année complète</option>
+                                <option value="custom">Personnalisé</option>
+                            </select>
                         </div>
-                        <button id="apply-custom-dates" class="view-btn" style="margin-top: 5px; padding: 4px 12px; font-size: 0.9em; display: block; margin-left: auto; margin-right: auto;">Appliquer</button>
+                        <div id="custom-date-range" style="display: none; margin-top: 5px;">
+                            <div style="display: flex; gap: 10px;">
+                                <div>
+                                    <label for="start-date">Du :</label>
+                                    <input type="date" id="start-date">
+                                </div>
+                                <div>
+                                    <label for="end-date">Au :</label>
+                                    <input type="date" id="end-date">
+                                </div>
+                            </div>
+                            <button id="apply-custom-dates" class="view-btn" style="margin-top: 5px; padding: 4px 12px; font-size: 0.9em;">Appliquer</button>
+                        </div>
                     </div>
-                    <div class="range-option" style="display: flex; align-items: center; gap: 10px; margin-top: 10px;">
+                    <div id="data-select-container" class="range-option" style="margin-top: 10px;">
                         <label for="data-select">Données :</label>
                         <select id="data-select" style="padding: 4px 8px;">
                             <option value="all" selected>Toutes les données</option>
@@ -4659,7 +4700,7 @@
                 dateRangeSelect.value = savedRange;
 
                 if (savedRange === "custom") {
-                    customDateRange.style.display = "block";
+                    customDateRange.style.display = "flex";
                     startDateInput.value = savedStart || formatForInput(thirtyDaysAgo);
                     endDateInput.value   = savedEnd   || formatForInput(today);
                     generateCustomChart(new Date(startDateInput.value), new Date(endDateInput.value));
@@ -4701,7 +4742,7 @@
                 localStorage.setItem("spondylogChartRange", range);
                 
                 if (range === "custom") {
-                    customDateRange.style.display = "block";
+                    customDateRange.style.display = "flex";
                 } else {
                     customDateRange.style.display = "none";
                     generateChart(parseInt(range));
