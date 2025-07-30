@@ -1542,7 +1542,7 @@
             #chart-range-selector .top-filters {
                 display: flex;
                 align-items: center;
-                gap: 20px;
+                gap: 10px;
                 flex-wrap: wrap;
             }
             #chart-range-selector #custom-date-range {
@@ -1556,8 +1556,7 @@
                 gap: 10px;
             }
             #apply-custom-dates {
-                margin-top: 0;
-                margin-left: 10px;
+                margin-right: 10px;
             }
         }
 
@@ -1579,11 +1578,11 @@
                 gap: 5px;
             }
             #apply-custom-dates {
-                align-self: flex-start;
-                margin-left: 0;
+                margin: 0;
+                align-self: flex-end;
             }
             #data-select-container {
-                margin-top: 10px;
+                margin-top: 5px;
             }
         }
 
@@ -1934,21 +1933,19 @@
                                 <option value="custom">Personnalisé</option>
                             </select>
                         </div>
-                        <div id="custom-date-range" style="display: none; margin-top: 5px;">
-                            <div style="display: flex; gap: 10px;">
-                                <div>
-                                    <label for="start-date">Du :</label>
-                                    <input type="date" id="start-date">
-                                </div>
-                                <div>
-                                    <label for="end-date">Au :</label>
-                                    <input type="date" id="end-date">
-                                </div>
+                        <div id="custom-date-range" class="range-option" style="display: none; margin-top: 0;">
+                            <div>
+                                <label for="start-date">Du :</label>
+                                <input type="date" id="start-date">
                             </div>
-                            <button id="apply-custom-dates" class="view-btn" style="margin-top: 5px; padding: 4px 12px; font-size: 0.9em;">Appliquer</button>
+                            <div>
+                                <label for="end-date">Au :</label>
+                                <input type="date" id="end-date">
+                            </div>
+                            <button id="apply-custom-dates" class="view-btn" style="padding: 4px 12px; font-size: 0.9em; margin: 0;">Appliquer</button>
                         </div>
                     </div>
-                    <div id="data-select-container" class="range-option" style="margin-top: 10px;">
+                    <div id="data-select-container" class="range-option" style="margin-top: 5px;">
                         <label for="data-select">Données :</label>
                         <select id="data-select" style="padding: 4px 8px;">
                             <option value="all" selected>Toutes les données</option>
