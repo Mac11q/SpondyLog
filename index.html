@@ -295,10 +295,20 @@
             padding: 6px;
             border-radius: 4px;
             transition: background-color 0.2s;
+            cursor: pointer;
         }
 
         .color-item:hover {
             background-color: rgba(0,0,0,0.05);
+        }
+
+        .color-item.disabled {
+            filter: brightness(85%);
+            text-decoration: line-through;
+        }
+
+        .color-item.disabled .color-box {
+            filter: brightness(85%);
         }
 
         .color-box {
@@ -312,6 +322,41 @@
             margin-right: 10px;
             box-shadow: 0 1px 2px rgba(0,0,0,0.1);
             font-size: 0.9em;
+        }
+
+        .note-legend {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            justify-content: center;
+        }
+
+        .note-legend-item {
+            position: relative;
+            padding: 6px 10px;
+            border: 2px solid;
+            border-radius: 4px;
+            cursor: pointer;
+            min-width: 100px;
+            text-align: center;
+        }
+
+        .note-legend-item .note-legend-dot {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
+
+        .note-legend-item.disabled {
+            filter: brightness(85%);
+            text-decoration: line-through;
+        }
+
+        .note-legend-item.disabled .note-legend-dot {
+            filter: brightness(85%);
         }
 
         /* Styles responsifs supplémentaires */
@@ -1556,7 +1601,8 @@
                 gap: 10px;
             }
             #apply-custom-dates {
-                margin-right: 10px;
+                margin-top: 0;
+                margin-left: 10px;
             }
         }
 
@@ -1578,11 +1624,11 @@
                 gap: 5px;
             }
             #apply-custom-dates {
-                margin: 0;
-                align-self: flex-end;
+                align-self: flex-start;
+                margin-left: 0;
             }
             #data-select-container {
-                margin-top: 5px;
+                margin-top: 10px;
             }
         }
 
@@ -1909,6 +1955,8 @@
                     <span>Extrême</span>
                 </div>
             </div>
+            <h3>Légende des notes</h3>
+            <div id="note-legend" class="note-legend"></div>
         </div>
 
 
@@ -1933,19 +1981,21 @@
                                 <option value="custom">Personnalisé</option>
                             </select>
                         </div>
-                        <div id="custom-date-range" class="range-option" style="display: none; margin-top: 0;">
-                            <div>
-                                <label for="start-date">Du :</label>
-                                <input type="date" id="start-date">
+                        <div id="custom-date-range" style="display: none; margin-top: 5px;">
+                            <div style="display: flex; gap: 10px;">
+                                <div>
+                                    <label for="start-date">Du :</label>
+                                    <input type="date" id="start-date">
+                                </div>
+                                <div>
+                                    <label for="end-date">Au :</label>
+                                    <input type="date" id="end-date">
+                                </div>
                             </div>
-                            <div>
-                                <label for="end-date">Au :</label>
-                                <input type="date" id="end-date">
-                            </div>
-                            <button id="apply-custom-dates" class="view-btn" style="padding: 4px 12px; font-size: 0.9em; margin: 0;">Appliquer</button>
+                            <button id="apply-custom-dates" class="view-btn" style="margin-top: 5px; padding: 4px 12px; font-size: 0.9em;">Appliquer</button>
                         </div>
                     </div>
-                    <div id="data-select-container" class="range-option" style="margin-top: 5px;">
+                    <div id="data-select-container" class="range-option" style="margin-top: 10px;">
                         <label for="data-select">Données :</label>
                         <select id="data-select" style="padding: 4px 8px;">
                             <option value="all" selected>Toutes les données</option>
@@ -2281,6 +2331,8 @@
         let noteTypes = [];  // Liste des types de notes personnalisées (objets { name, color })
         let userMedsData = {}; // Variable pour stocker les jours avec prise d'anti-inflammatoires
         let userLastNoteType = {}; // Mémorise pour chaque jour le dernier type de note utilisé
+        let hiddenNoteTypes = JSON.parse(localStorage.getItem('spondylogHiddenNoteTypes') || '{}');
+        let hiddenLevels = JSON.parse(localStorage.getItem('spondylogHiddenLevels') || '{"pain":{},"stiffness":{}}');
         let editingTypeName = null;
         let chartStartDate = null;
         let chartEndDate = null;
@@ -2291,6 +2343,14 @@
         let stiffPointRadius = 2;
         let chartDataChoice = 'all';
         let currentSettingsVariant = 'pain';
+
+        for (let v of ['pain','stiffness']) {
+            if (!hiddenLevels[v]) hiddenLevels[v] = {};
+            for (let i = 0; i <= 5; i++) {
+                if (hiddenLevels[v][i] === undefined) hiddenLevels[v][i] = false;
+            }
+        }
+        localStorage.setItem('spondylogHiddenLevels', JSON.stringify(hiddenLevels));
 
         const defaultLegendLevels = {
             0: 'Absente',
@@ -2580,6 +2640,8 @@
             if (settingsStiffnessToggle) settingsStiffnessToggle.checked = !painChecked;
         
            updateToggleLabels();
+           attachLegendLevelEvents();
+           renderNoteLegend();
        }
 
        function applyLegendToPainModal(variant) {
@@ -2590,6 +2652,54 @@
            const sliderLabels = document.querySelectorAll('.pain-slider-rect-labels span');
            sliderLabels.forEach((span, idx) => { span.textContent = data.levels[idx]; });
        }
+
+       function attachLegendLevelEvents() {
+            const items = document.querySelectorAll('.legend .color-item');
+            items.forEach((item, idx) => {
+                item.dataset.level = idx;
+                const variant = settings.activeLegend;
+                item.classList.toggle('disabled', !!hiddenLevels[variant][idx]);
+                item.onclick = () => {
+                    const v = settings.activeLegend;
+                    hiddenLevels[v][idx] = !hiddenLevels[v][idx];
+                    localStorage.setItem('spondylogHiddenLevels', JSON.stringify(hiddenLevels));
+                    attachLegendLevelEvents();
+                    if (currentView === 'month') renderCalendar(currentMonth, currentYear);
+                    else renderYearView(currentYear);
+                };
+            });
+        }
+
+        function renderNoteLegend() {
+            const container = document.getElementById('note-legend');
+            if (!container) return;
+            container.innerHTML = '';
+            noteTypes.forEach(type => {
+                if (hiddenNoteTypes[type.name] === undefined) hiddenNoteTypes[type.name] = false;
+                const item = document.createElement('div');
+                item.className = 'note-legend-item';
+                item.style.borderColor = type.color;
+                item.dataset.type = type.name;
+                const label = document.createElement('span');
+                label.textContent = type.name;
+                item.appendChild(label);
+                const dot = document.createElement('span');
+                dot.className = 'note-legend-dot';
+                dot.style.backgroundColor = type.color;
+                item.appendChild(dot);
+                if (hiddenNoteTypes[type.name]) item.classList.add('disabled');
+                item.addEventListener('click', () => {
+                    hiddenNoteTypes[type.name] = !hiddenNoteTypes[type.name];
+                    localStorage.setItem('spondylogHiddenNoteTypes', JSON.stringify(hiddenNoteTypes));
+                    renderNoteLegend();
+                    if (currentView === 'month') renderCalendar(currentMonth, currentYear);
+                    else renderYearView(currentYear);
+                });
+                container.appendChild(item);
+            });
+            localStorage.setItem('spondylogHiddenNoteTypes', JSON.stringify(hiddenNoteTypes));
+        }
+
 
         function resetSettings() {
             settings = cloneSettings(defaultSettings);
@@ -2817,6 +2927,8 @@
             if (editingTypeName === null) {
                 // 1. Ajouter le nouveau type dans la liste
                 noteTypes.push({ name: newName, color: newColor });
+                hiddenNoteTypes[newName] = false;
+                localStorage.setItem('spondylogHiddenNoteTypes', JSON.stringify(hiddenNoteTypes));
                 // 2. Persister immédiatement
                 localStorage.setItem('spondylogNoteTypes', JSON.stringify(noteTypes));
                 // 3. Fermer le modal d’ajout
@@ -2851,6 +2963,7 @@
                 renderCalendar(currentMonth, currentYear);
                 renderNotesList();
                 populateNoteTypeFilter();
+                renderNoteLegend();
                 return;
             }
 
@@ -2862,6 +2975,13 @@
                 const wasNameChanged = (typeObj.name !== newName);
                 typeObj.name  = newName;
                 typeObj.color = newColor;
+                if (wasNameChanged) {
+                    if (hiddenNoteTypes[editingTypeName] !== undefined) {
+                        hiddenNoteTypes[newName] = hiddenNoteTypes[editingTypeName];
+                        delete hiddenNoteTypes[editingTypeName];
+                    }
+                }
+                localStorage.setItem('spondylogHiddenNoteTypes', JSON.stringify(hiddenNoteTypes));
                 // 2. Mettre à jour les clés dans userNotes si renommage
                 if (wasNameChanged) {
                     for (let date in userNotes) {
@@ -2879,6 +2999,7 @@
                 renderCalendar(currentMonth, currentYear);
                 renderNotesList();
                 populateNoteTypeFilter();
+                renderNoteLegend();
 
                 // 5. Mettre à jour l’affichage du modal de notes (si ouvert)
                 showPainModal(selectedDate);
@@ -2919,6 +3040,8 @@
 
             // 3️⃣ Retirer le type de la liste des types
             noteTypes = noteTypes.filter(t => t.name !== editingTypeName);
+            delete hiddenNoteTypes[editingTypeName];
+            localStorage.setItem('spondylogHiddenNoteTypes', JSON.stringify(hiddenNoteTypes));
 
             // 4️⃣ Supprimer toutes les notes de ce type pour chaque jour
             for (let date in userNotes) {
@@ -2934,6 +3057,7 @@
             // 5️⃣ Persister les changements
             localStorage.setItem('spondylogNoteTypes', JSON.stringify(noteTypes));
             localStorage.setItem('spondylogNotes', JSON.stringify(userNotes));
+            renderNoteLegend();
 
             // 6️⃣ Rafraîchir l’UI si le modal est toujours ouvert
             if (selectedDate) {
@@ -3761,12 +3885,12 @@
                                 // Ajoutez le carré rouge en premier pour qu'il soit en arrière-plan
                                 dayCell.insertBefore(redSquare, dayCell.firstChild);
                             }
-                            
-                            if (symptomData[dateId] !== undefined) {
+                            const level = symptomData[dateId];
+                            if (level !== undefined && !hiddenLevels[settings.activeLegend][level]) {
                                 // Valeur définie par l'utilisateur
-                                dayCell.style.backgroundColor = painColors[symptomData[dateId]];
+                                dayCell.style.backgroundColor = painColors[level];
                                 // Si c'est le niveau 5 (noir), mettre le texte en blanc
-                                if (symptomData[dateId] === 5) {
+                                if (level === 5) {
                                     dayNumber.style.color = "white";
                                 }
                             } else if (targetDate < today) {
@@ -3777,60 +3901,61 @@
                                 dayCell.style.backgroundColor = painColors.default_future;
                             }
                             
-                           // Ajouter un indicateur si une note existe pour cette date
-                           if (userNotes[dateId]) {
-                                dayCell.classList.add("note-present");
-                                const typeNameForDay = userLastNoteType[dateId];
-                                const typeObjBorder = noteTypes.find(t => t.name === typeNameForDay);
-                                dayCell.style.borderColor = typeObjBorder ? typeObjBorder.color : (noteTypes[0]?.color || "#3498db");
-
-                                // --- Début nouvelle version multi-points ---
-                                const typesForDay = Object.keys(userNotes[dateId]).filter(typeName => {
+                            // Ajouter un indicateur si une note existe pour cette date
+                            if (userNotes[dateId]) {
+                            const visibleTypesForDay = Object.keys(userNotes[dateId]).filter(typeName => {
                                     const noteText = userNotes[dateId][typeName];
-                                    return noteText && noteText.trim() !== "";
+                                    return noteText && noteText.trim() !== "" && !hiddenNoteTypes[typeName];
                                 });
-                                if (typesForDay.length > 0) {
-                                const dotsContainer = document.createElement("div");
-                                dotsContainer.className = "note-dots-container";
-                                typesForDay.slice().reverse().forEach((typeName, idx) => {
-                                    const typeObj = noteTypes.find(t => t.name === typeName);
-                                    const dot = document.createElement("span");
-                                    dot.className = "note-dot";
-                                    dot.style.backgroundColor = typeObj ? typeObj.color : "#3498db";
-                                    const noteText = userNotes[dateId][typeName] || "";
-
-                                    // Tooltip custom (affichage instantané)
-                                    const tooltip = document.createElement("div");
-                                    tooltip.className = "note-dot-tooltip";
-                                    tooltip.innerHTML = `<span class="tooltip-dot" style="background:${typeObj ? typeObj.color : "#3498db"}"></span>${typeName} : <strong>${noteText.length > 70 ? noteText.substring(0, 70) + '…' : noteText}</strong>`;
-                                    dot.appendChild(tooltip);
-                                    dot.addEventListener("mouseenter", function() {
-                                        dot.classList.add("show-tooltip");
-                                        dayCell.closest("td").classList.add("note-tooltip-open");
-                                        adjustTooltipPosition(tooltip);
-                                    });
-                                    dot.addEventListener("mouseleave", function() {
-                                        setTimeout(() => {
-                                            if (!dot.matches(':hover') && !tooltip.matches(':hover')) {
-                                                dot.classList.remove("show-tooltip");
-                                                dayCell.closest("td").classList.remove("note-tooltip-open");
+                                if (visibleTypesForDay.length > 0) {
+                                    dayCell.classList.add("note-present");
+                                    const typeNameForDay = visibleTypesForDay[visibleTypesForDay.length - 1];
+                                    const typeObjBorder = noteTypes.find(t => t.name === typeNameForDay);
+                                    dayCell.style.borderColor = typeObjBorder ? typeObjBorder.color : (noteTypes[0]?.color || "#3498db");
+                                    const dotsContainer = document.createElement("div");
+                                    dotsContainer.className = "note-dots-container";
+                                    visibleTypesForDay.slice().reverse().forEach(typeName => {
+                                        const typeObj = noteTypes.find(t => t.name === typeName);
+                                        const dot = document.createElement("span");
+                                        dot.className = "note-dot";
+                                        dot.style.backgroundColor = typeObj ? typeObj.color : "#3498db";
+                                        const noteText = userNotes[dateId][typeName] || "";
+                                        const tooltip = document.createElement("div");
+                                        tooltip.className = "note-dot-tooltip";
+                                        tooltip.innerHTML = `<span class="tooltip-dot" style="background:${typeObj ? typeObj.color : '#3498db'}"></span>${typeName} : <strong>${noteText.length > 70 ? noteText.substring(0,70)+'…' : noteText}</strong>`;
+                                        dot.appendChild(tooltip);
+                                        dot.addEventListener("mouseenter", function() {
+                                            dot.classList.add("show-tooltip");
+                                            dayCell.closest("td").classList.add("note-tooltip-open");
+                                            adjustTooltipPosition(tooltip);
+                                        });
+                                        dot.addEventListener("mouseleave", function() {
+                                            setTimeout(() => {
+                                                if (!dot.matches(':hover') && !tooltip.matches(':hover')) {
+                                                    dot.classList.remove("show-tooltip");
+                                                    const parentTd = dayCell.closest("td");
+                                                    if (parentTd) parentTd.classList.remove("note-tooltip-open");
+                                                }
+                                            }, 0);
+                                        });
+                                        dot.addEventListener("click", (event) => {
+                                            const tooltip = dot.querySelector(".note-dot-tooltip");
+                                            const isOpen = dot.classList.contains("show-tooltip");
+                                            document.querySelectorAll(".note-dot.show-tooltip").forEach(d => { if (d !== dot) d.classList.remove("show-tooltip"); });
+                                            document.querySelectorAll(".calendar td").forEach(td => td.classList.remove("note-tooltip-open"));
+                                            if (!isOpen) {
+                                                dot.classList.add("show-tooltip");
+                                                const parentTd = dayCell.closest("td");
+                                                if (parentTd) parentTd.classList.add("note-tooltip-open");
+                                                adjustTooltipPosition(tooltip);
                                             }
-                                        }, 0);
-                                    });
-                                    tooltip.addEventListener("mouseenter", function() {
-                                        dot.classList.add("show-tooltip");
-                                        dayCell.closest("td").classList.add("note-tooltip-open");
-                                    });
-                                    tooltip.addEventListener("mouseleave", function() {
-                                        dot.classList.remove("show-tooltip");
-                                        dayCell.closest("td").classList.remove("note-tooltip-open");
-                                    });
+                                            event.stopPropagation();
+                                        });
 
                                         dotsContainer.appendChild(dot);
                                     });
                                     dayCell.appendChild(dotsContainer);
                                 }
-                                // --- Fin nouvelle version multi-points ---
                             }
                         
                             // Ajouter un indicateur si des anti-inflammatoires ont été pris ce jour
@@ -4006,11 +4131,12 @@
                                 const todayForComparison = new Date();
                                 todayForComparison.setHours(0, 0, 0, 0);
                                 
-                                if (symptomData[dateId] !== undefined) {
+                                const level = symptomData[dateId];
+                                if (level !== undefined && !hiddenLevels[settings.activeLegend][level]) {
                                     // Valeur définie par l'utilisateur
-                                    miniDay.style.backgroundColor = painColors[symptomData[dateId]];
+                                    miniDay.style.backgroundColor = painColors[level];
                                     // Si c'est le niveau 5 (noir), mettre le texte en blanc
-                                    if (symptomData[dateId] === 5) {
+                                    if (level === 5) {
                                         miniDay.style.color = "white";
                                     }
                                 } else if (targetDate < todayForComparison) {
@@ -4028,20 +4154,17 @@
                                     miniDay.style.boxSizing = "border-box";
                                     miniDay.style.borderRadius = "2px"
                                 } else if (userNotes && userNotes[dateId]) {
-                                    // Utiliser la classe mini-note-present au lieu du style inline
-                                    miniDay.classList.add("mini-note-present");
-                                    const typeNameForDay = userLastNoteType[dateId];
-                                    const typeObjBorder = noteTypes.find(t => t.name === typeNameForDay);
-                                    miniDay.style.borderColor = typeObjBorder ? typeObjBorder.color : (noteTypes[0]?.color || "#3498db");
-                                    
-                                    // Si tu veux également ajouter l'indicateur de note (le petit point)
-                                    //const noteIndicator = document.createElement("div");
-                                    //noteIndicator.className = "note-indicator";
-                                    //miniDay.appendChild(noteIndicator);
-                                    
-                                    // Assure-toi que miniDay a une position relative pour que le note-indicator
-                                    // soit correctement positionné
-                                    miniDay.style.position = "relative";
+                                    const visibleTypes = Object.keys(userNotes[dateId]).filter(t => {
+                                        const txt = userNotes[dateId][t];
+                                        return txt && txt.trim() !== '' && !hiddenNoteTypes[t];
+                                    });
+                                    if (visibleTypes.length > 0) {
+                                        miniDay.classList.add('mini-note-present');
+                                        const typeNameForDay = visibleTypes[visibleTypes.length - 1];
+                                        const typeObjBorder = noteTypes.find(t => t.name === typeNameForDay);
+                                        miniDay.style.borderColor = typeObjBorder ? typeObjBorder.color : (noteTypes[0]?.color || '#3498db');
+                                        miniDay.style.position = 'relative';
+                                    }
                                 }
                                 
                                 // Ajout de l'événement de clic pour ouvrir le modal sans changer la vue
@@ -4050,11 +4173,11 @@
                                 });
 
                                 const painLevel = symptomData[dateId];
-                                const painInfo = (painLevel !== undefined && painLevel !== 0);
+                                const painInfo = (painLevel !== undefined && painLevel !== 0 && !hiddenLevels[settings.activeLegend][painLevel]);
                                 const medData  = userMedsData[dateId];
                                 const medInfo  = medData && medData.taken;
                                 const noteObjY = userNotes[dateId];
-                                const notesInfo = noteObjY && Object.values(noteObjY).some(t => t && t.trim() !== "");
+                                const notesInfo = noteObjY && Object.entries(noteObjY).some(([t,txt]) => txt && txt.trim() !== '' && !hiddenNoteTypes[t]);
 
                                 if (painInfo || medInfo || notesInfo) {
                                 const tooltip = document.createElement("div");
@@ -4076,7 +4199,7 @@
                                 }
                                 if (notesInfo) {
                                     for (const [typeName, text] of Object.entries(noteObjY)) {
-                                        if (text && text.trim() !== "") {
+                                        if (text && text.trim() !== '' && !hiddenNoteTypes[typeName]) {
                                             const typeObj = noteTypes.find(t => t.name === typeName);
                                             const color = typeObj ? typeObj.color : "#3498db";
                                             // Type de note en normal, texte en gras
@@ -4845,6 +4968,8 @@
                 noteTypes: noteTypes,
                 medTypes:  medTypesSaved ? JSON.parse(medTypesSaved) : (typeof medTypes !== "undefined" ? medTypes : []),
                 lastNoteType: userLastNoteType,
+                hiddenNoteTypes: hiddenNoteTypes,
+                hiddenLevels: hiddenLevels,
                 penseBete: localStorage.getItem('spondylogPenseBete') || ""
             };
 
@@ -4923,6 +5048,18 @@
                             if (importedData.lastNoteType && typeof importedData.lastNoteType === 'object') {
                                 userLastNoteType = importedData.lastNoteType;
                             }
+
+                            if (importedData.hiddenNoteTypes && typeof importedData.hiddenNoteTypes === 'object') {
+                                hiddenNoteTypes = importedData.hiddenNoteTypes;
+                                localStorage.setItem('spondylogHiddenNoteTypes', JSON.stringify(hiddenNoteTypes));
+                            }
+                            if (importedData.hiddenLevels && typeof importedData.hiddenLevels === 'object') {
+                                hiddenLevels = importedData.hiddenLevels;
+                                localStorage.setItem('spondylogHiddenLevels', JSON.stringify(hiddenLevels));
+                            }
+
+                            renderNoteLegend();
+                            attachLegendLevelEvents();
 
                            // 🟢 Importer le pense-bête s'il existe
                            if (typeof importedData.penseBete === 'string') {
