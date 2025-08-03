@@ -333,21 +333,34 @@
 
         .note-legend-item {
             position: relative;
-            padding: 6px 10px;
+            padding: 8px 12px;
+            padding-right: 24px;
             border: 2px solid;
             border-radius: 4px;
             cursor: pointer;
             min-width: 100px;
             text-align: center;
+            -webkit-tap-highlight-color: transparent;
         }
 
         .note-legend-item .note-legend-dot {
             position: absolute;
-            top: -5px;
-            right: -5px;
-            width: 12px;
-            height: 12px;
+            top: 2px;
+            right: 2px;
+            width: 8px;
+            height: 8px;
             border-radius: 50%;
+            pointer-events: none;
+        }
+
+        @media (hover: hover) {
+            .note-legend-item:hover {
+                background-color: rgba(0,0,0,0.05);
+            }
+        }
+
+        .note-legend-item.active-touch {
+            background-color: rgba(0,0,0,0.05);
         }
 
         .note-legend-item.disabled {
@@ -1569,7 +1582,7 @@
         .range-option {
             display: flex;
             align-items: center;
-            gap: 10px;
+            gap: 5px;
         }
 
         .range-option select, .range-option input {
@@ -1582,27 +1595,26 @@
             #chart-range-selector {
                 display: flex;
                 flex-direction: column;
-                gap: 10px;
+                gap: 5px;
             }
             #chart-range-selector .top-filters {
                 display: flex;
                 align-items: center;
-                gap: 10px;
+                gap: 5px;
                 flex-wrap: wrap;
             }
             #chart-range-selector #custom-date-range {
                 display: flex;
                 align-items: center;
-                gap: 10px;
+                gap: 5px;
             }
             #data-select-container {
                 display: flex;
                 align-items: center;
-                gap: 10px;
+                gap: 5px;
             }
             #apply-custom-dates {
-                margin-top: 0;
-                margin-left: 10px;
+                margin-left: 5px;
             }
         }
 
@@ -1610,12 +1622,12 @@
             #chart-range-selector {
                 display: flex;
                 flex-direction: column;
-                gap: 10px;
+                gap: 5px;
             }
             #chart-range-selector .top-filters {
                 display: flex;
                 flex-direction: column;
-                gap: 10px;
+                gap: 5px;
                 align-items: flex-start;
             }
             #chart-range-selector #custom-date-range {
@@ -1625,10 +1637,11 @@
             }
             #apply-custom-dates {
                 align-self: flex-start;
+                align-self: flex-end;
                 margin-left: 0;
             }
             #data-select-container {
-                margin-top: 10px;
+                margin-top: 5px;
             }
         }
 
@@ -1967,7 +1980,7 @@
                     <h3>Graphique d'évolution</h3>
                     <button class="close-btn" id="close-chart-modal">&times;</button>
                 </div>
-                <div id="chart-range-selector" class="date-range-selector" style="margin-bottom: 10px;">
+                <div id="chart-range-selector" class="date-range-selector" style="margin-bottom: 5px;">
                     <div class="top-filters">
                         <div class="range-option">
                             <label for="date-range">Période :</label>
@@ -1982,7 +1995,7 @@
                             </select>
                         </div>
                         <div id="custom-date-range" style="display: none; margin-top: 5px;">
-                            <div style="display: flex; gap: 10px;">
+                            <div style="display: flex; flex-wrap: wrap; gap: 5px;">
                                 <div>
                                     <label for="start-date">Du :</label>
                                     <input type="date" id="start-date">
@@ -1995,7 +2008,7 @@
                             <button id="apply-custom-dates" class="view-btn" style="margin-top: 5px; padding: 4px 12px; font-size: 0.9em;">Appliquer</button>
                         </div>
                     </div>
-                    <div id="data-select-container" class="range-option" style="margin-top: 10px;">
+                    <div id="data-select-container" class="range-option" style="margin-top: 5px;">
                         <label for="data-select">Données :</label>
                         <select id="data-select" style="padding: 4px 8px;">
                             <option value="all" selected>Toutes les données</option>
@@ -2003,7 +2016,7 @@
                             <option id="data-option-stiffness" value="stiffness">Raideur</option>
                         </select>
                     </div>
-                    <div id="note-feature-root" style=" margin-bottom: -10px;">
+                    <div id="note-feature-root">
                     </div>
                 </div>
                 <div class="chart-container" style="position: relative; height: 350px; margin-bottom: 0px;">
@@ -2290,8 +2303,8 @@
                 <h3>Historique des notes</h3>
                 <button class="close-btn" id="close-notes-list">&times;</button>
               </div>
-              <div class="date-range-selector" style="margin-bottom: 10px;">
-                <div class="range-option" style="display: flex; align-items: center; gap: 10px;">
+              <div class="date-range-selector" style="margin-bottom: 5px;">
+                <div class="range-option" style="display: flex; align-items: center; gap: 5px;">
                   <label for="note-type-filter">Filtrer par type :</label>
                   <select id="note-type-filter" style="padding: 4px 8px;">
                     <option value="all">Tous les types</option>
@@ -2688,6 +2701,15 @@
                 dot.style.backgroundColor = type.color;
                 item.appendChild(dot);
                 if (hiddenNoteTypes[type.name]) item.classList.add('disabled');
+                item.addEventListener('pointerdown', () => {
+                    item.classList.add('active-touch');
+                });
+                const removeActiveTouch = () => item.classList.remove('active-touch');
+                item.addEventListener('pointerup', () => {
+                    setTimeout(removeActiveTouch, 300);
+                });
+                item.addEventListener('pointercancel', removeActiveTouch);
+                item.addEventListener('pointerleave', removeActiveTouch);
                 item.addEventListener('click', () => {
                     hiddenNoteTypes[type.name] = !hiddenNoteTypes[type.name];
                     localStorage.setItem('spondylogHiddenNoteTypes', JSON.stringify(hiddenNoteTypes));
@@ -5546,7 +5568,7 @@
             }
 
             return (
-                <div className="range-option" style={{display:'flex',alignItems:'center',gap:'10px',marginBottom:'10px', marginTop: '10px'}}>
+                <div className="range-option" style={{display:'flex',alignItems:'center',gap:'5px',marginBottom:'5px', marginTop: '5px'}}>
                     <label htmlFor="note-type-select">Type de note :</label>
                     <select id="note-type-select" value={choice} onChange={handleChange} style={{padding:'4px 8px'}}>
                         <option value="all">Tous les types</option>
