@@ -1726,9 +1726,26 @@
 
     .chart-note-dot {
         position: absolute;
-        border-radius: 50%;
         pointer-events: auto;
-        z-index: 1
+        z-index: 1;
+        overflow: visible;
+    }
+
+    .chart-note-dot::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        border-radius: 50%;
+        background-color: var(--dot-color);
+        transition: transform 0.15s ease;
+        transform-origin: center;
+    }
+
+    .chart-note-dot:hover::before {
+        transform: scale(1.3);
     }
 
     .chart-note-tooltip,
@@ -5679,7 +5696,7 @@
 
                     const dot = document.createElement('div');
                     dot.className = 'chart-note-dot';
-                    dot.style.backgroundColor = color;
+                    dot.style.setProperty('--dot-color', color);
                     dot.style.width = `${noteDotRadius*4}px`;
                     dot.style.height = `${noteDotRadius*4}px`;
                     const x = bar.x !== undefined ? bar.x : xScale.getPixelForValue(idx);
