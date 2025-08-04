@@ -2352,7 +2352,7 @@
         let chartPainData = [];
         let chartStiffnessData = [];
         let chartMedData = [];
-        let noteDotRadius = 6;
+        let noteDotRadius = 2.5; // rayon de base (diamètre max 10 px)
         let stiffPointRadius = 2;
         let chartDataChoice = 'all';
         let currentSettingsVariant = 'pain';
@@ -5631,7 +5631,7 @@
             if (!painChart || !painChart.chartArea || !painChart.data.labels.length) return;
             const tickWidth = painChart.chartArea.width / painChart.data.labels.length;
             const barWidth = tickWidth * 0.72; // ratio par défaut (category 0.8 * bar 0.9)
-            noteDotRadius = Math.max(1, Math.min(10, barWidth * 0.35));
+            noteDotRadius = Math.max(1, Math.min(2.5, barWidth * 0.35)); // limite à un diamètre max de 10 px
         }
 
         function updateStiffPointRadius() {
