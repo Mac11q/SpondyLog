@@ -1573,7 +1573,6 @@
 
         /* Styles pour le graphique */
         .date-range-selector {
-            margin-top: 15px;
             padding: 10px;
             background: #f5f5f5;
             border-radius: 5px;
@@ -1980,7 +1979,7 @@
                     <h3>Graphique d'évolution</h3>
                     <button class="close-btn" id="close-chart-modal">&times;</button>
                 </div>
-                <div id="chart-range-selector" class="date-range-selector" style="margin-bottom: 5px;">
+                <div id="chart-range-selector" class="date-range-selector">
                     <div class="top-filters">
                         <div class="range-option">
                             <label for="date-range">Période :</label>
@@ -2353,7 +2352,8 @@
         let chartStiffnessData = [];
         let chartMedData = [];
         let noteDotRadius = 2.5; // rayon de base (diamètre max 10 px)
-        let stiffPointRadius = 2;
+        const MAX_STIFF_POINT_RADIUS = 5; // limite max de la taille des points (en px)
+        let stiffPointRadius = 5; // rayon de base pour la raideur
         let chartDataChoice = 'all';
         let currentSettingsVariant = 'pain';
 
@@ -5283,8 +5283,8 @@
                         // Masquer le marqueur si la valeur est à 0 pour ne pas
                         // attirer l'attention sur ces points tout en gardant la
                         // continuité de la courbe.
-                        pointRadius: ctx => (ctx.raw > 0 ? stiffPointRadius : 0),
-                        pointHoverRadius: ctx => (ctx.raw > 0 ? stiffPointRadius + 2 : 0),
+                        pointRadius: ctx => (ctx.raw > 0 ? Math.min(stiffPointRadius, MAX_STIFF_POINT_RADIUS) : 0),
+                        pointHoverRadius: ctx => (ctx.raw > 0 ? Math.min(stiffPointRadius + 2, MAX_STIFF_POINT_RADIUS) : 0),
                         spanGaps: true,
                         order: 0,
                         hidden: hideStiff
@@ -5645,7 +5645,7 @@
             } else if (painChart.chartArea && painChart.data.labels.length) {
                 barWidth = painChart.chartArea.width / painChart.data.labels.length;
             }
-            stiffPointRadius = Math.max(1.5, Math.min(10, barWidth * 0.2));
+            stiffPointRadius = Math.max(1.5, Math.min(MAX_STIFF_POINT_RADIUS, barWidth * 0.2));
         }
 
         function drawNoteDots(selectedTypes) {
