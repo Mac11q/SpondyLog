@@ -2371,9 +2371,9 @@
         let chartPainData = [];
         let chartStiffnessData = [];
         let chartMedData = [];
-        let noteDotRadius = 2.5; // rayon de base (diamètre max 10 px)
-        const MAX_STIFF_POINT_RADIUS = 5; // limite max de la taille des points (en px)
-        let stiffPointRadius = 5; // rayon de base pour la raideur
+        let noteDotRadius = 3.5; // rayon de base (diamètre max 10 px)
+        const MAX_STIFF_POINT_RADIUS = 3.5; // limite max de la taille des points (en px)
+        let stiffPointRadius = 3; // rayon de base pour la raideur
         let chartDataChoice = 'all';
         let currentSettingsVariant = 'pain';
 
@@ -5304,7 +5304,7 @@
                         // attirer l'attention sur ces points tout en gardant la
                         // continuité de la courbe.
                         pointRadius: ctx => (ctx.raw > 0 ? Math.min(stiffPointRadius, MAX_STIFF_POINT_RADIUS) : 0),
-                        pointHoverRadius: ctx => (ctx.raw > 0 ? Math.min(stiffPointRadius + 2, MAX_STIFF_POINT_RADIUS) : 0),
+                        pointHoverRadius: ctx => (ctx.raw > 0 ? Math.min(stiffPointRadius +2, MAX_STIFF_POINT_RADIUS) : 0),
                         spanGaps: true,
                         order: 0,
                         hidden: hideStiff
@@ -5651,7 +5651,7 @@
             if (!painChart || !painChart.chartArea || !painChart.data.labels.length) return;
             const tickWidth = painChart.chartArea.width / painChart.data.labels.length;
             const barWidth = tickWidth * 0.72; // ratio par défaut (category 0.8 * bar 0.9)
-            noteDotRadius = Math.max(1, Math.min(2.5, barWidth * 0.35)); // limite à un diamètre max de 10 px
+            noteDotRadius = Math.max(1, Math.min(3.5, barWidth * 0.35)); // limite à un diamètre max de 10 px
         }
 
         function updateStiffPointRadius() {
