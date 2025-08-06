@@ -164,6 +164,13 @@
             padding: 5px 15px;
             cursor: pointer;
             transition: background 0.3s;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .nav-btn-style.active-touch {
+            .nav-btn-style:hover {
+                background: var(--primary-hover-color);
+            }
         }
 
         .nav-btn-style:hover {
@@ -296,9 +303,16 @@
             border-radius: 4px;
             transition: background-color 0.2s;
             cursor: pointer;
+            -webkit-tap-highlight-color: transparent;
         }
 
-        .color-item:hover {
+        @media (hover: hover) {
+            .color-item:hover {
+                background-color: rgba(0,0,0,0.05);
+            }
+        }
+
+        .color-item.active-touch {
             background-color: rgba(0,0,0,0.05);
         }
 
@@ -2541,6 +2555,20 @@
             return '#' + toHex(r) + toHex(g) + toHex(b);
         }
 
+        function hexToRgba(hex, alpha) {
+            let r = 0, g = 0, b = 0;
+            if (hex.length === 4) {
+                r = parseInt(hex[1] + hex[1], 16);
+                g = parseInt(hex[2] + hex[2], 16);
+                b = parseInt(hex[3] + hex[3], 16);
+            } else if (hex.length === 7) {
+                r = parseInt(hex[1] + hex[2], 16);
+                g = parseInt(hex[3] + hex[4], 16);
+                b = parseInt(hex[5] + hex[6], 16);
+            }
+            return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+        }
+
         const defaultPrimaryHex = '#3498db';
         const defaultHoverHex = '#2980b9';
         const defaultPrimaryHSL = hexToHsl(defaultPrimaryHex);
@@ -2691,13 +2719,20 @@
                 item.dataset.level = idx;
                 const variant = settings.activeLegend;
                 item.classList.toggle('disabled', !!hiddenLevels[variant][idx]);
+                item.onpointerdown = () => item.classList.add('active-touch');
+                const removeActive = () => item.classList.remove('active-touch');
+                item.onpointerup = removeActive;
+                item.onpointercancel = removeActive;
+                item.onpointerleave = removeActive;
                 item.onclick = () => {
+                    removeActive();
                     const v = settings.activeLegend;
                     hiddenLevels[v][idx] = !hiddenLevels[v][idx];
                     localStorage.setItem('spondylogHiddenLevels', JSON.stringify(hiddenLevels));
                     attachLegendLevelEvents();
                     if (currentView === 'month') renderCalendar(currentMonth, currentYear);
                     else renderYearView(currentYear);
+                    item.blur();
                 };
             });
         }
@@ -2719,22 +2754,27 @@
                 dot.className = 'note-legend-dot';
                 dot.style.backgroundColor = type.color;
                 item.appendChild(dot);
-                if (hiddenNoteTypes[type.name]) item.classList.add('disabled');
+                if (hiddenNoteTypes[type.name]) {
+                    item.classList.add('disabled');
+                    item.style.backgroundColor = hexToRgba(type.color, 0.1);
+                } else {
+                    item.style.backgroundColor = '';
+                }
                 item.addEventListener('pointerdown', () => {
                     item.classList.add('active-touch');
                 });
                 const removeActiveTouch = () => item.classList.remove('active-touch');
-                item.addEventListener('pointerup', () => {
-                    setTimeout(removeActiveTouch, 300);
-                });
+                item.addEventListener('pointerup', removeActiveTouch);
                 item.addEventListener('pointercancel', removeActiveTouch);
                 item.addEventListener('pointerleave', removeActiveTouch);
                 item.addEventListener('click', () => {
+                    removeActiveTouch();
                     hiddenNoteTypes[type.name] = !hiddenNoteTypes[type.name];
                     localStorage.setItem('spondylogHiddenNoteTypes', JSON.stringify(hiddenNoteTypes));
                     renderNoteLegend();
                     if (currentView === 'month') renderCalendar(currentMonth, currentYear);
                     else renderYearView(currentYear);
+                    item.blur();
                 });
                 container.appendChild(item);
             });
@@ -3121,14 +3161,26 @@
             // Affichage du calendrier initial
             renderCalendar(currentMonth, currentYear);
             renderYearView(currentYear);
+
+            function addNavBtnHandlers(btn, handler) {
+                btn.addEventListener('pointerdown', () => btn.classList.add('active-touch'));
+                const remove = () => btn.classList.remove('active-touch');
+                btn.addEventListener('pointerup', remove);
+                btn.addEventListener('pointercancel', remove);
+                btn.addEventListener('pointerleave', remove);
+                btn.addEventListener('click', () => {
+                    handler();
+                    btn.blur();
+                });
+            }
             
             // Événements de navigation du calendrier mensuel
-            prevMonthBtn.addEventListener("click", navigateToPrevMonth);
-            nextMonthBtn.addEventListener("click", navigateToNextMonth);
+            addNavBtnHandlers(prevMonthBtn, navigateToPrevMonth);
+            addNavBtnHandlers(nextMonthBtn, navigateToNextMonth);
             
             // Événements de navigation du calendrier annuel
-            prevYearBtn.addEventListener("click", navigateToPrevYear);
-            nextYearBtn.addEventListener("click", navigateToNextYear);
+            addNavBtnHandlers(prevYearBtn, navigateToPrevYear);
+            addNavBtnHandlers(nextYearBtn, navigateToNextYear);
             
             // Événements du modal
             // Ajoute ce gestionnaire pour le bouton OK
