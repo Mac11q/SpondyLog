@@ -945,7 +945,7 @@
             align-items: center;
             justify-content: center;
             margin-right: 4px; /* ajusté pour un peu plus d’espace */
-            vertical-align: middle;
+            vertical-align: 1px;
         }
 
         /* Style pour l’option "Ajouter un type" */
@@ -1621,14 +1621,19 @@
                 display: flex;
                 align-items: center;
                 gap: 5px;
+                width: 100%;
+            }
+            #chart-range-selector #custom-date-range .date-inputs {
+                display: flex;
+                gap: 5px;
             }
             #data-select-container {
                 display: flex;
                 align-items: center;
                 gap: 5px;
             }
-            #apply-custom-dates {
-                margin-left: 5px;
+            #custom-date-range #apply-custom-dates {
+                flex: 1;
                 
             }
         }
@@ -2025,7 +2030,7 @@
                             </select>
                         </div>
                         <div id="custom-date-range" style="display: none; margin-top: 5px;">
-                            <div style="display: flex; flex-wrap: wrap; gap: 5px;">
+                            <div class="date-inputs" style="display: flex; flex-wrap: wrap; gap: 5px;">
                                 <div>
                                     <label for="start-date">Du :</label>
                                     <input type="date" id="start-date">
@@ -2035,7 +2040,7 @@
                                     <input type="date" id="end-date">
                                 </div>
                             </div>
-                            <button id="apply-custom-dates" class="view-btn" style="margin-top: 0px; padding: 4px 12px; font-size: 0.9em;">Appliquer</button>
+                            <button id="apply-custom-dates" class="view-btn" style="margin-top: 0; padding: 4px 12px; font-size: 0.9em;">Appliquer</button>
                         </div>
                     </div>
                     <div id="data-select-container" class="range-option" style="margin-top: 5px;">
@@ -2666,7 +2671,7 @@
             const legendTitle = document.querySelector('.legend h3');
             if (legendTitle) legendTitle.textContent = `Légende des niveaux ${legendData.pre.toLowerCase()} ${legendData.name.toLowerCase()}`;
             const chartTitle = document.querySelector('#chart-modal .modal-header h3');
-            if (chartTitle) chartTitle.textContent = `Graphique des symptomes`;
+            if (chartTitle) chartTitle.textContent = `Graphique des symptômes`;
             const painLabel = document.querySelector('.pain-slider-label');
             if (painLabel) painLabel.textContent = `${capitalizeFirst(legendData.name)} ressenti :`;
             const legendItems = document.querySelectorAll('.legend .color-item span');
