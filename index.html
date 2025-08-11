@@ -1470,20 +1470,22 @@
             color: #fff;
         }
         .cancel-btn-style {
-            background-color: #EDEEED;
-            color: #000;
-            padding: 4px 16px;
+            padding: 8px 16px;
             font-size: 1em;
-            line-height: 1.2;
-            border: none;
             border-radius: 4px;
+            background: #f5f5f5;
+            color: #333333;
+            border: 1px solid #bbb;
             cursor: pointer;
             transition: background 0.2s, color 0.2s;
+            flex: 0 0 auto; /* Ne prend pas toute la largeur */
         }
+        
         .cancel-btn-style:hover {
-            background-color: #ccc;
-            color: #000;
+            background: #e0e0e0;
+            color: #333333;
         }
+
 
         /* Bouton “Supprimer” */
         #delete-type-btn {
@@ -2009,7 +2011,7 @@
         <div id="chart-modal" class="modal">
             <div class="modal-content" style="max-width: 800px; width: 90%;">
                 <div class="modal-header">
-                    <h3>Graphique d'évolution</h3>
+                    <h3>Graphique des symptômes</h3>
                     <button class="close-btn" id="close-chart-modal">&times;</button>
                 </div>
                 <div id="chart-range-selector" class="date-range-selector">
@@ -2117,9 +2119,9 @@
                                     <input type="text" id="med-type-name-input" placeholder="Nom du médicament" />
                                 </div>
                                 <div class="modal-actions">
-                                    <button id="save-med-type-btn" class="save-btn-style">Enregistrer</button>
-                                    <button id="cancel-med-type-btn" class="cancel-btn-style" type="button">Annuler</button>
                                     <button id="delete-med-type-btn" class="delete-btn-style">Supprimer</button>
+                                    <button id="cancel-med-type-btn" class="cancel-btn-style" type="button">Annuler</button>
+                                    <button id="save-med-type-btn" class="save-btn-style">Enregistrer</button>
                                 </div>
                             </div>
                     </div>
@@ -2668,7 +2670,7 @@
             const legendTitle = document.querySelector('.legend h3');
             if (legendTitle) legendTitle.textContent = `Légende des niveaux ${legendData.pre.toLowerCase()} ${legendData.name.toLowerCase()}`;
             const chartTitle = document.querySelector('#chart-modal .modal-header h3');
-            if (chartTitle) chartTitle.textContent = `Graphique d'évolution`;
+            if (chartTitle) chartTitle.textContent = `Graphique des symptomes`;
             const painLabel = document.querySelector('.pain-slider-label');
             if (painLabel) painLabel.textContent = `${capitalizeFirst(legendData.name)} ressenti :`;
             const legendItems = document.querySelectorAll('.legend .color-item span');
@@ -3412,7 +3414,7 @@
             // Ouvre le modal pour ajouter un type
             function openMedTypeModalForAdd() {
             editingMedTypeName = null;
-            document.getElementById('med-type-modal-title').textContent = `Ajouter un type de ${settings.elementName}`;
+            document.getElementById('med-type-modal-title').textContent = `Ajouter un type de médicament`;
             document.getElementById('med-type-name-input').value = "";
             document.getElementById('delete-med-type-btn').style.display = "none";
             document.getElementById('med-type-modal').style.display = "flex";
@@ -3421,7 +3423,8 @@
             // Ouvre le modal pour éditer un type
             function openMedTypeModalForEdit(typeName) {
             editingMedTypeName = typeName;
-            document.getElementById('med-type-modal-title').textContent = `Modifier le type de ${settings.elementName}`;
+            document.getElementById('med-type-modal-title').textContent = `Modifier le type de médicament`;
+            //document.getElementById('med-type-modal-title').textContent = `Modifier le type de ${settings.elementName}`;
             document.getElementById('med-type-name-input').value = typeName;
             document.getElementById('delete-med-type-btn').style.display = "inline-block";
             document.getElementById('med-type-modal').style.display = "flex";
