@@ -383,6 +383,7 @@
         .note-legend-item.disabled {
             filter: brightness(85%);
             text-decoration: line-through;
+            background-color: rgba(0,0,0,0.05);
         }
 
         .note-legend-item.disabled .note-legend-dot {
@@ -2759,9 +2760,9 @@
                 item.appendChild(dot);
                 if (hiddenNoteTypes[type.name]) {
                     item.classList.add('disabled');
-                    item.style.backgroundColor = hexToRgba(type.color, 0.1);
-                } else {
-                    item.style.backgroundColor = '';
+                //    item.style.backgroundColor = hexToRgba(type.color, 0.1);
+                //} else {
+                //    item.style.backgroundColor = ''; ==> Légende : Intérieur du cadre des types de note légèrement plus foncé que le cadre
                 }
                 item.addEventListener('pointerdown', () => {
                     item.classList.add('active-touch');
@@ -5110,6 +5111,10 @@
                             if (importedData.noteTypes && Array.isArray(importedData.noteTypes)) {
                                 noteTypes = importedData.noteTypes;
                                 localStorage.setItem('spondylogNoteTypes', JSON.stringify(noteTypes));
+                                 // Rafraîchir le sélecteur de type de note si la fonction React existe
+                                 if (typeof window.renderNoteDotsApp === 'function') {
+                                    window.renderNoteDotsApp();
+                                }
                             }
 
                             // 🟢 Importer les types de médicaments personnalisés
@@ -5797,7 +5802,11 @@
 
         }
 
-        ReactDOM.render(<NoteDotsApp />, document.getElementById('note-feature-root'));
+        // Fonction globale pour (re)rendre le composant de sélection de type de note
+        window.renderNoteDotsApp = function() {
+            ReactDOM.render(<NoteDotsApp />, document.getElementById('note-feature-root'));
+        };
+        window.renderNoteDotsApp();
 
 
         function updateLegendLayout() {
