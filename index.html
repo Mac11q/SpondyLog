@@ -20,9 +20,16 @@
             transition: opacity 0.2s;
         }
 
-        header h1 a:hover {
+        header h1 a.active-touch {
             color: var(--primary-hover-color);
             text-decoration: none;
+        }
+
+        @media (hover: hover) {
+            header h1 a:hover {
+                color: var(--primary-hover-color);
+                text-decoration: none;
+            }
         }
 
         :root {
@@ -93,8 +100,14 @@
             background: var(--primary-color);
         }
 
-        .view-btn:hover {
+        .view-btn.active-touch {
             background: var(--primary-color);
+        }
+
+        @media (hover: hover) {
+            .view-btn:hover {
+                background: var(--primary-color);
+            }
         }
 
         .toggle-switch {
@@ -168,14 +181,15 @@
         }
 
         .nav-btn-style.active-touch {
+            background: var(--primary-hover-color);
+        }
+
+        @media (hover: hover) {
             .nav-btn-style:hover {
                 background: var(--primary-hover-color);
             }
         }
 
-        .nav-btn-style:hover {
-            background: var(--primary-hover-color);
-        }
 
         .current-month, .current-year {
             font-size: 1.2rem;
@@ -3627,6 +3641,11 @@
             // Ajouter un gestionnaire d'événements pour le clic sur le titre
             const titleLink = document.getElementById("title-link");
                 if (titleLink) { // Vérification pour éviter les erreurs si l'élément n'existe pas
+                titleLink.addEventListener('pointerdown', () => titleLink.classList.add('active-touch'));
+                    const removeTitleActive = () => titleLink.classList.remove('active-touch');
+                    titleLink.addEventListener('pointerup', removeTitleActive);
+                    titleLink.addEventListener('pointercancel', removeTitleActive);
+                    titleLink.addEventListener('pointerleave', removeTitleActive);
                     titleLink.addEventListener("click", function(event) {
                     event.preventDefault(); // Empêche le comportement par défaut du lien
 
@@ -3656,6 +3675,7 @@
                     setTimeout(() => {
                         titleLink.style.opacity = "1";
                     }, 200);
+                    titleLink.blur();
                 });
 
             }
@@ -4968,19 +4988,27 @@
             });
             
             // Événement pour appliquer les dates personnalisées
-            applyCustomDatesBtn.addEventListener("click", function() {
-                const startDate = new Date(startDateInput.value);
-                const endDate = new Date(endDateInput.value);
-                
-                if (startDate && endDate && startDate <= endDate) {
-                    localStorage.setItem("spondylogChartRange", "custom");
-                    localStorage.setItem("spondylogChartStart", startDateInput.value);
-                    localStorage.setItem("spondylogChartEnd", endDateInput.value);
-                    generateCustomChart(startDate, endDate);
-                } else {
-                    alert("Veuillez sélectionner des dates valides (la date de début doit être antérieure ou égale à la date de fin).");
-                }
-            });
+            if (applyCustomDatesBtn) {
+                applyCustomDatesBtn.addEventListener('pointerdown', () => applyCustomDatesBtn.classList.add('active-touch'));
+                const removeApplyActive = () => applyCustomDatesBtn.classList.remove('active-touch');
+                applyCustomDatesBtn.addEventListener('pointerup', removeApplyActive);
+                applyCustomDatesBtn.addEventListener('pointercancel', removeApplyActive);
+                applyCustomDatesBtn.addEventListener('pointerleave', removeApplyActive);
+                applyCustomDatesBtn.addEventListener("click", function() {
+                    const startDate = new Date(startDateInput.value);
+                    const endDate = new Date(endDateInput.value);
+
+                    if (startDate && endDate && startDate <= endDate) {
+                        localStorage.setItem("spondylogChartRange", "custom");
+                        localStorage.setItem("spondylogChartStart", startDateInput.value);
+                        localStorage.setItem("spondylogChartEnd", endDateInput.value);
+                        generateCustomChart(startDate, endDate);
+                    } else {
+                        alert("Veuillez sélectionner des dates valides (la date de début doit être antérieure ou égale à la date de fin).");
+                    }
+                    applyCustomDatesBtn.blur();
+                });
+            }
 
             // Sélectionner les éléments
             const importExportContainers = document.querySelectorAll('.import-export-container');
@@ -5107,14 +5135,13 @@
                             userNotes    = importedData.notes;
                             userMedsData = importedData.medsData;
 
+                            // Après import, afficher par défaut toutes les catégories de notes dans la vue graphique
+                            localStorage.setItem('spondylogChartNoteChoice', 'all');
+
                             // 🟢 Importer les types de notes (et couleurs)
                             if (importedData.noteTypes && Array.isArray(importedData.noteTypes)) {
                                 noteTypes = importedData.noteTypes;
                                 localStorage.setItem('spondylogNoteTypes', JSON.stringify(noteTypes));
-                                 // Rafraîchir le sélecteur de type de note si la fonction React existe
-                                 if (typeof window.renderNoteDotsApp === 'function') {
-                                    window.renderNoteDotsApp();
-                                }
                             }
 
                             // 🟢 Importer les types de médicaments personnalisés
@@ -5125,6 +5152,10 @@
                                 if (typeof renderMedTypeDropdown === "function") {
                                     renderMedTypeDropdown(medTypes[0]?.name);
                                 }
+                            }
+                            // Rafraîchir le sélecteur de type de note si la fonction React existe
+                            if (typeof window.renderNoteDotsApp === 'function') {
+                                window.renderNoteDotsApp();
                             }
 
                             if (importedData.settings && typeof importedData.settings === 'object') {
@@ -5466,7 +5497,7 @@
         painChart.update();
         updateStiffPointRadius();
         painChart.update();
-        const storedChoice = localStorage.getItem('spondylogChartNoteChoice') || '';
+        const storedChoice = localStorage.getItem('spondylogChartNoteChoice') || 'all';
         const selectedTypes = storedChoice === 'all'
             ? noteTypes.map(t => t.name)
             : (storedChoice === '' ? [] : [storedChoice]);
@@ -5606,7 +5637,7 @@
     <script type="text/babel">
         function NoteDotsApp() {
             const [choice, setChoice] = React.useState(() =>
-                localStorage.getItem('spondylogChartNoteChoice') || ''
+            localStorage.getItem('spondylogChartNoteChoice') || 'all'
             );
 
             const selected = React.useMemo(() => {
