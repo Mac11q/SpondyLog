@@ -1516,7 +1516,7 @@
         .save-btn-style {
             background: var(--primary-color);
             color: white;
-            border: 1px #333333;
+            border: 1px var(--primary-color);;
             border-radius: 4px;
             padding: 8px 20px;
             font-size: 1em;
@@ -2322,6 +2322,33 @@
                         <div class="modal-row"><span class="legend-color-box" style="background-color:#000000;"></span><span class="legend-number">5 - </span><input type="text" id="legend-5" value="Extrême" /></div>
                     </div>
                 </div>
+                <div class="modal-section" id="default-level-section">
+                    <h4 style="width:100%; margin-bottom:4px;">Niveau par défaut</h4>
+                    <div class="modal-row">
+                        <span id="default-level-label-pain">Douleur</span>
+                        <span>&nbsp;-&nbsp;</span>
+                        <select id="default-level-pain" style="width:60px;">
+                            <option value="1">0</option>
+                            <option value="1">1</option>
+                            <option value="2">2</option>
+                            <option value="3">3</option>
+                            <option value="4">4</option>
+                            <option value="5">5</option>
+                        </select>
+                    </div>
+                    <div class="modal-row">
+                        <span id="default-level-label-stiffness">Raideur</span>
+                        <span>&nbsp;-&nbsp;</span>
+                        <select id="default-level-stiffness" style="width:60px;">
+                            <option value="1">0</option>
+                            <option value="1">1</option>
+                            <option value="2">2</option>
+                            <option value="3">3</option>
+                            <option value="4">4</option>
+                            <option value="5">5</option>
+                        </select>
+                    </div>
+                </div>
                 <div class="pain-modal-actions">
                     <button id="settings-reset" class="erase-option" type="button">Réinitialiser</button>
                     <button id="settings-save" class="validate-pain-modal-style" type="button">Enregistrer</button>
@@ -2442,6 +2469,10 @@
                     levels: { ...defaultLegendLevels }
                 }
             },
+            defaultLevels: {
+                pain: 1,
+                stiffness: 1
+            },
             activeLegend: 'pain'
         };
    
@@ -2475,6 +2506,10 @@
             }
             document.getElementById('settings-pain-toggle-btn').textContent = capitalizeWords(settings.legendVariants.pain.name);
             document.getElementById('settings-stiffness-toggle-btn').textContent = capitalizeWords(settings.legendVariants.stiffness.name);
+            const dlPain = document.getElementById('default-level-label-pain');
+            if (dlPain) dlPain.textContent = capitalizeWords(settings.legendVariants.pain.name);
+            const dlStiff = document.getElementById('default-level-label-stiffness');
+            if (dlStiff) dlStiff.textContent = capitalizeWords(settings.legendVariants.stiffness.name);
             updateLegendLayout();
         }
 
@@ -2492,13 +2527,15 @@
            const painEls = [
                document.getElementById('pain-toggle-btn'),
                document.getElementById('modal-pain-toggle-btn'),
-               document.getElementById('settings-pain-toggle-btn')
+               document.getElementById('settings-pain-toggle-btn'),
+               document.getElementById('default-level-label-pain')
            ];
            painEls.forEach(el => { if (el) el.textContent = painLabel; });
            const stiffEls = [
                document.getElementById('stiffness-toggle-btn'),
                document.getElementById('modal-stiffness-toggle-btn'),
-               document.getElementById('settings-stiffness-toggle-btn')
+               document.getElementById('settings-stiffness-toggle-btn'),
+               document.getElementById('default-level-label-stiffness')
            ];
            stiffEls.forEach(el => { if (el) el.textContent = stiffLabel; });
            updateDataSelectOptions();
@@ -2648,6 +2685,12 @@
                             stiffness: { pre: 'de', name: 'raideur', levels: cloneSettings(defaultLegendLevels) }
                         };
                     }
+                    if (!settings.defaultLevels) {
+                        settings.defaultLevels = { pain: 1, stiffness: 1 };
+                    } else {
+                        if (settings.defaultLevels.pain === undefined) settings.defaultLevels.pain = 1;
+                        if (settings.defaultLevels.stiffness === undefined) settings.defaultLevels.stiffness = 1;
+                    }
                     if (!settings.activeLegend) settings.activeLegend = 'pain';
                 } catch(e) {
                     settings = cloneSettings(defaultSettings);
@@ -2665,7 +2708,8 @@
                 themeColor: settings.themeColor,
                 elementIcon: settings.elementIcon,
                 elementName: settings.elementName,
-                legendVariants: settings.legendVariants
+                legendVariants: settings.legendVariants,
+                defaultLevels: settings.defaultLevels
             };
             localStorage.setItem('spondylogSettings', JSON.stringify(toSave));
         }
@@ -2814,6 +2858,14 @@
             document.getElementById('settings-name').value = settings.elementName;
             document.getElementById('settings-pain-toggle-btn').textContent = capitalizeWords(settings.legendVariants.pain.name);
             document.getElementById('settings-stiffness-toggle-btn').textContent = capitalizeWords(settings.legendVariants.stiffness.name);
+            const dlPain = document.getElementById('default-level-label-pain');
+            if (dlPain) dlPain.textContent = capitalizeWords(settings.legendVariants.pain.name);
+            const dlStiff = document.getElementById('default-level-label-stiffness');
+            if (dlStiff) dlStiff.textContent = capitalizeWords(settings.legendVariants.stiffness.name);
+            const dlPainSelect = document.getElementById('default-level-pain');
+            if (dlPainSelect) dlPainSelect.value = settings.defaultLevels.pain;
+            const dlStiffSelect = document.getElementById('default-level-stiffness');
+            if (dlStiffSelect) dlStiffSelect.value = settings.defaultLevels.stiffness;
             document.getElementById('settings-pain-toggle').checked = true;
             document.getElementById('settings-stiffness-toggle').checked = false;
             currentSettingsVariant = 'pain';
@@ -5158,6 +5210,12 @@
                                 window.renderNoteDotsApp();
                             }
 
+                            // Dessiner immédiatement toutes les notes si le graphique est affiché
+                            if (painChart && typeof drawNoteDots === 'function') {
+                                const allTypes = noteTypes.map(t => t.name);
+                                drawNoteDots(allTypes);
+                            }
+
                             if (importedData.settings && typeof importedData.settings === 'object') {
                                 settings = { ...cloneSettings(defaultSettings), ...importedData.settings };
                                 if (!settings.activeLegend) settings.activeLegend = 'pain';
@@ -5861,15 +5919,18 @@
             const settingsStiffnessToggleInput = document.getElementById('settings-stiffness-toggle');
 
             loadSettings();
-
             legendNameInput.addEventListener('input', () => {
-               legendNameInput.value = legendNameInput.value.toLowerCase();
-               updateLegendLayout();
-               const label = capitalizeWords(legendNameInput.value);
-               if (currentSettingsVariant === 'pain') {
+              legendNameInput.value = legendNameInput.value.toLowerCase();
+              updateLegendLayout();
+              const label = capitalizeWords(legendNameInput.value);
+              if (currentSettingsVariant === 'pain') {
                    document.getElementById('settings-pain-toggle-btn').textContent = label;
+                   const dlPain = document.getElementById('default-level-label-pain');
+                   if (dlPain) dlPain.textContent = label;
                } else {
                    document.getElementById('settings-stiffness-toggle-btn').textContent = label;
+                   const dlStiff = document.getElementById('default-level-label-stiffness');
+                   if (dlStiff) dlStiff.textContent = label;
                }
            });
 
@@ -5934,6 +5995,8 @@
                     settings.themeColor = document.getElementById('settings-color').value;
                     settings.elementIcon = document.getElementById('settings-icon').value;
                     settings.elementName = document.getElementById('settings-name').value;
+                    settings.defaultLevels.pain = parseInt(document.getElementById('default-level-pain').value);
+                    settings.defaultLevels.stiffness = parseInt(document.getElementById('default-level-stiffness').value);
                     
                     setActiveLegend('pain');
 
