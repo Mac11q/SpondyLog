@@ -2443,6 +2443,49 @@
         }
         localStorage.setItem('spondylogHiddenLevels', JSON.stringify(hiddenLevels));
 
+        function parseDateId(dateId) {
+            const [y, m, d] = dateId.split('-').map(Number);
+            return new Date(y, m - 1, d);
+        }
+
+        function getTodayId() {
+            const t = new Date();
+            return `${t.getFullYear()}-${t.getMonth()+1}-${t.getDate()}`;
+        }
+
+        function getSymptomValue(dateId, variant) {
+            const data = variant === 'pain' ? userPainData : userStiffnessData;
+            if (data[dateId] != null) return data[dateId];
+            const level = settings.defaultLevels[variant];
+            const startStr = settings.defaultStartDates ? settings.defaultStartDates[variant] : null;
+            if (level > 0 && startStr) {
+                const date = parseDateId(dateId);
+                const start = parseDateId(startStr);
+                start.setDate(start.getDate() + 1);
+                if (date >= start) return level;
+            }
+            return 0;
+        }
+
+        function applyDefaultValues() {
+            const today = new Date();
+            today.setHours(0,0,0,0);
+            ['pain','stiffness'].forEach(variant => {
+                const level = settings.defaultLevels[variant];
+                const startStr = settings.defaultStartDates ? settings.defaultStartDates[variant] : null;
+                if (level > 0 && startStr) {
+                    const data = variant === 'pain' ? userPainData : userStiffnessData;
+                    let cur = parseDateId(startStr);
+                    cur.setDate(cur.getDate() + 1);
+                    while (cur <= today) {
+                        const id = `${cur.getFullYear()}-${cur.getMonth()+1}-${cur.getDate()}`;
+                        if (data[id] === undefined) data[id] = level;
+                        cur.setDate(cur.getDate() + 1);
+                    }
+                }
+            });
+        }
+
         const defaultLegendLevels = {
             0: 'Absente',
             1: 'Légère',
@@ -2472,6 +2515,10 @@
             defaultLevels: {
                 pain: 1,
                 stiffness: 1
+            },
+            defaultStartDates: {
+                pain: null,
+                stiffness: null
             },
             activeLegend: 'pain'
         };
@@ -2691,6 +2738,12 @@
                         if (settings.defaultLevels.pain === undefined) settings.defaultLevels.pain = 1;
                         if (settings.defaultLevels.stiffness === undefined) settings.defaultLevels.stiffness = 1;
                     }
+                    if (!settings.defaultStartDates) {
+                        settings.defaultStartDates = { pain: null, stiffness: null };
+                    } else {
+                        if (settings.defaultStartDates.pain === undefined) settings.defaultStartDates.pain = null;
+                        if (settings.defaultStartDates.stiffness === undefined) settings.defaultStartDates.stiffness = null;
+                    }
                     if (!settings.activeLegend) settings.activeLegend = 'pain';
                 } catch(e) {
                     settings = cloneSettings(defaultSettings);
@@ -2709,7 +2762,8 @@
                 elementIcon: settings.elementIcon,
                 elementName: settings.elementName,
                 legendVariants: settings.legendVariants,
-                defaultLevels: settings.defaultLevels
+                defaultLevels: settings.defaultLevels,
+                defaultStartDates: settings.defaultStartDates
             };
             localStorage.setItem('spondylogSettings', JSON.stringify(toSave));
         }
@@ -3227,7 +3281,9 @@
             // Essayer de charger les données depuis localStorage
             loadUserData();
             loadSettings();
-            
+            applyDefaultValues();
+            saveUserData();
+
             // Affichage du calendrier initial
             renderCalendar(currentMonth, currentYear);
             renderYearView(currentYear);
@@ -3781,6 +3837,7 @@
             }
             if (savedLastType)   userLastNoteType = JSON.parse(savedLastType);
             if (savedSettings)   settings = { ...cloneSettings(defaultSettings), ...JSON.parse(savedSettings) };
+            if (!settings.defaultStartDates) settings.defaultStartDates = { pain: null, stiffness: null };
 
             // 2) Initialiser les types de notes AVANT conversion des anciennes notes
             if (savedNoteTypes) {
@@ -3896,6 +3953,7 @@
                     delete userNotes[selectedDate];    // supprime toutes les notes de ce jour
                     delete userMedsData[selectedDate];
                     delete userLastNoteType[selectedDate];
+                    applyDefaultValues();
                     saveUserData();
                     closeModal(true);
                 }
@@ -3973,7 +4031,6 @@
 
             // Fonctions de rendu et de navigation du calendrier mensuel
             function renderCalendar(month, year) {
-                const symptomData = settings.activeLegend === 'pain' ? userPainData : userStiffnessData;
                 // Mise à jour de l'affichage du mois et de l'année
                 const monthNames = ["Janvier", "Février", "Mars", "Avril", "Mai", "Juin", 
                                     "Juillet", "Août", "Septembre", "Octobre", "Novembre", "Décembre"];
@@ -4055,8 +4112,8 @@
                                 // Ajoutez le carré rouge en premier pour qu'il soit en arrière-plan
                                 dayCell.insertBefore(redSquare, dayCell.firstChild);
                             }
-                            const level = symptomData[dateId];
-                            if (level !== undefined && !hiddenLevels[settings.activeLegend][level]) {
+                            const level = getSymptomValue(dateId, settings.activeLegend);
+                            if (level > 0 && !hiddenLevels[settings.activeLegend][level]) {
                                 // Valeur définie par l'utilisateur
                                 dayCell.style.backgroundColor = painColors[level];
                                 // Si c'est le niveau 5 (noir), mettre le texte en blanc
@@ -4192,7 +4249,6 @@
 
             // Rendu de la vue annuelle
             function renderYearView(year) {
-                const symptomData = settings.activeLegend === 'pain' ? userPainData : userStiffnessData;
                 // Mise à jour de l'affichage de l'année
                 currentYearDisplay.textContent = year;
                 
@@ -4301,8 +4357,8 @@
                                 const todayForComparison = new Date();
                                 todayForComparison.setHours(0, 0, 0, 0);
                                 
-                                const level = symptomData[dateId];
-                                if (level !== undefined && !hiddenLevels[settings.activeLegend][level]) {
+                                const level = getSymptomValue(dateId, settings.activeLegend);
+                                if (level > 0 && !hiddenLevels[settings.activeLegend][level]) {
                                     // Valeur définie par l'utilisateur
                                     miniDay.style.backgroundColor = painColors[level];
                                     // Si c'est le niveau 5 (noir), mettre le texte en blanc
@@ -4342,8 +4398,8 @@
                                     showPainModal(dateId);
                                 });
 
-                                const painLevel = symptomData[dateId];
-                                const painInfo = (painLevel !== undefined && painLevel !== 0 && !hiddenLevels[settings.activeLegend][painLevel]);
+                                const painLevel = getSymptomValue(dateId, settings.activeLegend);
+                                const painInfo = (painLevel > 0 && !hiddenLevels[settings.activeLegend][painLevel]);
                                 const medData  = userMedsData[dateId];
                                 const medInfo  = medData && medData.taken;
                                 const noteObjY = userNotes[dateId];
@@ -4483,12 +4539,7 @@
                 const rectOptions = rectBar.querySelectorAll('.pain-slider-rect-option');
 
                 // Charge la valeur selon la variante courante (0 si rien)
-                let sliderVal = 0;
-                if (currentModalLegend === 'pain') {
-                    sliderVal = (userPainData[dateId] != null) ? userPainData[dateId] : 0;
-                } else {
-                    sliderVal = (userStiffnessData[dateId] != null) ? userStiffnessData[dateId] : 0;
-                }
+                let sliderVal = getSymptomValue(dateId, currentModalLegend);
                 moveSelector(sliderVal);
                 painRectValueSpan.textContent = sliderVal;
                 painRectValue = sliderVal;
@@ -4647,9 +4698,13 @@
 
                 if (selectedDate) {
                     if (currentModalLegend === 'pain') {
-                        if (currentVal > 0) userPainData[selectedDate] = currentVal; else delete userPainData[selectedDate];
+                        if (userPainData[selectedDate] !== undefined) {
+                            if (currentVal > 0) userPainData[selectedDate] = currentVal; else delete userPainData[selectedDate];
+                        }
                     } else {
-                        if (currentVal > 0) userStiffnessData[selectedDate] = currentVal; else delete userStiffnessData[selectedDate];
+                        if (userStiffnessData[selectedDate] !== undefined) {
+                            if (currentVal > 0) userStiffnessData[selectedDate] = currentVal; else delete userStiffnessData[selectedDate];
+                        }
                     }
                 }
 
@@ -4660,7 +4715,7 @@
 
                 let newVal = 0;
                 if (selectedDate) {
-                    newVal = newVariant === 'pain' ? (userPainData[selectedDate] || 0) : (userStiffnessData[selectedDate] || 0);
+                    newVal = getSymptomValue(selectedDate, newVariant);
                 }
                 selector.style.left = `calc(${newVal} * (100% / ${total}))`;
                 valueSpan.textContent = newVal;
@@ -4739,10 +4794,11 @@
                     // Supprimer l'information sur les anti-inflammatoires
                     delete userMedsData[selectedDate];
                     delete userLastNoteType[selectedDate];
-                    
+
                     // Sauvegarder les données
+                    applyDefaultValues();
                     saveUserData();
-                    
+
                     // Fermer le modal et mettre à jour l'affichage
                     closeModal(true);
                 }
@@ -4831,10 +4887,10 @@
                     const noteDate = document.createElement("div");
                     noteDate.className = "note-date";
 
-                    const painDefined = userPainData[dateId] !== undefined;
-                    const stiffnessDefined = userStiffnessData[dateId] !== undefined;
-                    const painValue = painDefined ? userPainData[dateId] : 0;
-                    const stiffnessValue = stiffnessDefined ? userStiffnessData[dateId] : 0;
+                    const painValue = getSymptomValue(dateId, 'pain');
+                    const stiffnessValue = getSymptomValue(dateId, 'stiffness');
+                    const painDefined = painValue > 0;
+                    const stiffnessDefined = stiffnessValue > 0;
                     const hasSymptoms = painDefined || stiffnessDefined;
                     noteDate.textContent = formattedDate;
                     const hasMeds  = !!userMedsData[dateId];
@@ -5218,6 +5274,7 @@
 
                             if (importedData.settings && typeof importedData.settings === 'object') {
                                 settings = { ...cloneSettings(defaultSettings), ...importedData.settings };
+                                if (!settings.defaultStartDates) settings.defaultStartDates = { pain: null, stiffness: null };
                                 if (!settings.activeLegend) settings.activeLegend = 'pain';
                                 if (!settings.legendVariants) {
                                     settings.legendVariants = {
@@ -5274,6 +5331,7 @@
                                 }
                             }
 
+                            applyDefaultValues();
                             // Sauvegarde et rafraîchissement de la vue
                             saveUserData();
                             if (currentView === "month") {
@@ -5347,21 +5405,17 @@
                 dates.push(`${day}/${month}`);
                 
                 // Récupérer la valeur de douleur
-                let painValue = null;
-                if (userPainData[dateId] !== undefined) {
-                    painValue = userPainData[dateId];
+                let painValue = getSymptomValue(dateId, 'pain');
+                if (painValue > 0) {
                     totalPain += painValue;
                     painCount++;
                     if (painValue >= 3) severeDays++;
                 }
 
                 // Récupérer la valeur de raideur
-                // Récupérer la valeur de raideur. Si aucune valeur n'est
-                // enregistrée pour ce jour, utiliser 0 afin de conserver une
-                // courbe continue.
-                let stiffValue = 0;
-                if (userStiffnessData[dateId] !== undefined) {
-                    stiffValue = userStiffnessData[dateId];
+                // Si aucune valeur n'est enregistrée pour ce jour, utiliser 0 afin de conserver une courbe continue.
+                let stiffValue = getSymptomValue(dateId, 'stiffness');
+                if (stiffValue > 0) {
                     totalStiff += stiffValue;
                     stiffCount++;
                 }
@@ -5995,12 +6049,24 @@
                     settings.themeColor = document.getElementById('settings-color').value;
                     settings.elementIcon = document.getElementById('settings-icon').value;
                     settings.elementName = document.getElementById('settings-name').value;
-                    settings.defaultLevels.pain = parseInt(document.getElementById('default-level-pain').value);
-                    settings.defaultLevels.stiffness = parseInt(document.getElementById('default-level-stiffness').value);
-                    
+                    const oldPain = settings.defaultLevels.pain;
+                    const oldStiff = settings.defaultLevels.stiffness;
+                    const newPain = parseInt(document.getElementById('default-level-pain').value);
+                    const newStiff = parseInt(document.getElementById('default-level-stiffness').value);
+                    if (newPain !== oldPain) {
+                        settings.defaultStartDates.pain = newPain > 0 ? getTodayId() : null;
+                    }
+                    if (newStiff !== oldStiff) {
+                        settings.defaultStartDates.stiffness = newStiff > 0 ? getTodayId() : null;
+                    }
+                    settings.defaultLevels.pain = newPain;
+                    settings.defaultLevels.stiffness = newStiff;
+
                     setActiveLegend('pain');
 
                     saveSettings();
+                    applyDefaultValues();
+                    saveUserData();
                     applySettingsToUI();
                     if (currentView === "month") {
                         renderCalendar(currentMonth, currentYear);
