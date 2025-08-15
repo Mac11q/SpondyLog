@@ -2423,6 +2423,7 @@
         let userLastNoteType = {}; // Mémorise pour chaque jour le dernier type de note utilisé
         let hiddenNoteTypes = JSON.parse(localStorage.getItem('spondylogHiddenNoteTypes') || '{}');
         let hiddenLevels = JSON.parse(localStorage.getItem('spondylogHiddenLevels') || '{"pain":{},"stiffness":{}}');
+        let defaultSkipDates = JSON.parse(localStorage.getItem('spondylogDefaultSkipDates') || '{"pain":{},"stiffness":{}}');
         let editingTypeName = null;
         let chartStartDate = null;
         let chartEndDate = null;
@@ -2474,15 +2475,16 @@
         function applyDefaultValues() {
             const tz = getUserTimeZone();
             const today = parseDateId(getTodayId(tz));
-            ['pain','stiffness'].forEach(variant => {
+        ['pain','stiffness'].forEach(variant => {
                 const level = settings.defaultLevels[variant];
                 const startStr = settings.defaultStartDates ? settings.defaultStartDates[variant] : null;
+                const skip = defaultSkipDates[variant] || {};
                 if (level > 0 && startStr) {
                     const data = variant === 'pain' ? userPainData : userStiffnessData;
                     let cur = parseDateId(startStr);
                     while (cur <= today) {
                         const id = `${cur.getFullYear()}-${cur.getMonth()+1}-${cur.getDate()}`;
-                        if (data[id] === undefined) data[id] = level;
+                        if (data[id] === undefined && !skip[id]) data[id] = level;
                         cur.setDate(cur.getDate() + 1);
                     }
                 }
@@ -3811,6 +3813,12 @@
             for (const d in userStiffnessData) {
                 if (!(userStiffnessData[d] > 0)) delete userStiffnessData[d];
             }
+            for (const d in defaultSkipDates.pain) {
+                if (userPainData[d] > 0) delete defaultSkipDates.pain[d];
+            }
+            for (const d in defaultSkipDates.stiffness) {
+                if (userStiffnessData[d] > 0) delete defaultSkipDates.stiffness[d];
+            }
             // Stocker les données dans localStorage
             localStorage.setItem('spondylogPainData', JSON.stringify(userPainData));
             localStorage.setItem('spondylogStiffnessData', JSON.stringify(userStiffnessData));
@@ -3818,6 +3826,7 @@
             localStorage.setItem('spondylogMedsData', JSON.stringify(userMedsData));
             localStorage.setItem('spondylogNoteTypes', JSON.stringify(noteTypes));
             localStorage.setItem('spondylogLastNoteType', JSON.stringify(userLastNoteType));
+            localStorage.setItem('spondylogDefaultSkipDates', JSON.stringify(defaultSkipDates));
             }
 
         
@@ -3830,6 +3839,7 @@
             const savedNoteTypes  = localStorage.getItem('spondylogNoteTypes');
             const savedLastType   = localStorage.getItem('spondylogLastNoteType');
             const savedSettings   = localStorage.getItem('spondylogSettings');
+            const savedSkip       = localStorage.getItem('spondylogDefaultSkipDates');
 
             if (savedPainData) {
                 userPainData = JSON.parse(savedPainData);
@@ -3838,6 +3848,7 @@
                 userStiffnessData = JSON.parse(savedStiffnessData);
             }
             if (savedMedsData)   userMedsData = JSON.parse(savedMedsData);
+            if (savedSkip)       defaultSkipDates = JSON.parse(savedSkip);
             if (userPainData) {
                 for (const d in userPainData) {
                     const val = userPainData[d];
@@ -3968,6 +3979,8 @@
                     delete userNotes[selectedDate];    // supprime toutes les notes de ce jour
                     delete userMedsData[selectedDate];
                     delete userLastNoteType[selectedDate];
+                    defaultSkipDates.pain[selectedDate] = true;
+                    defaultSkipDates.stiffness[selectedDate] = true;
                     applyDefaultValues();
                     saveUserData();
                     closeModal(true);
@@ -4802,13 +4815,17 @@
                     // Supprimer la valeur
                     delete userPainData[selectedDate];
                     delete userStiffnessData[selectedDate];
-                    
+
                     // Supprimer la note
                     delete userNotes[selectedDate];
 
                     // Supprimer l'information sur les anti-inflammatoires
                     delete userMedsData[selectedDate];
                     delete userLastNoteType[selectedDate];
+
+                    // Empêcher la réapplication de la valeur par défaut pour ce jour
+                    defaultSkipDates.pain[selectedDate] = true;
+                    defaultSkipDates.stiffness[selectedDate] = true;
 
                     // Sauvegarder les données
                     applyDefaultValues();
@@ -5219,7 +5236,8 @@
                 lastNoteType: userLastNoteType,
                 hiddenNoteTypes: hiddenNoteTypes,
                 hiddenLevels: hiddenLevels,
-                penseBete: localStorage.getItem('spondylogPenseBete') || ""
+                penseBete: localStorage.getItem('spondylogPenseBete') || "",
+                defaultSkipDates: defaultSkipDates
             };
 
             // Convertir en JSON joliment indenté
@@ -5320,6 +5338,10 @@
                             if (importedData.hiddenLevels && typeof importedData.hiddenLevels === 'object') {
                                 hiddenLevels = importedData.hiddenLevels;
                                 localStorage.setItem('spondylogHiddenLevels', JSON.stringify(hiddenLevels));
+                            }
+                            if (importedData.defaultSkipDates && typeof importedData.defaultSkipDates === 'object') {
+                                defaultSkipDates = importedData.defaultSkipDates;
+                                localStorage.setItem('spondylogDefaultSkipDates', JSON.stringify(defaultSkipDates));
                             }
 
                             renderNoteLegend();
