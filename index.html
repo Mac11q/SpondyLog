@@ -2924,6 +2924,9 @@
             settings = cloneSettings(defaultSettings);
             setActiveLegend('pain');
             localStorage.removeItem('spondylogSettings');
+            // Réinitialise également les jours ignorés pour la valeur par défaut
+            defaultSkipDates = { pain: {}, stiffness: {} };
+            localStorage.removeItem('spondylogDefaultSkipDates');
             applySettingsToUI();
         }
 
@@ -6106,6 +6109,10 @@
                     }
                     settings.defaultLevels.pain = newPain;
                     settings.defaultLevels.stiffness = newStiff;
+
+                    // Réinitialiser les jours ignorés afin que les nouvelles
+                    // valeurs par défaut puissent s'appliquer sur les cases vides
+                    defaultSkipDates = { pain: {}, stiffness: {} };
 
                     setActiveLegend('pain');
 
