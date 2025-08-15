@@ -2472,6 +2472,12 @@
             return 0;
         }
 
+        // Marque un jour pour ignorer la réapplication de la valeur par défaut
+        function skipDefaultForDate(dateId) {
+            defaultSkipDates.pain[dateId] = true;
+            defaultSkipDates.stiffness[dateId] = true;
+        }
+
         function applyDefaultValues() {
             const tz = getUserTimeZone();
             const today = parseDateId(getTodayId(tz));
@@ -3979,8 +3985,7 @@
                     delete userNotes[selectedDate];    // supprime toutes les notes de ce jour
                     delete userMedsData[selectedDate];
                     delete userLastNoteType[selectedDate];
-                    defaultSkipDates.pain[selectedDate] = true;
-                    defaultSkipDates.stiffness[selectedDate] = true;
+                    skipDefaultForDate(selectedDate);
                     applyDefaultValues();
                     saveUserData();
                     closeModal(true);
@@ -4824,8 +4829,7 @@
                     delete userLastNoteType[selectedDate];
 
                     // Empêcher la réapplication de la valeur par défaut pour ce jour
-                    defaultSkipDates.pain[selectedDate] = true;
-                    defaultSkipDates.stiffness[selectedDate] = true;
+                    skipDefaultForDate(selectedDate);
 
                     // Sauvegarder les données
                     applyDefaultValues();
