@@ -2490,7 +2490,10 @@
                     let cur = parseDateId(startStr);
                     while (cur <= today) {
                         const id = `${cur.getFullYear()}-${cur.getMonth()+1}-${cur.getDate()}`;
-                        if (data[id] === undefined && !skip[id]) data[id] = level;
+                        // Considère comme vide toute valeur nulle ou non définie
+                        if ((data[id] === undefined || data[id] === null || data[id] === 0) && !skip[id]) {
+                            data[id] = level;
+                        }
                         cur.setDate(cur.getDate() + 1);
                     }
                 }
@@ -6110,14 +6113,31 @@
                     settings.defaultLevels.pain = newPain;
                     settings.defaultLevels.stiffness = newStiff;
 
-                    // Réinitialiser les jours ignorés afin que les nouvelles
-                    // valeurs par défaut puissent s'appliquer sur les cases vides
+                    // Conserver les jours réinitialisés avant de vider la liste
+                    const skipped = JSON.parse(JSON.stringify(defaultSkipDates));
                     defaultSkipDates = { pain: {}, stiffness: {} };
 
                     setActiveLegend('pain');
 
                     saveSettings();
                     applyDefaultValues();
+
+                    // Réapplique la valeur par défaut sur les jours réinitialisés encore vides
+                    if (newPain > 0) {
+                        for (const d in skipped.pain) {
+                            if (userPainData[d] === undefined) {
+                                userPainData[d] = newPain;
+                            }
+                        }
+                    }
+                    if (newStiff > 0) {
+                        for (const d in skipped.stiffness) {
+                            if (userStiffnessData[d] === undefined) {
+                                userStiffnessData[d] = newStiff;
+                            }
+                        }
+                    }
+
                     saveUserData();
                     applySettingsToUI();
                     if (currentView === "month") {
