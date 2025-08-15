@@ -2448,35 +2448,38 @@
             return new Date(y, m - 1, d);
         }
 
-        function getTodayId() {
-            const t = new Date();
-            return `${t.getFullYear()}-${t.getMonth()+1}-${t.getDate()}`;
+        function getUserTimeZone() {
+            const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
+            return tz || 'UTC';
+        }
+
+        function getTodayId(tz = getUserTimeZone()) {
+            const now = new Date();
+            const formatter = new Intl.DateTimeFormat('en-CA', {
+                timeZone: tz,
+                year: 'numeric',
+                month: 'numeric',
+                day: 'numeric'
+            });
+            const parts = formatter.formatToParts(now).reduce((acc, p) => ({ ...acc, [p.type]: p.value }), {});
+            return `${parseInt(parts.year)}-${parseInt(parts.month)}-${parseInt(parts.day)}`;
         }
 
         function getSymptomValue(dateId, variant) {
             const data = variant === 'pain' ? userPainData : userStiffnessData;
             if (data[dateId] != null) return data[dateId];
-            const level = settings.defaultLevels[variant];
-            const startStr = settings.defaultStartDates ? settings.defaultStartDates[variant] : null;
-            if (level > 0 && startStr) {
-                const date = parseDateId(dateId);
-                const start = parseDateId(startStr);
-                start.setDate(start.getDate() + 1);
-                if (date >= start) return level;
-            }
             return 0;
         }
 
         function applyDefaultValues() {
-            const today = new Date();
-            today.setHours(0,0,0,0);
+            const tz = getUserTimeZone();
+            const today = parseDateId(getTodayId(tz));
             ['pain','stiffness'].forEach(variant => {
                 const level = settings.defaultLevels[variant];
                 const startStr = settings.defaultStartDates ? settings.defaultStartDates[variant] : null;
                 if (level > 0 && startStr) {
                     const data = variant === 'pain' ? userPainData : userStiffnessData;
                     let cur = parseDateId(startStr);
-                    cur.setDate(cur.getDate() + 1);
                     while (cur <= today) {
                         const id = `${cur.getFullYear()}-${cur.getMonth()+1}-${cur.getDate()}`;
                         if (data[id] === undefined) data[id] = level;
@@ -2517,6 +2520,10 @@
                 stiffness: 1
             },
             defaultStartDates: {
+                pain: null,
+                stiffness: null
+            },
+            defaultTimeZones: {
                 pain: null,
                 stiffness: null
             },
@@ -2744,6 +2751,12 @@
                         if (settings.defaultStartDates.pain === undefined) settings.defaultStartDates.pain = null;
                         if (settings.defaultStartDates.stiffness === undefined) settings.defaultStartDates.stiffness = null;
                     }
+                    if (!settings.defaultTimeZones) {
+                        settings.defaultTimeZones = { pain: null, stiffness: null };
+                    } else {
+                        if (settings.defaultTimeZones.pain === undefined) settings.defaultTimeZones.pain = null;
+                        if (settings.defaultTimeZones.stiffness === undefined) settings.defaultTimeZones.stiffness = null;
+                    }
                     if (!settings.activeLegend) settings.activeLegend = 'pain';
                 } catch(e) {
                     settings = cloneSettings(defaultSettings);
@@ -2763,7 +2776,8 @@
                 elementName: settings.elementName,
                 legendVariants: settings.legendVariants,
                 defaultLevels: settings.defaultLevels,
-                defaultStartDates: settings.defaultStartDates
+                defaultStartDates: settings.defaultStartDates,
+                defaultTimeZones: settings.defaultTimeZones
             };
             localStorage.setItem('spondylogSettings', JSON.stringify(toSave));
         }
@@ -3838,6 +3852,7 @@
             if (savedLastType)   userLastNoteType = JSON.parse(savedLastType);
             if (savedSettings)   settings = { ...cloneSettings(defaultSettings), ...JSON.parse(savedSettings) };
             if (!settings.defaultStartDates) settings.defaultStartDates = { pain: null, stiffness: null };
+            if (!settings.defaultTimeZones) settings.defaultTimeZones = { pain: null, stiffness: null };
 
             // 2) Initialiser les types de notes AVANT conversion des anciennes notes
             if (savedNoteTypes) {
@@ -4082,8 +4097,8 @@
                             
                             // Colorier la cellule en fonction des données utilisateur
                             const targetDate = new Date(year, month, date);
-                            const today = new Date();
-                            today.setHours(0, 0, 0, 0);
+                            const tz = getUserTimeZone();
+                            const today = parseDateId(getTodayId(tz));
                             
                             // Vérifier si c'est aujourd'hui et ajouter un carré rouge autour
                             if (targetDate.getFullYear() === today.getFullYear() && 
@@ -4260,10 +4275,11 @@
                                 "Juillet", "Août", "Septembre", "Octobre", "Novembre", "Décembre"];
                 
                 // Date du jour actuel
-                const today = new Date();
-                const currentDay = today.getDate();
-                let currentMonth = today.getMonth();
-                let currentYear = today.getFullYear();
+                const tz = getUserTimeZone();
+                const todayParts = getTodayId(tz).split('-').map(Number);
+                const currentDay = todayParts[2];
+                let currentMonth = todayParts[1] - 1;
+                let currentYear = todayParts[0];
                 
                 // Créer une carte pour chaque mois
                 for (let month = 0; month < 12; month++) {
@@ -4354,8 +4370,7 @@
                                 
                                 // Colorier la cellule en fonction des données utilisateur
                                 const targetDate = new Date(year, month, date);
-                                const todayForComparison = new Date();
-                                todayForComparison.setHours(0, 0, 0, 0);
+                                const todayForComparison = parseDateId(getTodayId(tz));
                                 
                                 const level = getSymptomValue(dateId, settings.activeLegend);
                                 if (level > 0 && !hiddenLevels[settings.activeLegend][level]) {
@@ -5275,6 +5290,7 @@
                             if (importedData.settings && typeof importedData.settings === 'object') {
                                 settings = { ...cloneSettings(defaultSettings), ...importedData.settings };
                                 if (!settings.defaultStartDates) settings.defaultStartDates = { pain: null, stiffness: null };
+                                if (!settings.defaultTimeZones) settings.defaultTimeZones = { pain: null, stiffness: null };
                                 if (!settings.activeLegend) settings.activeLegend = 'pain';
                                 if (!settings.legendVariants) {
                                     settings.legendVariants = {
@@ -6053,11 +6069,14 @@
                     const oldStiff = settings.defaultLevels.stiffness;
                     const newPain = parseInt(document.getElementById('default-level-pain').value);
                     const newStiff = parseInt(document.getElementById('default-level-stiffness').value);
+                    const tz = getUserTimeZone();
                     if (newPain !== oldPain) {
-                        settings.defaultStartDates.pain = newPain > 0 ? getTodayId() : null;
+                        settings.defaultStartDates.pain = newPain > 0 ? getTodayId(tz) : null;
+                        settings.defaultTimeZones.pain = newPain > 0 ? tz : null;
                     }
                     if (newStiff !== oldStiff) {
-                        settings.defaultStartDates.stiffness = newStiff > 0 ? getTodayId() : null;
+                        settings.defaultStartDates.stiffness = newStiff > 0 ? getTodayId(tz) : null;
+                        settings.defaultTimeZones.stiffness = newStiff > 0 ? tz : null;
                     }
                     settings.defaultLevels.pain = newPain;
                     settings.defaultLevels.stiffness = newStiff;
