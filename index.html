@@ -6123,16 +6123,19 @@
                     applyDefaultValues();
 
                     // Réapplique la valeur par défaut sur les jours réinitialisés encore vides
+                    const todayId = getTodayId(tz);
+                    const todayDate = parseDateId(todayId);
+
                     if (newPain > 0) {
                         for (const d in skipped.pain) {
-                            if (userPainData[d] === undefined) {
+                            if (userPainData[d] === undefined && parseDateId(d) >= todayDate) {
                                 userPainData[d] = newPain;
                             }
                         }
                     }
                     if (newStiff > 0) {
                         for (const d in skipped.stiffness) {
-                            if (userStiffnessData[d] === undefined) {
+                            if (userStiffnessData[d] === undefined && parseDateId(d) >= todayDate) {
                                 userStiffnessData[d] = newStiff;
                             }
                         }
