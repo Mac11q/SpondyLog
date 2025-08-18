@@ -4175,8 +4175,11 @@
                                 });
                                 if (visibleTypesForDay.length > 0) {
                                     dayCell.classList.add("note-present");
-                                    const typeNameForDay = visibleTypesForDay[visibleTypesForDay.length - 1];
-                                    const typeObjBorder = noteTypes.find(t => t.name === typeNameForDay);
+                                    let mainTypeName = userLastNoteType[dateId];
+                                    if (!mainTypeName || !visibleTypesForDay.includes(mainTypeName)) {
+                                        mainTypeName = visibleTypesForDay[visibleTypesForDay.length - 1];
+                                    }
+                                    const typeObjBorder = noteTypes.find(t => t.name === mainTypeName);
                                     dayCell.style.borderColor = typeObjBorder ? typeObjBorder.color : (noteTypes[0]?.color || "#3498db");
                                     const dotsContainer = document.createElement("div");
                                     dotsContainer.className = "note-dots-container";
@@ -4425,8 +4428,11 @@
                                     });
                                     if (visibleTypes.length > 0) {
                                         miniDay.classList.add('mini-note-present');
-                                        const typeNameForDay = visibleTypes[visibleTypes.length - 1];
-                                        const typeObjBorder = noteTypes.find(t => t.name === typeNameForDay);
+                                        let mainTypeName = userLastNoteType[dateId];
+                                        if (!mainTypeName || !visibleTypes.includes(mainTypeName)) {
+                                            mainTypeName = visibleTypes[visibleTypes.length - 1];
+                                        }
+                                        const typeObjBorder = noteTypes.find(t => t.name === mainTypeName);
                                         miniDay.style.borderColor = typeObjBorder ? typeObjBorder.color : (noteTypes[0]?.color || '#3498db');
                                         miniDay.style.position = 'relative';
                                     }
