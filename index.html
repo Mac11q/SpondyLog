@@ -3343,7 +3343,6 @@
                 validatePainModalBtn.addEventListener("click", function() {
                     if (selectedDate) {
                         saveCurrentNote();
-                        updateLastNoteTypeForDate(selectedDate);
                         saveMedDataForDay(selectedDate);
                           // Sauvegarder le niveau de douleur
                           let v;
@@ -3376,7 +3375,6 @@
                     // Enregistrer toutes les données comme pour "OK"
                     if (selectedDate) {
                         saveCurrentNote();
-                        updateLastNoteTypeForDate(selectedDate);
                         saveMedDataForDay(selectedDate);
                         let v;
                         const selectedPain = document.querySelector(".pain-option.selected");
@@ -3948,6 +3946,8 @@
                         }
                     }
                 }
+                // Met à jour la note principale après chaque sauvegarde de note
+                updateLastNoteTypeForDate(selectedDate);
             }
 
             function updateLastNoteTypeForDate(dateId) {
@@ -4810,8 +4810,6 @@
                 // 2️⃣ Sauvegarder la note du type de note actuellement sélectionné
                 //    Cette fonction gère correctement userNotes[selectedDate] en tant qu'objet
                 saveCurrentNote();
-                // Met à jour le dernier type utilisé pour ce jour en fonction des notes restantes
-                updateLastNoteTypeForDate(selectedDate);
 
                 // 3️⃣ Sauvegarder l’état des anti-inflammatoires
                 if (document.getElementById('med-taken').checked) {
