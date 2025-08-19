@@ -6117,33 +6117,14 @@
                     settings.defaultLevels.pain = newPain;
                     settings.defaultLevels.stiffness = newStiff;
 
-                    // Conserver les jours réinitialisés avant de vider la liste
-                    const skipped = JSON.parse(JSON.stringify(defaultSkipDates));
+                    // Réinitialise les jours ignorés pour que les nouvelles valeurs par défaut
+                    // ne s'appliquent qu'à partir du jour courant.
                     defaultSkipDates = { pain: {}, stiffness: {} };
 
                     setActiveLegend('pain');
 
                     saveSettings();
                     applyDefaultValues();
-
-                    // Réapplique la valeur par défaut sur les jours réinitialisés encore vides
-                    const todayId = getTodayId(tz);
-                    const todayDate = parseDateId(todayId);
-
-                    if (newPain > 0) {
-                        for (const d in skipped.pain) {
-                            if (userPainData[d] === undefined && parseDateId(d) >= todayDate) {
-                                userPainData[d] = newPain;
-                            }
-                        }
-                    }
-                    if (newStiff > 0) {
-                        for (const d in skipped.stiffness) {
-                            if (userStiffnessData[d] === undefined && parseDateId(d) >= todayDate) {
-                                userStiffnessData[d] = newStiff;
-                            }
-                        }
-                    }
 
                     saveUserData();
                     applySettingsToUI();
