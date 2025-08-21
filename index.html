@@ -1765,6 +1765,10 @@
         overflow: visible;
     }
 
+    .chart-note-dot.show-tooltip {
+        z-index: 50;
+    }
+
     .chart-note-dot::before {
         content: '';
         position: absolute;
@@ -5974,19 +5978,25 @@
                     const dateStr = `${dayStr}/${monthStr}/${yearStr}`;
                     tooltip.innerHTML = `<div><strong>${dateStr}</strong></div><div><span class='chart-tooltip-dot' style='color:${color}'>●</span> ${type}: <strong>${text}</strong></div>`;
                     dot.appendChild(tooltip);
-                    dot.onmouseenter = () => { tooltip.style.display = 'inline-block'; };
+                    dot.onmouseenter = () => {
+                        tooltip.style.display = 'inline-block';
+                        dot.classList.add('show-tooltip');
+                    };
                     dot.onmouseleave = () => {
                         setTimeout(() => {
                             if (!dot.matches(':hover') && !tooltip.matches(':hover')) {
                                 tooltip.style.display = 'none';
+                                dot.classList.remove('show-tooltip');
                             }
                         }, 0);
                     };
                     tooltip.addEventListener('mouseenter', () => {
                         tooltip.style.display = 'inline-block';
+                        dot.classList.add('show-tooltip');
                     });
                     tooltip.addEventListener('mouseleave', () => {
                         tooltip.style.display = 'none';
+                        dot.classList.remove('show-tooltip');
                     });
 
                     overlay.appendChild(dot);
