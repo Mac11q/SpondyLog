@@ -108,3 +108,14 @@ test('S8 Chgmt TZ', () => {
   assert.strictEqual(state.pain[idNY], 1);
   assert.strictEqual(state.pain[idParis], undefined);
 });
+
+test('S9 Reset défaut à zéro efface la valeur du jour', () => {
+  const state = createState();
+  const tz = 'UTC';
+  const today = new Date('2023-08-20T10:00:00Z');
+  const id = getTodayId(tz, today);
+  saveDefault(state, 'pain', 1, today, tz);
+  assert.strictEqual(state.pain[id], 1);
+  saveDefault(state, 'pain', 0, today, tz);
+  assert.strictEqual(state.pain[id], undefined);
+});

@@ -12,9 +12,10 @@ function getTodayId(tz, date = new Date()) {
 }
 
 function saveDefault(state, metric, value, now = new Date(), tz = 'UTC') {
+  const prevLevel = state.settings.defaultLevels[metric];
   state.settings.defaultLevels[metric] = value;
+  const todayId = getTodayId(tz, now);
   if (value > 0) {
-    const todayId = getTodayId(tz, now);
     state.settings.defaultStartDates[metric] = todayId;
     state.settings.defaultTimeZones[metric] = tz;
     const data = state[metric];
@@ -25,6 +26,9 @@ function saveDefault(state, metric, value, now = new Date(), tz = 'UTC') {
   } else {
     state.settings.defaultStartDates[metric] = null;
     state.settings.defaultTimeZones[metric] = null;
+    if (state[metric][todayId] === prevLevel) {
+      delete state[metric][todayId];
+    }
   }
 }
 
