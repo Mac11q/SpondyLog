@@ -2332,7 +2332,7 @@
                         <span id="default-level-label-pain">Douleur</span>
                         <span>&nbsp;-&nbsp;</span>
                         <select id="default-level-pain" style="width:60px;">
-                            <option value="1">0</option>
+                            <option value="0">0</option>
                             <option value="1">1</option>
                             <option value="2">2</option>
                             <option value="3">3</option>
@@ -2344,7 +2344,7 @@
                         <span id="default-level-label-stiffness">Raideur</span>
                         <span>&nbsp;-&nbsp;</span>
                         <select id="default-level-stiffness" style="width:60px;">
-                            <option value="1">0</option>
+                            <option value="0">0</option>
                             <option value="1">1</option>
                             <option value="2">2</option>
                             <option value="3">3</option>
@@ -2530,8 +2530,8 @@
                 }
             },
             defaultLevels: {
-                pain: 1,
-                stiffness: 1
+                pain: 0,
+                stiffness: 0
             },
             defaultStartDates: {
                 pain: null,
@@ -2754,10 +2754,10 @@
                         };
                     }
                     if (!settings.defaultLevels) {
-                        settings.defaultLevels = { pain: 1, stiffness: 1 };
+                        settings.defaultLevels = { pain: 0, stiffness: 0 };
                     } else {
-                        if (settings.defaultLevels.pain === undefined) settings.defaultLevels.pain = 1;
-                        if (settings.defaultLevels.stiffness === undefined) settings.defaultLevels.stiffness = 1;
+                        if (settings.defaultLevels.pain === undefined) settings.defaultLevels.pain = 0;
+                        if (settings.defaultLevels.stiffness === undefined) settings.defaultLevels.stiffness = 0;
                     }
                     if (!settings.defaultStartDates) {
                         settings.defaultStartDates = { pain: null, stiffness: null };
